@@ -9,6 +9,7 @@ export function LoginPage() {
   const { session, isAdmin, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
@@ -45,13 +46,22 @@ export function LoginPage() {
         </div>
         <div>
           <label className="mb-1 block text-sm text-neutral-600">{t("admin.password")}</label>
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 pe-14 text-sm"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((show) => !show)}
+              className="absolute end-2 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 hover:text-neutral-700"
+            >
+              {showPassword ? t("common.hide") : t("common.show")}
+            </button>
+          </div>
         </div>
         {error && <p className="text-sm text-red-600">{t("admin.signInFailed")}</p>}
         {!loading && session && !isAdmin && (

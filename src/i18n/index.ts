@@ -42,6 +42,8 @@ const resources = {
         confirmDelete: "Are you sure you want to delete this?",
         yes: "Yes",
         no: "No",
+        show: "Show",
+        hide: "Hide",
       },
       admin: {
         login: "Admin sign in",
@@ -115,6 +117,8 @@ const resources = {
         confirmDelete: "هل أنت متأكد أنك تريد حذف هذا؟",
         yes: "نعم",
         no: "لا",
+        show: "إظهار",
+        hide: "إخفاء",
       },
       admin: {
         login: "تسجيل دخول المشرف",
