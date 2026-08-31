@@ -4,7 +4,9 @@ import { CategoryForm, type CategoryFormValues } from "../../components/admin/Ca
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
 import type { Category, CategoryWithChildren } from "../../types/database";
 
-type FormMode = { kind: "create" } | { kind: "edit"; category: Category };
+type FormMode =
+  | { kind: "create"; parentId?: string }
+  | { kind: "edit"; category: Category };
 
 export function AdminCategoriesPage() {
   const { t } = useTranslation();
@@ -71,10 +73,17 @@ export function AdminCategoriesPage() {
         <div className="rounded-xl border border-neutral-200 bg-white p-4">
           <h2 className="mb-3 text-sm font-semibold text-neutral-900">
             {formMode.kind === "edit" ? t("admin.editCategory") : t("admin.newCategory")}
+            {formMode.kind === "create" && formMode.parentId && (
+              <span className="ms-1 font-normal text-neutral-500">
+                ({t("admin.addSubcategory")}:{" "}
+                {categories.find((c) => c.id === formMode.parentId)?.name_en})
+              </span>
+            )}
           </h2>
           <CategoryForm
             topLevelCategories={categories}
             initial={formMode.kind === "edit" ? formMode.category : undefined}
+            initialParentId={formMode.kind === "create" ? formMode.parentId : undefined}
             onSubmit={handleSubmit}
             onCancel={() => setFormMode(null)}
           />
@@ -91,11 +100,22 @@ export function AdminCategoriesPage() {
                 <span className="font-medium text-neutral-900">
                   {category.name_en} / {category.name_ar}
                 </span>
-                <CategoryActions
-                  category={category}
-                  onEdit={() => setFormMode({ kind: "edit", category })}
-                  onDelete={() => handleDelete(category)}
-                />
+                <div className="flex items-center gap-3">
+                  {!formMode && (
+                    <button
+                      type="button"
+                      onClick={() => setFormMode({ kind: "create", parentId: category.id })}
+                      className="text-sm text-emerald-700 hover:underline"
+                    >
+                      + {t("admin.addSubcategory")}
+                    </button>
+                  )}
+                  <CategoryActions
+                    category={category}
+                    onEdit={() => setFormMode({ kind: "edit", category })}
+                    onDelete={() => handleDelete(category)}
+                  />
+                </div>
               </div>
               {category.children.length > 0 && (
                 <ul className="divide-y divide-neutral-100 ps-8">

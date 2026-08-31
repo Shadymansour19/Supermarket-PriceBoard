@@ -11,18 +11,23 @@ export type CategoryFormValues = {
 export function CategoryForm({
   topLevelCategories,
   initial,
+  initialParentId,
   onSubmit,
   onCancel,
 }: {
   topLevelCategories: (Category | CategoryWithChildren)[];
   initial?: Category;
+  /** Preselects the parent when creating a fresh category (e.g. from an
+   * "Add subcategory" shortcut on a specific parent). Ignored when editing
+   * an existing category — `initial.parent_id` wins there. */
+  initialParentId?: string;
   onSubmit: (values: CategoryFormValues) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
   const [nameEn, setNameEn] = useState(initial?.name_en ?? "");
   const [nameAr, setNameAr] = useState(initial?.name_ar ?? "");
-  const [parentId, setParentId] = useState(initial?.parent_id ?? "");
+  const [parentId, setParentId] = useState(initial?.parent_id ?? initialParentId ?? "");
   const [submitting, setSubmitting] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
