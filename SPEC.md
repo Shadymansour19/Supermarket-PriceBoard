@@ -1,0 +1,118 @@
+# Bakala — Spec
+
+Working name: **Bakala** (Arabic for grocery/corner store). Open to renaming
+once scope is clearer — no code or infra depends on the name yet.
+
+## Overview
+
+A single-store product catalog with two sides:
+
+- **Admin** (small fixed team, same permissions): add/edit/remove products —
+  name, category, price, image, availability.
+- **Public**: browse/view the catalog read-only, navigate by
+  category → subcategory, search by name. No accounts required.
+
+No cart, no checkout — this is a browsing/pricing reference, not a
+storefront (see Non-goals for why, and what might change that later).
+
+UI is bilingual (English + Arabic) with full RTL support, not just a
+translated string table bolted onto an LTR layout.
+
+## Decision log
+
+Decisions are dated and kept even after superseded, so the reasoning stays
+visible. Newest first.
+
+- **2026-08-31 — No price history tracking.** Products store a single
+  current `price`. No history table, no per-change audit log, in the DB or
+  UI, for admin or public. Chosen for simplicity over the originally
+  proposed "admin manages price history" — revisit only if there's a
+  concrete need (e.g. "was this cheaper last week") later.
+- **2026-08-31 — Categories are hierarchical, admin-manageable.** Two
+  levels: category → subcategory, modeled as one self-referencing table
+  (`parent_id`). Admin can add/rename/delete at either level. Products
+  belong to one (typically leaf) category.
+- **2026-08-31 — Admin auth: small fixed team, equal permissions.**
+  Multiple Supabase Auth users, each with a `profiles` row and
+  `role = 'admin'`. RLS checks membership in that table rather than
+  hardcoding user IDs, and rather than building out per-role permissions
+  (admin vs editor) that aren't needed yet.
+- **2026-08-31 — Public browsing needs no account; optional accounts are
+  backlog, not built now.** No `users`/auth requirement for browsing or
+  search. If favorites/saved-lists are wanted later, that's the trigger to
+  add Supabase Auth for normal users — not needed for the current scope.
+- **2026-08-31 — Single currency, app-wide.** Price is a plain numeric
+  column; no per-product currency code. Currency symbol/formatting is one
+  app-level setting. Assumption, not explicitly confirmed — flag if wrong.
+- **2026-08-31 — Default language: browser locale, fallback Arabic.**
+  Manual EN/AR toggle, persisted in local storage, overrides the guess.
+  Assumption, not explicitly confirmed — flag if wrong.
+- **2026-08-31 — Stack confirmed**: Supabase (Postgres + Auth + Storage,
+  free tier) for backend; React + Vite + TypeScript + Tailwind for
+  frontend; Vercel/Netlify free tier for hosting, auto-deploy from GitHub.
+  No pushback needed — this is a solid, boring-in-a-good-way fit for a
+  small catalog app. Tailwind ≥3.3 logical properties (`ps-`, `pe-`,
+  `ms-`, `me-`, etc.) are used instead of `pl-`/`pr-` so RTL doesn't
+  require a parallel set of overrides.
+
+## Data model (Postgres / Supabase)
+
+```
+profiles
+  id            uuid PK, references auth.users(id)
+  role          text  -- 'admin' (only value for now; kept as text, not
+                       -- enum, so adding roles later is a data change)
+  created_at    timestamptz default now()
+
+categories
+  id            uuid PK default gen_random_uuid()
+  parent_id     uuid FK -> categories.id, nullable  -- null = top-level
+  name_en       text not null
+  name_ar       text not null
+  sort_order    int default 0
+  created_at    timestamptz default now()
+
+products
+  id            uuid PK default gen_random_uuid()
+  category_id   uuid FK -> categories.id, not null
+  name_en       text not null
+  name_ar       text not null
+  description_en text
+  description_ar text
+  price         numeric(10,2) not null
+  image_path    text  -- path within the Storage bucket, not a full URL
+  in_stock      boolean not null default true
+  is_active     boolean not null default true  -- soft hide, not delete
+  created_at    timestamptz default now()
+  updated_at    timestamptz default now()
+  updated_by    uuid FK -> profiles.id, nullable
+```
+
+Storage: one public-read bucket (`product-images`). Images are resized/
+compressed client-side before upload (target: long edge ~1000px, JPEG/WebP)
+to stay inside free-tier storage and bandwidth.
+
+## Auth & RLS model
+
+- **Public (anon + authenticated)**: `SELECT` on `categories` and
+  `products` where `is_active = true`. No write access.
+- **Admin** (`profiles.role = 'admin'` for `auth.uid()`): full
+  `INSERT`/`UPDATE`/`DELETE` on `categories` and `products`, and can see
+  inactive products too (for un-hiding them).
+- **Storage bucket policies** mirror the same admin check for writes;
+  reads are public.
+- Admin accounts are provisioned manually (Supabase dashboard / SQL), not
+  via public sign-up — there's no self-serve admin registration flow.
+
+## Non-goals (for now)
+
+Flagging these as natural next steps rather than building them:
+
+- Cart / checkout / ordering — this is a pricing/catalog reference, not a
+  transactional storefront. Worth reconsidering if the goal shifts from
+  "see what's available and what it costs" to "let people actually order."
+- Accounts for normal users (favorites, saved lists, notifications on
+  price/stock changes) — deferred until there's a concrete reason.
+- Price history / trend charts — explicitly dropped, see decision log.
+- Multi-store / multi-location — single store only.
+- Multi-currency — single app-wide currency.

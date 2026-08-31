@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Inter",
+    system-ui,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+}
+
+/* Arabic gets a touch more line-height — its script needs it to stay legible. */
+html[dir="rtl"] {
+  font-family:
+    "Noto Sans Arabic",
+    system-ui,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  line-height: 1.7;
+}
