@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { Navigate } from "react-router-dom";
+import { EyeIcon } from "../../components/EyeIcon";
 import { useAuth } from "../../context/AuthContext";
 import { signInAdmin } from "../../lib/auth";
 
@@ -52,14 +53,15 @@ export function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 pe-14 text-sm"
+              className="w-full rounded-lg border border-neutral-300 px-3 py-2 pe-10 text-sm"
             />
             <button
               type="button"
               onClick={() => setShowPassword((show) => !show)}
-              className="absolute end-2 top-1/2 -translate-y-1/2 text-xs font-medium text-neutral-500 hover:text-neutral-700"
+              aria-label={showPassword ? t("common.hide") : t("common.show")}
+              className="absolute end-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700"
             >
-              {showPassword ? t("common.hide") : t("common.show")}
+              <EyeIcon off={showPassword} />
             </button>
           </div>
         </div>
