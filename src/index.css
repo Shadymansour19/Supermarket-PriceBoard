@@ -20,10 +20,12 @@ body {
     sans-serif;
 }
 
-/* Arabic gets a touch more line-height — its script needs it to stay legible. */
-html[dir="rtl"] {
+/* Arabic gets a touch more line-height — its script needs it to stay
+   legible — and the Cairo font, whether the whole page is RTL or it's just
+   an Arabic-name input inside an otherwise-LTR admin form. */
+[dir="rtl"] {
   font-family:
-    "Noto Sans Arabic",
+    "Cairo",
     system-ui,
     "Segoe UI",
     Roboto,
