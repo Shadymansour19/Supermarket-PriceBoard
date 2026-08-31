@@ -30,8 +30,12 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
         <h3 className="line-clamp-2 text-sm font-medium text-neutral-900">{name}</h3>
+        {product.size && <span className="text-xs text-neutral-500">{product.size}</span>}
         <div className="mt-auto flex items-center justify-between pt-1">
-          <span className="font-semibold text-emerald-700">{formatPrice(product.price, i18n.language)}</span>
+          <span className="font-semibold text-emerald-700">
+            {formatPrice(product.price, i18n.language)}{" "}
+            <span className="text-xs font-normal text-neutral-500">/ {t(`unit.${product.unit}`)}</span>
+          </span>
           {!product.in_stock && (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
               {t("product.outOfStock")}

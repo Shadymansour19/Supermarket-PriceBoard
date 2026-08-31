@@ -23,6 +23,20 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-08-31 — Products get `unit` and `size` fields.** `unit` is what
+  the price is per (`each`, `kg`, `g`, `liter`, `ml`, `dozen`, `pack`,
+  `box`, `bag` — enforced by a DB check constraint, chosen from a
+  `<select>` in the admin form) so a price is never ambiguous ("1.25 / kg"
+  vs. just "1.25"). `size` is a separate optional free-text field for
+  package labeling (e.g. "500g", "1L", "6-pack") for products that need
+  it — distinct from `unit` because a product can be priced per kg while
+  sold in a fixed-size pack. Adding a new unit later needs a migration;
+  that trade-off was made for data consistency over flexibility.
+- **2026-08-31 — Category nav and mobile sidebar are collapsible.**
+  Categories with subcategories expand/collapse in place (auto-expanding
+  the branch containing the active selection); on mobile the whole sidebar
+  starts collapsed behind a toggle button to save vertical space, and is
+  always visible at `md+`.
 - **2026-08-31 — No price history tracking.** Products store a single
   current `price`. No history table, no per-change audit log, in the DB or
   UI, for admin or public. Chosen for simplicity over the originally
@@ -80,6 +94,8 @@ products
   description_en text
   description_ar text
   price         numeric(10,2) not null
+  unit          text not null default 'each'  -- check: each/kg/g/liter/ml/dozen/pack/box/bag
+  size          text  -- optional package label, e.g. "500g", "1L", "6-pack"
   image_path    text  -- path within the Storage bucket, not a full URL
   in_stock      boolean not null default true
   is_active     boolean not null default true  -- soft hide, not delete

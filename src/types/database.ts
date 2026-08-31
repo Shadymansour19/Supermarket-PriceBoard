@@ -1,5 +1,21 @@
-// Hand-written types mirroring supabase/migrations/0001_init.sql.
-// If the schema changes, update this alongside the migration.
+// Hand-written types mirroring supabase/migrations/0001_init.sql and
+// 0002_product_unit_size.sql. If the schema changes, update this alongside
+// the migrations.
+
+/** Matches the `products_unit_check` constraint in 0002_product_unit_size.sql. */
+export const PRODUCT_UNITS = [
+  "each",
+  "kg",
+  "g",
+  "liter",
+  "ml",
+  "dozen",
+  "pack",
+  "box",
+  "bag",
+] as const;
+
+export type ProductUnit = (typeof PRODUCT_UNITS)[number];
 
 export type Category = {
   id: string;
@@ -18,6 +34,8 @@ export type Product = {
   description_en: string | null;
   description_ar: string | null;
   price: number;
+  unit: ProductUnit;
+  size: string | null;
   image_path: string | null;
   in_stock: boolean;
   is_active: boolean;

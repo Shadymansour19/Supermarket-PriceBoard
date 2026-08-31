@@ -18,6 +18,9 @@ export function CatalogPage() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  // Sidebar starts collapsed on mobile to save vertical space; always
+  // visible at md+ regardless of this flag (see className below).
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     fetchCategoryTree()
@@ -34,9 +37,25 @@ export function CatalogPage() {
       .finally(() => setLoading(false));
   }, [categoryId, search]);
 
+  // Collapse the mobile sidebar again once a category selection is made.
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [categoryId]);
+
   return (
     <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-      <aside>
+      <div className="md:hidden">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen((open) => !open)}
+          aria-expanded={sidebarOpen}
+          className="flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700"
+        >
+          {t("nav.categories")}
+          <span>{sidebarOpen ? "▾" : "▸"}</span>
+        </button>
+      </div>
+      <aside className={sidebarOpen ? "block" : "hidden md:block"}>
         <CategoryNav categories={categories} />
       </aside>
       <section className="space-y-4">

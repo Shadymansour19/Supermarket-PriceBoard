@@ -1,5 +1,5 @@
 import { supabase } from "./supabase";
-import type { Product } from "../types/database";
+import type { Product, ProductUnit } from "../types/database";
 
 export type ProductFilter = {
   categoryId?: string | null;
@@ -41,6 +41,8 @@ export type ProductInput = {
   description_en?: string | null;
   description_ar?: string | null;
   price: number;
+  unit: ProductUnit;
+  size?: string | null;
   image_path?: string | null;
   in_stock?: boolean;
   is_active?: boolean;

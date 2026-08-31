@@ -40,6 +40,8 @@ export function AdminProductsPage() {
       description_en: values.description_en || null,
       description_ar: values.description_ar || null,
       price: Number(values.price),
+      unit: values.unit,
+      size: values.size || null,
       category_id: values.category_id,
       in_stock: values.in_stock,
       is_active: values.is_active,
@@ -136,8 +138,12 @@ export function AdminProductsPage() {
                     </td>
                     <td className="px-4 py-2 font-medium text-neutral-900">
                       {product.name_en} / {product.name_ar}
+                      {product.size && <span className="ms-1 text-neutral-400">({product.size})</span>}
                     </td>
-                    <td className="px-4 py-2">{formatPrice(product.price, i18n.language)}</td>
+                    <td className="px-4 py-2">
+                      {formatPrice(product.price, i18n.language)}{" "}
+                      <span className="text-neutral-400">/ {t(`unit.${product.unit}`)}</span>
+                    </td>
                     <td className="px-4 py-2">{product.in_stock ? "✅" : "—"}</td>
                     <td className="px-4 py-2">{product.is_active ? "✅" : "—"}</td>
                     <td className="px-4 py-2">

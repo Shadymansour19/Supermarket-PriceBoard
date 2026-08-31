@@ -52,8 +52,14 @@ export function ProductDetailPage() {
         </div>
         <div className="space-y-3">
           <h1 className="text-2xl font-bold text-neutral-900">{name}</h1>
+          {product.size && (
+            <p className="text-sm text-neutral-500">
+              {t("product.size")}: {product.size}
+            </p>
+          )}
           <p className="text-2xl font-semibold text-emerald-700">
-            {formatPrice(product.price, i18n.language)}
+            {formatPrice(product.price, i18n.language)}{" "}
+            <span className="text-base font-normal text-neutral-500">/ {t(`unit.${product.unit}`)}</span>
           </p>
           <span
             className={`inline-block rounded-full px-3 py-1 text-sm ${

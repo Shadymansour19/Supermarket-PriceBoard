@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { flattenCategoryTree } from "../../lib/categories";
-import type { CategoryWithChildren, Product } from "../../types/database";
+import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
 
 export type ProductFormValues = {
   name_en: string;
@@ -9,6 +9,8 @@ export type ProductFormValues = {
   description_en: string;
   description_ar: string;
   price: string;
+  unit: ProductUnit;
+  size: string;
   category_id: string;
   in_stock: boolean;
   is_active: boolean;
@@ -33,6 +35,8 @@ export function ProductForm({
   const [descriptionEn, setDescriptionEn] = useState(initial?.description_en ?? "");
   const [descriptionAr, setDescriptionAr] = useState(initial?.description_ar ?? "");
   const [price, setPrice] = useState(initial ? String(initial.price) : "");
+  const [unit, setUnit] = useState<ProductUnit>(initial?.unit ?? "each");
+  const [size, setSize] = useState(initial?.size ?? "");
   const [categoryId, setCategoryId] = useState(initial?.category_id ?? flatCategories[0]?.category.id ?? "");
   const [inStock, setInStock] = useState(initial?.in_stock ?? true);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
@@ -50,6 +54,8 @@ export function ProductForm({
           description_en: descriptionEn,
           description_ar: descriptionAr,
           price,
+          unit,
+          size,
           category_id: categoryId,
           in_stock: inStock,
           is_active: isActive,
@@ -101,15 +107,40 @@ export function ProductForm({
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
         />
       </div>
+      <div className="flex gap-2">
+        <div className="flex-1">
+          <label className="mb-1 block text-sm text-neutral-600">{t("admin.price")}</label>
+          <input
+            required
+            type="number"
+            min="0"
+            step="0.01"
+            value={price}
+            onChange={(e) => setPrice(e.target.value)}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div className="w-28">
+          <label className="mb-1 block text-sm text-neutral-600">{t("admin.unit")}</label>
+          <select
+            value={unit}
+            onChange={(e) => setUnit(e.target.value as ProductUnit)}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          >
+            {PRODUCT_UNITS.map((u) => (
+              <option key={u} value={u}>
+                {t(`unit.${u}`)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
       <div>
-        <label className="mb-1 block text-sm text-neutral-600">{t("admin.price")}</label>
+        <label className="mb-1 block text-sm text-neutral-600">{t("admin.size")}</label>
         <input
-          required
-          type="number"
-          min="0"
-          step="0.01"
-          value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+          placeholder="e.g. 500g, 1L, 6-pack"
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
         />
       </div>

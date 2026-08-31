@@ -46,19 +46,22 @@ sub_juice as (
   select id, 'Juice', 'عصير', 2 from top_beverages
   returning id
 )
-insert into public.products (category_id, name_en, name_ar, price, in_stock)
-select id, 'Banana', 'موز', 1.25, true from sub_fruit
+-- unit is the pricing unit (e.g. "1.25 / kg"); size is package labeling for
+-- products that come in a fixed size, kept separate so a product can be
+-- priced per kg/liter while also showing its pack size.
+insert into public.products (category_id, name_en, name_ar, price, unit, size, in_stock)
+select id, 'Banana', 'موز', 1.25, 'kg', null, true from sub_fruit
 union all
-select id, 'Apple', 'تفاح', 1.75, true from sub_fruit
+select id, 'Apple', 'تفاح', 1.75, 'kg', null, true from sub_fruit
 union all
-select id, 'Tomato', 'طماطم', 0.90, true from sub_veg
+select id, 'Tomato', 'طماطم', 0.90, 'kg', null, true from sub_veg
 union all
-select id, 'Cucumber', 'خيار', 0.75, true from sub_veg
+select id, 'Cucumber', 'خيار', 0.75, 'kg', null, true from sub_veg
 union all
-select id, 'Whole Milk 1L', 'حليب كامل الدسم ١ لتر', 1.50, true from sub_milk
+select id, 'Whole Milk', 'حليب كامل الدسم', 1.50, 'liter', '1L', true from sub_milk
 union all
-select id, 'Halloumi Cheese 250g', 'جبنة حلوم ٢٥٠ غ', 3.90, false from sub_cheese
+select id, 'Halloumi Cheese', 'جبنة حلوم', 3.90, 'each', '250g', false from sub_cheese
 union all
-select id, 'Mineral Water 1.5L', 'مياه معدنية ١.٥ لتر', 0.60, true from sub_water
+select id, 'Mineral Water', 'مياه معدنية', 0.60, 'liter', '1.5L', true from sub_water
 union all
-select id, 'Orange Juice 1L', 'عصير برتقال ١ لتر', 2.10, true from sub_juice;
+select id, 'Orange Juice', 'عصير برتقال', 2.10, 'liter', '1L', true from sub_juice;
