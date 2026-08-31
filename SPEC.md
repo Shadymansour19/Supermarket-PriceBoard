@@ -23,6 +23,23 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-08-31 — Currency confirmed: EGP.** Was an unconfirmed assumption
+  (see the "single currency, app-wide" entry below) — now set via
+  `CURRENCY_CODE` in `src/config.ts`, and `formatPrice` uses
+  `Intl.NumberFormat(locale, { style: "currency", currency: CURRENCY_CODE })`
+  so the symbol/placement follow each locale's own convention instead of
+  being hand-formatted.
+- **2026-08-31 — `unit: 'each'` means the price is for the whole item;
+  measured units (`kg`/`g`/`liter`/`ml`) mean it's actually priced per that
+  measure.** Fixes a real bug caught by the user: bottled/packaged
+  products (Mineral Water 1.5L, Whole Milk 1L, Orange Juice 1L) were
+  seeded with `unit: 'liter'`, which read as "0.60 per liter" next to a
+  1.5L size — ambiguous about what the shown price actually buys. They're
+  priced as a whole bottle, not by volume, so they're `unit: 'each'` with
+  `size` as pure packaging info. The "/ unit" suffix is now hidden for
+  `each` (see `shouldShowUnit` in `src/lib/localize.ts`) since it added
+  noise, not information, once the ambiguity was gone. Only genuinely
+  bulk-priced goods (loose produce, by weight) should use a measured unit.
 - **2026-08-31 — Products get `unit` and `size` fields.** `unit` is what
   the price is per (`each`, `kg`, `g`, `liter`, `ml`, `dozen`, `pack`,
   `box`, `bag` — enforced by a DB check constraint, chosen from a
@@ -57,7 +74,8 @@ visible. Newest first.
   add Supabase Auth for normal users — not needed for the current scope.
 - **2026-08-31 — Single currency, app-wide.** Price is a plain numeric
   column; no per-product currency code. Currency symbol/formatting is one
-  app-level setting. Assumption, not explicitly confirmed — flag if wrong.
+  app-level setting. Was an unconfirmed assumption — currency itself is now
+  confirmed as EGP, see the entry above.
 - **2026-08-31 — Default language: browser locale, fallback Arabic.**
   Manual EN/AR toggle, persisted in local storage, overrides the guess.
   Assumption, not explicitly confirmed — flag if wrong.

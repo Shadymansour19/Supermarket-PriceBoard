@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { productImageUrl } from "../lib/supabase";
-import { formatPrice, localizedField } from "../lib/localize";
+import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
 import type { Product } from "../types/database";
 
 export function ProductCard({ product }: { product: Product }) {
@@ -33,8 +33,10 @@ export function ProductCard({ product }: { product: Product }) {
         {product.size && <span className="text-xs text-neutral-500">{product.size}</span>}
         <div className="mt-auto flex items-center justify-between pt-1">
           <span className="font-semibold text-emerald-700">
-            {formatPrice(product.price, i18n.language)}{" "}
-            <span className="text-xs font-normal text-neutral-500">/ {t(`unit.${product.unit}`)}</span>
+            {formatPrice(product.price, i18n.language)}
+            {shouldShowUnit(product.unit) && (
+              <span className="text-xs font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
+            )}
           </span>
           {!product.in_stock && (
             <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">

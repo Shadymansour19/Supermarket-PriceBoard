@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
 import { fetchCategoryTree } from "../../lib/categories";
 import { uploadProductImage } from "../../lib/imageUpload";
-import { formatPrice } from "../../lib/localize";
+import { formatPrice, shouldShowUnit } from "../../lib/localize";
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
 import type { CategoryWithChildren, Product } from "../../types/database";
@@ -141,8 +141,10 @@ export function AdminProductsPage() {
                       {product.size && <span className="ms-1 text-neutral-400">({product.size})</span>}
                     </td>
                     <td className="px-4 py-2">
-                      {formatPrice(product.price, i18n.language)}{" "}
-                      <span className="text-neutral-400">/ {t(`unit.${product.unit}`)}</span>
+                      {formatPrice(product.price, i18n.language)}
+                      {shouldShowUnit(product.unit) && (
+                        <span className="text-neutral-400"> / {t(`unit.${product.unit}`)}</span>
+                      )}
                     </td>
                     <td className="px-4 py-2">{product.in_stock ? "✅" : "—"}</td>
                     <td className="px-4 py-2">{product.is_active ? "✅" : "—"}</td>
