@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryForm, type CategoryFormValues } from "../../components/admin/CategoryForm";
+import { Chevron } from "../../components/Chevron";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
 import type { Category, CategoryWithChildren } from "../../types/database";
 
@@ -14,6 +15,16 @@ export function AdminCategoriesPage() {
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<FormMode | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  function toggleExpanded(id: string) {
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
 
   const reload = useCallback(() => {
     setLoading(true);
@@ -33,6 +44,10 @@ export function AdminCategoriesPage() {
         await updateCategory(formMode.category.id, values);
       } else {
         await createCategory(values);
+      }
+      // Make sure the category just added/edited is actually visible.
+      if (values.parent_id) {
+        setExpanded((prev) => new Set(prev).add(values.parent_id!));
       }
       setFormMode(null);
       await reload();
@@ -94,47 +109,68 @@ export function AdminCategoriesPage() {
         <p className="text-neutral-500">{t("common.loading")}</p>
       ) : (
         <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
-          {categories.map((category) => (
-            <li key={category.id}>
-              <div className="flex items-center justify-between px-4 py-3">
-                <span className="font-medium text-neutral-900">
-                  {category.name_en} / {category.name_ar}
-                </span>
-                <div className="flex items-center gap-3">
-                  {!formMode && (
-                    <button
-                      type="button"
-                      onClick={() => setFormMode({ kind: "create", parentId: category.id })}
-                      className="text-sm text-emerald-700 hover:underline"
-                    >
-                      + {t("admin.addSubcategory")}
-                    </button>
-                  )}
-                  <CategoryActions
-                    category={category}
-                    onEdit={() => setFormMode({ kind: "edit", category })}
-                    onDelete={() => handleDelete(category)}
-                  />
+          {categories.map((category) => {
+            const isOpen = expanded.has(category.id);
+            const hasChildren = category.children.length > 0;
+
+            return (
+              <li key={category.id}>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <div className="flex items-center gap-2">
+                    {hasChildren && (
+                      <button
+                        type="button"
+                        onClick={() => toggleExpanded(category.id)}
+                        aria-expanded={isOpen}
+                        aria-label={isOpen ? "Collapse" : "Expand"}
+                        className="w-5 shrink-0 text-center text-neutral-400 hover:text-neutral-700"
+                      >
+                        <Chevron open={isOpen} />
+                      </button>
+                    )}
+                    <span className={`font-medium text-neutral-900 ${hasChildren ? "" : "ms-5"}`}>
+                      {category.name_en} / {category.name_ar}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {!formMode && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setExpanded((prev) => new Set(prev).add(category.id));
+                          setFormMode({ kind: "create", parentId: category.id });
+                        }}
+                        className="text-sm text-emerald-700 hover:underline"
+                      >
+                        + {t("admin.addSubcategory")}
+                      </button>
+                    )}
+                    <CategoryActions
+                      category={category}
+                      onEdit={() => setFormMode({ kind: "edit", category })}
+                      onDelete={() => handleDelete(category)}
+                    />
+                  </div>
                 </div>
-              </div>
-              {category.children.length > 0 && (
-                <ul className="divide-y divide-neutral-100 ps-8">
-                  {category.children.map((child) => (
-                    <li key={child.id} className="flex items-center justify-between px-4 py-2">
-                      <span className="text-sm text-neutral-700">
-                        {child.name_en} / {child.name_ar}
-                      </span>
-                      <CategoryActions
-                        category={child}
-                        onEdit={() => setFormMode({ kind: "edit", category: child })}
-                        onDelete={() => handleDelete(child)}
-                      />
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </li>
-          ))}
+                {hasChildren && isOpen && (
+                  <ul className="divide-y divide-neutral-100 ps-8">
+                    {category.children.map((child) => (
+                      <li key={child.id} className="flex items-center justify-between px-4 py-2">
+                        <span className="text-sm text-neutral-700">
+                          {child.name_en} / {child.name_ar}
+                        </span>
+                        <CategoryActions
+                          category={child}
+                          onEdit={() => setFormMode({ kind: "edit", category: child })}
+                          onDelete={() => handleDelete(child)}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>

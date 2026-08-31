@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { flattenCategoryTree } from "../../lib/categories";
 import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
+import { ImageCropModal } from "./ImageCropModal";
 
 export type ProductFormValues = {
   name_en: string;
@@ -25,7 +26,7 @@ export function ProductForm({
 }: {
   categoryTree: CategoryWithChildren[];
   initial?: Product;
-  onSubmit: (values: ProductFormValues, imageFile: File | null) => Promise<void>;
+  onSubmit: (values: ProductFormValues, imageFile: File | null, removeImage: boolean) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -42,14 +43,22 @@ export function ProductForm({
   const [inStock, setInStock] = useState(initial?.in_stock ?? true);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  // A file picked from disk but not yet cropped/confirmed — held here just
+  // long enough to show the crop modal, then discarded either way.
+  const [cropSource, setCropSource] = useState<{ src: string; fileName: string } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(
     () => productImageUrl(initial?.image_path ?? null),
   );
   const [submitting, setSubmitting] = useState(false);
 
-  // Show the newly selected file immediately; fall back to the product's
-  // existing image (or nothing) once the selection is cleared.
+  // Show the newly cropped file immediately; fall back to the product's
+  // existing image (or nothing, if removed) once there's no pending file.
   useEffect(() => {
+    if (removeImage) {
+      setPreviewUrl(null);
+      return;
+    }
     if (!imageFile) {
       setPreviewUrl(productImageUrl(initial?.image_path ?? null));
       return;
@@ -57,7 +66,24 @@ export function ProductForm({
     const objectUrl = URL.createObjectURL(imageFile);
     setPreviewUrl(objectUrl);
     return () => URL.revokeObjectURL(objectUrl);
-  }, [imageFile, initial?.image_path]);
+  }, [imageFile, removeImage, initial?.image_path]);
+
+  function handleFileSelected(file: File | undefined) {
+    if (!file) return;
+    setCropSource({ src: URL.createObjectURL(file), fileName: `${file.name.replace(/\.[^.]+$/, "")}.jpg` });
+  }
+
+  function handleCropConfirm(croppedFile: File) {
+    if (cropSource) URL.revokeObjectURL(cropSource.src);
+    setCropSource(null);
+    setImageFile(croppedFile);
+    setRemoveImage(false);
+  }
+
+  function handleCropCancel() {
+    if (cropSource) URL.revokeObjectURL(cropSource.src);
+    setCropSource(null);
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -77,6 +103,7 @@ export function ProductForm({
           is_active: isActive,
         },
         imageFile,
+        removeImage,
       );
     } finally {
       setSubmitting(false);
@@ -192,21 +219,47 @@ export function ProductForm({
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              onChange={(e) => {
+                handleFileSelected(e.target.files?.[0]);
+                e.target.value = ""; // allow re-selecting the same file later
+              }}
               className="text-sm"
             />
-            {imageFile && (
-              <button
-                type="button"
-                onClick={() => setImageFile(null)}
-                className="self-start text-xs text-neutral-500 hover:underline"
-              >
-                {t("admin.clearImage")}
-              </button>
-            )}
+            <div className="flex gap-3">
+              {imageFile && (
+                <button
+                  type="button"
+                  onClick={() => setImageFile(null)}
+                  className="self-start text-xs text-neutral-500 hover:underline"
+                >
+                  {t("admin.clearImage")}
+                </button>
+              )}
+              {previewUrl && !removeImage && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setImageFile(null);
+                    setRemoveImage(true);
+                  }}
+                  className="self-start text-xs text-red-600 hover:underline"
+                >
+                  {t("admin.removeImage")}
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      {cropSource && (
+        <ImageCropModal
+          imageSrc={cropSource.src}
+          fileName={cropSource.fileName}
+          onCancel={handleCropCancel}
+          onConfirm={handleCropConfirm}
+        />
+      )}
       <div className="flex gap-6 sm:col-span-2">
         <label className="flex items-center gap-2 text-sm text-neutral-700">
           <input type="checkbox" checked={inStock} onChange={(e) => setInStock(e.target.checked)} />

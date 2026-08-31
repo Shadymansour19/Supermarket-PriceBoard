@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
 import { fetchCategoryTree } from "../../lib/categories";
-import { uploadProductImage } from "../../lib/imageUpload";
+import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
@@ -32,7 +32,7 @@ export function AdminProductsPage() {
     reload();
   }, [reload]);
 
-  async function handleSubmit(values: ProductFormValues, imageFile: File | null) {
+  async function handleSubmit(values: ProductFormValues, imageFile: File | null, removeImage: boolean) {
     setActionError(null);
     const payload = {
       name_en: values.name_en,
@@ -46,6 +46,7 @@ export function AdminProductsPage() {
       in_stock: values.in_stock,
       is_active: values.is_active,
     };
+    const previousImagePath = formMode?.kind === "edit" ? formMode.product.image_path : null;
 
     try {
       let product: Product;
@@ -58,6 +59,12 @@ export function AdminProductsPage() {
       if (imageFile) {
         const path = await uploadProductImage(imageFile, product.id);
         await updateProduct(product.id, { image_path: path });
+        // Best-effort cleanup of the photo it replaced — not critical if
+        // this fails, so it shouldn't block the save that already succeeded.
+        if (previousImagePath) await deleteProductImage(previousImagePath).catch(() => {});
+      } else if (removeImage && previousImagePath) {
+        await updateProduct(product.id, { image_path: null });
+        await deleteProductImage(previousImagePath).catch(() => {});
       }
 
       setFormMode(null);
@@ -72,6 +79,7 @@ export function AdminProductsPage() {
     setActionError(null);
     try {
       await deleteProduct(product.id);
+      if (product.image_path) await deleteProductImage(product.image_path).catch(() => {});
       await reload();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));

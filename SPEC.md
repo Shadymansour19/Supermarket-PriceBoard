@@ -23,6 +23,16 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-08-31 — Admin product images: crop, remove, and the admin category
+  tree are collapsible too.** Added `react-easy-crop`: picking a file opens
+  a square (1:1) crop/zoom modal before it's staged as the upload — every
+  product image slot in the app is a square, so locking the aspect here
+  avoids a surprise `object-cover` recrop at display time. "Remove image"
+  clears an existing photo outright (not just a pending selection); both
+  replacing and removing best-effort delete the old Storage file so
+  swapped-out photos don't pile up. Deleting a product now also cleans up
+  its image. The admin categories list reuses the same `Chevron` expand/
+  collapse pattern as the public nav.
 - **2026-08-31 — Currency confirmed: EGP.** Was an unconfirmed assumption
   (see the "single currency, app-wide" entry below) — now set via
   `CURRENCY_CODE` in `src/config.ts`, and `formatPrice` uses
