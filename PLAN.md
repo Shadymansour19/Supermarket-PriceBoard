@@ -19,7 +19,7 @@ Phases are meant to each leave the app in a working, demoable state.
 - [x] `product-images` storage bucket + matching policies
 - [x] Seed script with sample categories/subcategories + a handful of
       products (bilingual names) for local dev — applied to the dev DB
-- [ ] Manually provision first admin user + `profiles` row
+- [x] Manually provision first admin user + `profiles` row
 
 ## Phase 2 — Public browsing
 - [x] Category/subcategory navigation
@@ -39,8 +39,11 @@ Phases are meant to each leave the app in a working, demoable state.
 - [ ] Responsive pass (mobile-first, it's a shopping-adjacent app)
 - [ ] Basic accessibility check (contrast, focus states, alt text on
       product images)
-- [ ] Deploy to Vercel/Netlify, auto-deploy from GitHub on push
-- [ ] README: setup, env vars, how to provision an admin
+- [ ] Deploy to Vercel/Netlify, auto-deploy from GitHub on push — Vercel
+      project created and linked to the repo; `vercel.json` SPA rewrite
+      added; still needed: set `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`
+      in Vercel's env vars, then push to trigger the first deploy
+- [x] README: setup, env vars, how to provision an admin
 
 ## Backlog (not scheduled)
 - Accounts + favorites for normal users

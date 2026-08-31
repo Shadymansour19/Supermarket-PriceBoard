@@ -23,11 +23,14 @@ Get the URL and anon key from your Supabase project's
 
 ## Database
 
-Schema and RLS policies live in [supabase/migrations/0001_init.sql](./supabase/migrations/0001_init.sql).
-Apply it to a fresh Supabase project with `psql` (or the Supabase CLI):
+Schema and RLS policies live in [supabase/migrations/](./supabase/migrations/),
+applied in order. Apply them to a fresh Supabase project with `psql` (or the
+Supabase CLI):
 
 ```bash
-psql "<connection string from Settings → Database>" -f supabase/migrations/0001_init.sql
+for f in supabase/migrations/*.sql; do
+  psql "<connection string from Settings → Database>" -f "$f"
+done
 ```
 
 [supabase/seed.sql](./supabase/seed.sql) adds sample bilingual categories and
@@ -44,6 +47,20 @@ insert into public.profiles (id, role) values ('<auth-user-uuid>', 'admin');
 ```
 
 They can then sign in at `/admin/login`.
+
+## Deploying (Vercel)
+
+1. Import the repo into Vercel (framework preset auto-detects as Vite —
+   build command `npm run build`, output directory `dist`).
+2. In the project's **Settings → Environment Variables**, add
+   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (same values as your
+   `.env.local`) for the Production environment — and Preview too, if you
+   want PR/branch deploys to work against the same database.
+3. [vercel.json](./vercel.json) rewrites every path to `index.html` so
+   client-side routes (e.g. `/admin/login`, `/product/:id`) don't 404 on a
+   direct load or refresh — already committed, nothing to configure.
+4. Push to the branch Vercel is watching; it builds and deploys
+   automatically from there on.
 
 ## Scripts
 
