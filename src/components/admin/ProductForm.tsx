@@ -1,6 +1,7 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { flattenCategoryTree } from "../../lib/categories";
+import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
 
 export type ProductFormValues = {
@@ -41,7 +42,22 @@ export function ProductForm({
   const [inStock, setInStock] = useState(initial?.in_stock ?? true);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    () => productImageUrl(initial?.image_path ?? null),
+  );
   const [submitting, setSubmitting] = useState(false);
+
+  // Show the newly selected file immediately; fall back to the product's
+  // existing image (or nothing) once the selection is cleared.
+  useEffect(() => {
+    if (!imageFile) {
+      setPreviewUrl(productImageUrl(initial?.image_path ?? null));
+      return;
+    }
+    const objectUrl = URL.createObjectURL(imageFile);
+    setPreviewUrl(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [imageFile, initial?.image_path]);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -162,12 +178,34 @@ export function ProductForm({
       </div>
       <div className="sm:col-span-2">
         <label className="mb-1 block text-sm text-neutral-600">{t("admin.image")}</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-          className="w-full text-sm"
-        />
+        <div className="flex items-center gap-3">
+          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+            {previewUrl ? (
+              <img src={previewUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-neutral-300">
+                <span className="text-2xl">🛒</span>
+              </div>
+            )}
+          </div>
+          <div className="flex flex-col gap-1">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+              className="text-sm"
+            />
+            {imageFile && (
+              <button
+                type="button"
+                onClick={() => setImageFile(null)}
+                className="self-start text-xs text-neutral-500 hover:underline"
+              >
+                {t("admin.clearImage")}
+              </button>
+            )}
+          </div>
+        </div>
       </div>
       <div className="flex gap-6 sm:col-span-2">
         <label className="flex items-center gap-2 text-sm text-neutral-700">
