@@ -47,11 +47,12 @@ sub_juice as (
   returning id
 )
 -- unit is the pricing unit: 'kg'/'g'/'liter'/'ml' mean the price genuinely
--- is per that measure (loose produce, sold by weight). 'each' means the
--- price is for one whole item/pack regardless of its size — size then
--- just labels the pack (e.g. "1L") without being multiplied into price.
--- Mixing these up is exactly the "0.60 / liter, but the bottle is 1.5L"
--- confusion to avoid: a bottled/packaged product is 'each', not 'liter'.
+-- is per that measure (loose produce, sold by weight). 'pack' means the
+-- price is for one whole bottle/carton/package regardless of its size —
+-- size then just labels the pack (e.g. "1L") without being multiplied into
+-- price. Mixing 'liter' into a bottled product read as "0.60 per liter"
+-- next to a 1.5L size, which is exactly the ambiguity 'pack' avoids while
+-- still showing a clear "/ pack" (عبوة) label, unlike the generic 'each'.
 insert into public.products (category_id, name_en, name_ar, price, unit, size, in_stock)
 select id, 'Banana', 'موز', 1.25, 'kg', null, true from sub_fruit
 union all
@@ -61,10 +62,10 @@ select id, 'Tomato', 'طماطم', 0.90, 'kg', null, true from sub_veg
 union all
 select id, 'Cucumber', 'خيار', 0.75, 'kg', null, true from sub_veg
 union all
-select id, 'Whole Milk', 'حليب كامل الدسم', 1.50, 'each', '1L', true from sub_milk
+select id, 'Whole Milk', 'حليب كامل الدسم', 1.50, 'pack', '1L', true from sub_milk
 union all
-select id, 'Halloumi Cheese', 'جبنة حلوم', 3.90, 'each', '250g', false from sub_cheese
+select id, 'Halloumi Cheese', 'جبنة حلوم', 3.90, 'pack', '250g', false from sub_cheese
 union all
-select id, 'Mineral Water', 'مياه معدنية', 0.60, 'each', '1.5L', true from sub_water
+select id, 'Mineral Water', 'مياه معدنية', 0.60, 'pack', '1.5L', true from sub_water
 union all
-select id, 'Orange Juice', 'عصير برتقال', 2.10, 'each', '1L', true from sub_juice;
+select id, 'Orange Juice', 'عصير برتقال', 2.10, 'pack', '1L', true from sub_juice;

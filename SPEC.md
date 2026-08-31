@@ -29,17 +29,27 @@ visible. Newest first.
   `Intl.NumberFormat(locale, { style: "currency", currency: CURRENCY_CODE })`
   so the symbol/placement follow each locale's own convention instead of
   being hand-formatted.
-- **2026-08-31 — `unit: 'each'` means the price is for the whole item;
-  measured units (`kg`/`g`/`liter`/`ml`) mean it's actually priced per that
-  measure.** Fixes a real bug caught by the user: bottled/packaged
-  products (Mineral Water 1.5L, Whole Milk 1L, Orange Juice 1L) were
-  seeded with `unit: 'liter'`, which read as "0.60 per liter" next to a
-  1.5L size — ambiguous about what the shown price actually buys. They're
-  priced as a whole bottle, not by volume, so they're `unit: 'each'` with
-  `size` as pure packaging info. The "/ unit" suffix is now hidden for
-  `each` (see `shouldShowUnit` in `src/lib/localize.ts`) since it added
-  noise, not information, once the ambiguity was gone. Only genuinely
-  bulk-priced goods (loose produce, by weight) should use a measured unit.
+- **2026-08-31 — Whole packaged goods use `unit: 'pack'`, not `'each'` or a
+  measured unit.** Fixes a real bug caught by the user: bottled/packaged
+  products (Mineral Water 1.5L, Whole Milk 1L, Orange Juice 1L, Halloumi
+  Cheese 250g) were seeded with `unit: 'liter'`/`'g'`-style measured units,
+  which read as "0.60 per liter" right next to a 1.5L size — ambiguous
+  about what the shown price actually buys. They're priced as one whole
+  bottle/carton/pack, not by volume or weight, so `unit: 'pack'` (shown as
+  "pack" / "عبوة") with `size` as pure packaging info. Measured units
+  (`kg`/`g`/`liter`/`ml`) are reserved for goods genuinely priced per that
+  measure (loose produce, sold by weight). `unit: 'each'` still exists for
+  single discrete items with no pack framing (e.g. a single loaf) and is
+  the one case where the "/ unit" suffix is hidden entirely (see
+  `shouldShowUnit` in `src/lib/localize.ts`) since "/ each" is noise, not
+  information — every other unit, `pack` included, is always shown because
+  it says something the price alone doesn't.
+- **2026-08-31 — Collapse/expand chevrons are direction-aware.** A single
+  glyph is rotated (`Chevron` in `src/components/Chevron.tsx`) rather than
+  swapping characters: collapsed points toward reading direction (right in
+  LTR, left in RTL), expanded always points down. Fixes the arrow pointing
+  the same way regardless of language, caught by the user in the category
+  nav and mobile sidebar toggle.
 - **2026-08-31 — Products get `unit` and `size` fields.** `unit` is what
   the price is per (`each`, `kg`, `g`, `liter`, `ml`, `dozen`, `pack`,
   `box`, `bag` — enforced by a DB check constraint, chosen from a

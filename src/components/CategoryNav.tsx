@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useParams } from "react-router-dom";
+import { Chevron } from "./Chevron";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
 
@@ -58,7 +59,7 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
                     aria-label={isOpen ? "Collapse" : "Expand"}
                     className="w-6 shrink-0 text-center text-neutral-400 hover:text-neutral-700"
                   >
-                    {isOpen ? "▾" : "▸"}
+                    <Chevron open={isOpen} />
                   </button>
                 )}
                 <NavLink

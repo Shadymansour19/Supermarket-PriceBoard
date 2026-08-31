@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { CategoryNav } from "../../components/CategoryNav";
+import { Chevron } from "../../components/Chevron";
 import { ProductCard } from "../../components/ProductCard";
 import { SearchBar } from "../../components/SearchBar";
 import { fetchCategoryTree } from "../../lib/categories";
@@ -52,7 +53,7 @@ export function CatalogPage() {
           className="flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700"
         >
           {t("nav.categories")}
-          <span>{sidebarOpen ? "▾" : "▸"}</span>
+          <Chevron open={sidebarOpen} />
         </button>
       </div>
       <aside className={sidebarOpen ? "block" : "hidden md:block"}>
