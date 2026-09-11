@@ -1,4 +1,4 @@
-# Bakala
+# Super Market Hamada
 
 A single-store bilingual (EN/AR) product catalog. Admins manage products and
 categories; the public browses read-only, with navigation by category/

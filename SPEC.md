@@ -1,7 +1,7 @@
-# Bakala — Spec
+# Super Market Hamada — Spec
 
-Working name: **Bakala** (Arabic for grocery/corner store). Open to renaming
-once scope is clearer — no code or infra depends on the name yet.
+Renamed from the working name "Bakala" to **Super Market Hamada** (سوبر
+ماركت حماده), matching the real store's Facebook page.
 
 ## Overview
 
@@ -22,6 +22,18 @@ translated string table bolted onto an LTR layout.
 
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
+
+- **2026-09-11 — Renamed to Super Market Hamada; added a Contact Us page.**
+  Working name "Bakala" replaced everywhere user-facing (app name, page
+  title, docs) with the real store's name and branding, taken from its
+  Facebook page. Added a public `/contact` route (linked from the header)
+  with WhatsApp click-to-chat, a Facebook link, both phone numbers as `tel:`
+  links, and the store's address — all sourced from `src/config.ts`'s new
+  `CONTACT` object so they're one place to update. The Google Maps
+  directions link is a known gap (`CONTACT.mapsUrl`, currently `null`) —
+  add it once a share link is available; the page already renders a
+  "coming soon" placeholder in its place. No logo/banner image yet either
+  — deferred, not sourced.
 
 - **2026-08-31 — Admin product images: crop, remove, and the admin category
   tree are collapsible too.** Added `react-easy-crop`: picking a file opens

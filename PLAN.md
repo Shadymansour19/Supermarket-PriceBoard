@@ -1,4 +1,4 @@
-# Bakala — Plan
+# Super Market Hamada — Plan
 
 See [SPEC.md](./SPEC.md) for the data model, decisions, and non-goals.
 Phases are meant to each leave the app in a working, demoable state.

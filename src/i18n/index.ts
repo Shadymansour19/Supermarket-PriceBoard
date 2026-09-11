@@ -7,8 +7,13 @@ export const RTL_LANGUAGES = new Set(["ar"]);
 const resources = {
   en: {
     translation: {
-      app: { name: "Bakala" },
-      nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
+      app: { name: "Super Market Hamada" },
+      nav: {
+        home: "Home",
+        allCategories: "All categories",
+        categories: "Categories",
+        contact: "Contact us",
+      },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
       product: {
         price: "Price",
@@ -78,12 +83,28 @@ const resources = {
         cropImage: "Adjust photo",
         zoom: "Zoom",
       },
+      contact: {
+        title: "Contact us",
+        whatsapp: "WhatsApp",
+        chatOnWhatsapp: "Chat with us on WhatsApp",
+        facebook: "Facebook",
+        visitFacebook: "Visit our Facebook page",
+        phone: "Phone",
+        location: "Location",
+        getDirections: "Get directions",
+        directionsSoon: "Map link coming soon",
+      },
     },
   },
   ar: {
     translation: {
-      app: { name: "بقالة" },
-      nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
+      app: { name: "سوبر ماركت حماده" },
+      nav: {
+        home: "الرئيسية",
+        allCategories: "كل الأقسام",
+        categories: "الأقسام",
+        contact: "تواصل معنا",
+      },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
       product: {
         price: "السعر",
@@ -152,6 +173,17 @@ const resources = {
         removeImage: "إزالة الصورة",
         cropImage: "تعديل الصورة",
         zoom: "التكبير",
+      },
+      contact: {
+        title: "تواصل معنا",
+        whatsapp: "واتساب",
+        chatOnWhatsapp: "تواصل معنا عبر واتساب",
+        facebook: "فيسبوك",
+        visitFacebook: "زيارة صفحتنا على فيسبوك",
+        phone: "الهاتف",
+        location: "الموقع",
+        getDirections: "الحصول على الاتجاهات",
+        directionsSoon: "رابط الخريطة قريبًا",
       },
     },
   },

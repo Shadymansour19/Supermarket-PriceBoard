@@ -1,4 +1,4 @@
--- Bakala — initial schema
+-- Super Market Hamada — initial schema
 -- profiles / categories / products, RLS policies, storage bucket.
 -- See SPEC.md for the data model rationale.
 

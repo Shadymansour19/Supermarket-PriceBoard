@@ -12,7 +12,12 @@ export function PublicLayout() {
           <Link to="/" className="text-xl font-bold text-emerald-700">
             {t("app.name")}
           </Link>
-          <LanguageToggle />
+          <div className="flex items-center gap-4">
+            <Link to="/contact" className="text-sm font-medium text-neutral-700 hover:text-emerald-700">
+              {t("nav.contact")}
+            </Link>
+            <LanguageToggle />
+          </div>
         </div>
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6">
