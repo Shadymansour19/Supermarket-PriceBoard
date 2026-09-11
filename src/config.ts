@@ -18,6 +18,5 @@ export const CONTACT = {
   /** Kept in Arabic for both locales — it's a precise place name, and
    *  guessing an English transliteration risks getting it wrong. */
   address: "الدير - أجا - الدقهلية",
-  /** TODO: fill in once a Google Maps share link is provided. */
-  mapsUrl: null as string | null,
+  mapsUrl: "https://maps.app.goo.gl/8J7uKXqsRFwikUem9?g_st=aw" as string | null,
 };

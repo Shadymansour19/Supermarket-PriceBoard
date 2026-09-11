@@ -7,7 +7,10 @@ export function ContactPage() {
 
   return (
     <div className="mx-auto max-w-lg space-y-4">
-      <h1 className="text-2xl font-bold text-neutral-900">{t("contact.title")}</h1>
+      <div className="flex flex-col items-center gap-3 text-center">
+        <img src="/logo.jpg" alt={t("app.name")} className="h-24 w-24 rounded-full object-cover shadow" />
+        <h1 className="text-2xl font-bold text-neutral-900">{t("contact.title")}</h1>
+      </div>
 
       <a
         href={`https://wa.me/${CONTACT.whatsappNumber}`}

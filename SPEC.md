@@ -28,12 +28,11 @@ visible. Newest first.
   title, docs) with the real store's name and branding, taken from its
   Facebook page. Added a public `/contact` route (linked from the header)
   with WhatsApp click-to-chat, a Facebook link, both phone numbers as `tel:`
-  links, and the store's address — all sourced from `src/config.ts`'s new
-  `CONTACT` object so they're one place to update. The Google Maps
-  directions link is a known gap (`CONTACT.mapsUrl`, currently `null`) —
-  add it once a share link is available; the page already renders a
-  "coming soon" placeholder in its place. No logo/banner image yet either
-  — deferred, not sourced.
+  links, the store's address, and a Google Maps directions link — all
+  sourced from `src/config.ts`'s new `CONTACT` object so they're one place
+  to update. The store's real logo (`public/logo.jpg`, from its signboard
+  photo) replaces the placeholder favicon and now appears in the header and
+  atop the Contact page.
 
 - **2026-08-31 — Admin product images: crop, remove, and the admin category
   tree are collapsible too.** Added `react-easy-crop`: picking a file opens

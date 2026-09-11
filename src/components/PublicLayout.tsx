@@ -9,7 +9,8 @@ export function PublicLayout() {
     <div className="min-h-screen bg-neutral-50">
       <header className="border-b border-neutral-200 bg-white">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
-          <Link to="/" className="text-xl font-bold text-emerald-700">
+          <Link to="/" className="flex items-center gap-2 text-xl font-bold text-emerald-700">
+            <img src="/logo.jpg" alt="" className="h-10 w-10 rounded-full object-cover" />
             {t("app.name")}
           </Link>
           <div className="flex items-center gap-4">
