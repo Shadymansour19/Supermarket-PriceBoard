@@ -5,7 +5,7 @@ import { CategoryNav } from "../../components/CategoryNav";
 import { Chevron } from "../../components/Chevron";
 import { ProductCard } from "../../components/ProductCard";
 import { SearchBar } from "../../components/SearchBar";
-import { fetchCategoryTree } from "../../lib/categories";
+import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchProducts } from "../../lib/products";
 import type { CategoryWithChildren, Product } from "../../types/database";
 
@@ -32,11 +32,14 @@ export function CatalogPage() {
   useEffect(() => {
     setLoading(true);
     setError(false);
-    fetchProducts({ categoryId, search })
+    // Selecting a top-level category also matches all of its subcategories;
+    // selecting a subcategory matches only itself.
+    const filterCategoryId = categoryId ? getCategoryFilterIds(categories, categoryId) : undefined;
+    fetchProducts({ categoryId: filterCategoryId, search })
       .then(setProducts)
       .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [categoryId, search]);
+  }, [categoryId, search, categories]);
 
   // Collapse the mobile sidebar again once a category selection is made.
   useEffect(() => {

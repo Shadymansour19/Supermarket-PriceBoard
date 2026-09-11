@@ -2,7 +2,9 @@ import { supabase } from "./supabase";
 import type { Product, ProductUnit } from "../types/database";
 
 export type ProductFilter = {
-  categoryId?: string | null;
+  /** A single category id for an exact match, or a list of ids to match any of
+   * (e.g. a parent category plus its subcategories). */
+  categoryId?: string | string[] | null;
   search?: string;
   /** Admin views want inactive products too; public views never do. */
   includeInactive?: boolean;
@@ -14,7 +16,11 @@ export async function fetchProducts(filter: ProductFilter = {}): Promise<Product
   if (!filter.includeInactive) {
     query = query.eq("is_active", true);
   }
-  if (filter.categoryId) {
+  if (Array.isArray(filter.categoryId)) {
+    if (filter.categoryId.length > 0) {
+      query = query.in("category_id", filter.categoryId);
+    }
+  } else if (filter.categoryId) {
     query = query.eq("category_id", filter.categoryId);
   }
   if (filter.search?.trim()) {

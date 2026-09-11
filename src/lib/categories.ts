@@ -31,6 +31,27 @@ export async function fetchCategoryTree(): Promise<CategoryWithChildren[]> {
 }
 
 /**
+ * Resolves a selected category to the set of category ids its product
+ * filter should match: itself plus, when it's a top-level category, all of
+ * its subcategories. Selecting a subcategory only ever matches itself.
+ */
+export function getCategoryFilterIds(
+  tree: CategoryWithChildren[],
+  categoryId: string,
+): string[] {
+  for (const root of tree) {
+    if (root.id === categoryId) {
+      return [root.id, ...root.children.map((child) => child.id)];
+    }
+    if (root.children.some((child) => child.id === categoryId)) {
+      return [categoryId];
+    }
+  }
+  // Tree not loaded yet (or id not found) — fall back to an exact match.
+  return [categoryId];
+}
+
+/**
  * Flattens a category tree into a depth-annotated list, for <select> options.
  * Only handles the two levels the schema/UI actually support (category,
  * subcategory) — see CategoryWithChildren.
