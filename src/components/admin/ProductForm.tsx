@@ -51,8 +51,7 @@ export function ProductForm({
     () => productImageUrl(initial?.image_path ?? null),
   );
   const [submitting, setSubmitting] = useState(false);
-  const deviceInputRef = useRef<HTMLInputElement | null>(null);
-  const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Show the newly cropped file immediately; fall back to the product's
   // existing image (or nothing, if removed) once there's no pending file.
@@ -218,41 +217,24 @@ export function ProductForm({
             )}
           </div>
           <div className="flex flex-col gap-1">
-            <div className="flex gap-2">
+            <div>
               <button
                 type="button"
-                onClick={() => deviceInputRef.current?.click()}
+                onClick={() => fileInputRef.current?.click()}
                 className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
               >
-                {t("admin.uploadFromDevice")}
+                {t("admin.addImage")}
               </button>
-              <button
-                type="button"
-                onClick={() => cameraInputRef.current?.click()}
-                className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
-              >
-                {t("admin.takePhoto")}
-              </button>
-              {/* Plain picker: device gallery/file browser. */}
+              {/* No `capture` attribute: on mobile this lets the OS show its
+                  own chooser (camera or gallery/files); on desktop it opens
+                  the regular file browser. */}
               <input
-                ref={deviceInputRef}
+                ref={fileInputRef}
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
                   handleFileSelected(e.target.files?.[0]);
                   e.target.value = ""; // allow re-selecting the same file later
-                }}
-                className="hidden"
-              />
-              {/* `capture` opens the device camera directly on mobile browsers. */}
-              <input
-                ref={cameraInputRef}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                onChange={(e) => {
-                  handleFileSelected(e.target.files?.[0]);
-                  e.target.value = "";
                 }}
                 className="hidden"
               />
