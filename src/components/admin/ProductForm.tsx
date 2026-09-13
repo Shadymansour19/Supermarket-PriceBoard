@@ -4,6 +4,7 @@ import { flattenCategoryTree } from "../../lib/categories";
 import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
 import { ImageCropModal } from "./ImageCropModal";
+import { ImageSourceSheet } from "./ImageSourceSheet";
 
 export type ProductFormValues = {
   name_en: string;
@@ -51,7 +52,9 @@ export function ProductForm({
     () => productImageUrl(initial?.image_path ?? null),
   );
   const [submitting, setSubmitting] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [showSourceSheet, setShowSourceSheet] = useState(false);
+  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   // Show the newly cropped file immediately; fall back to the product's
   // existing image (or nothing, if removed) once there's no pending file.
@@ -220,21 +223,32 @@ export function ProductForm({
             <div>
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => setShowSourceSheet(true)}
                 className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
               >
                 {t("admin.addImage")}
               </button>
-              {/* No `capture` attribute: on mobile this lets the OS show its
-                  own chooser (camera or gallery/files); on desktop it opens
-                  the regular file browser. */}
+              {/* Gallery/file browser — no `capture` attribute. */}
               <input
-                ref={fileInputRef}
+                ref={galleryInputRef}
                 type="file"
                 accept="image/*"
                 onChange={(e) => {
                   handleFileSelected(e.target.files?.[0]);
                   e.target.value = ""; // allow re-selecting the same file later
+                }}
+                className="hidden"
+              />
+              {/* `capture` opens the device camera directly, skipping any
+                  chooser — the source sheet already asked which is wanted. */}
+              <input
+                ref={cameraInputRef}
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={(e) => {
+                  handleFileSelected(e.target.files?.[0]);
+                  e.target.value = "";
                 }}
                 className="hidden"
               />
@@ -266,6 +280,19 @@ export function ProductForm({
         </div>
       </div>
 
+      {showSourceSheet && (
+        <ImageSourceSheet
+          onTakePhoto={() => {
+            setShowSourceSheet(false);
+            cameraInputRef.current?.click();
+          }}
+          onChooseFromGallery={() => {
+            setShowSourceSheet(false);
+            galleryInputRef.current?.click();
+          }}
+          onCancel={() => setShowSourceSheet(false)}
+        />
+      )}
       {cropSource && (
         <ImageCropModal
           imageSrc={cropSource.src}
