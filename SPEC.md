@@ -23,16 +23,25 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-13 — Contact Us moved from a `/contact` page to a floating
+  button + dialog.** `ContactWidget` (rendered once in `PublicLayout`, so
+  it floats over every public page) replaces the header nav link and the
+  standalone `ContactPage`/`/contact` route: a fixed round button in the
+  reading-direction-aware corner (chat-bubble icon) pops open a modal with
+  the same WhatsApp/Facebook/phone/location content, closable via its ✕,
+  Escape, or a backdrop click. Content and data source (`CONTACT` in
+  `src/config.ts`) are unchanged.
+
 - **2026-09-11 — Renamed to Super Market Hamada; added a Contact Us page.**
   Working name "Bakala" replaced everywhere user-facing (app name, page
   title, docs) with the real store's name and branding, taken from its
-  Facebook page. Added a public `/contact` route (linked from the header)
-  with WhatsApp click-to-chat, a Facebook link, both phone numbers as `tel:`
-  links, the store's address, and a Google Maps directions link — all
-  sourced from `src/config.ts`'s new `CONTACT` object so they're one place
-  to update. The store's real logo (`public/logo.jpg`, from its signboard
-  photo) replaces the placeholder favicon and now appears in the header and
-  atop the Contact page.
+  Facebook page. Added contact info (WhatsApp click-to-chat, a Facebook
+  link, both phone numbers as `tel:` links, the store's address, and a
+  Google Maps directions link) sourced from `src/config.ts`'s new `CONTACT`
+  object so they're one place to update — since superseded by the floating
+  widget above, but the data model stands. The store's real logo
+  (`public/logo.jpg`, from its signboard photo) replaces the placeholder
+  favicon and appears in the header and the contact dialog.
 
 - **2026-08-31 — Admin product images: crop, remove, and the admin category
   tree are collapsible too.** Added `react-easy-crop`: picking a file opens

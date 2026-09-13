@@ -8,12 +8,7 @@ const resources = {
   en: {
     translation: {
       app: { name: "Super Market Hamada" },
-      nav: {
-        home: "Home",
-        allCategories: "All categories",
-        categories: "Categories",
-        contact: "Contact us",
-      },
+      nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
       product: {
         price: "Price",
@@ -49,6 +44,7 @@ const resources = {
         no: "No",
         show: "Show",
         hide: "Hide",
+        close: "Close",
       },
       admin: {
         login: "Admin sign in",
@@ -99,12 +95,7 @@ const resources = {
   ar: {
     translation: {
       app: { name: "سوبر ماركت حماده" },
-      nav: {
-        home: "الرئيسية",
-        allCategories: "كل الأقسام",
-        categories: "الأقسام",
-        contact: "تواصل معنا",
-      },
+      nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
       product: {
         price: "السعر",
@@ -140,6 +131,7 @@ const resources = {
         no: "لا",
         show: "إظهار",
         hide: "إخفاء",
+        close: "إغلاق",
       },
       admin: {
         login: "تسجيل دخول المشرف",
