@@ -3,8 +3,11 @@ import { useTranslation } from "react-i18next";
 import { flattenCategoryTree } from "../../lib/categories";
 import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
+import { CameraCaptureModal } from "./CameraCaptureModal";
 import { ImageCropModal } from "./ImageCropModal";
 import { ImageSourceSheet } from "./ImageSourceSheet";
+
+const supportsLiveCamera = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
 
 export type ProductFormValues = {
   name_en: string;
@@ -53,7 +56,10 @@ export function ProductForm({
   );
   const [submitting, setSubmitting] = useState(false);
   const [showSourceSheet, setShowSourceSheet] = useState(false);
+  const [showCamera, setShowCamera] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  // Fallback only: used when the browser has no getUserMedia support, so the
+  // live CameraCaptureModal can't run.
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
 
   // Show the newly cropped file immediately; fall back to the product's
@@ -82,6 +88,11 @@ export function ProductForm({
     setCropSource(null);
     setImageFile(croppedFile);
     setRemoveImage(false);
+  }
+
+  function handleCameraCapture(file: File) {
+    setShowCamera(false);
+    setCropSource({ src: URL.createObjectURL(file), fileName: `camera-${Date.now()}.jpg` });
   }
 
   function handleCropCancel() {
@@ -284,7 +295,8 @@ export function ProductForm({
         <ImageSourceSheet
           onTakePhoto={() => {
             setShowSourceSheet(false);
-            cameraInputRef.current?.click();
+            if (supportsLiveCamera) setShowCamera(true);
+            else cameraInputRef.current?.click();
           }}
           onChooseFromGallery={() => {
             setShowSourceSheet(false);
@@ -293,6 +305,7 @@ export function ProductForm({
           onCancel={() => setShowSourceSheet(false)}
         />
       )}
+      {showCamera && <CameraCaptureModal onCapture={handleCameraCapture} onCancel={() => setShowCamera(false)} />}
       {cropSource && (
         <ImageCropModal
           imageSrc={cropSource.src}
