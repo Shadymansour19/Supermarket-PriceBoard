@@ -78,6 +78,8 @@ const resources = {
         removeImage: "Remove image",
         cropImage: "Adjust photo",
         zoom: "Zoom",
+        uploadFromDevice: "Upload from device",
+        takePhoto: "Take photo",
       },
       contact: {
         title: "Contact us",
@@ -165,6 +167,8 @@ const resources = {
         removeImage: "إزالة الصورة",
         cropImage: "تعديل الصورة",
         zoom: "التكبير",
+        uploadFromDevice: "رفع من الجهاز",
+        takePhoto: "التقاط صورة",
       },
       contact: {
         title: "تواصل معنا",
