@@ -5,7 +5,6 @@ import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
 import { CameraCaptureModal } from "./CameraCaptureModal";
 import { ImageCropModal } from "./ImageCropModal";
-import { ImageSourceSheet } from "./ImageSourceSheet";
 
 const supportsLiveCamera = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
 
@@ -55,7 +54,6 @@ export function ProductForm({
     () => productImageUrl(initial?.image_path ?? null),
   );
   const [submitting, setSubmitting] = useState(false);
-  const [showSourceSheet, setShowSourceSheet] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   // Fallback only: used when the browser has no getUserMedia support, so the
@@ -231,13 +229,20 @@ export function ProductForm({
             )}
           </div>
           <div className="flex flex-col gap-1">
-            <div>
+            <div className="flex gap-2">
               <button
                 type="button"
-                onClick={() => setShowSourceSheet(true)}
+                onClick={() => galleryInputRef.current?.click()}
                 className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
               >
-                {t("admin.addImage")}
+                {t("admin.uploadPhoto")}
+              </button>
+              <button
+                type="button"
+                onClick={() => (supportsLiveCamera ? setShowCamera(true) : cameraInputRef.current?.click())}
+                className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                {t("admin.captureImage")}
               </button>
               {/* Gallery/file browser — no `capture` attribute. */}
               <input
@@ -250,8 +255,8 @@ export function ProductForm({
                 }}
                 className="hidden"
               />
-              {/* `capture` opens the device camera directly, skipping any
-                  chooser — the source sheet already asked which is wanted. */}
+              {/* Fallback only: used when the browser has no getUserMedia
+                  support, so the live CameraCaptureModal can't run. */}
               <input
                 ref={cameraInputRef}
                 type="file"
@@ -291,20 +296,6 @@ export function ProductForm({
         </div>
       </div>
 
-      {showSourceSheet && (
-        <ImageSourceSheet
-          onTakePhoto={() => {
-            setShowSourceSheet(false);
-            if (supportsLiveCamera) setShowCamera(true);
-            else cameraInputRef.current?.click();
-          }}
-          onChooseFromGallery={() => {
-            setShowSourceSheet(false);
-            galleryInputRef.current?.click();
-          }}
-          onCancel={() => setShowSourceSheet(false)}
-        />
-      )}
       {showCamera && <CameraCaptureModal onCapture={handleCameraCapture} onCancel={() => setShowCamera(false)} />}
       {cropSource && (
         <ImageCropModal
