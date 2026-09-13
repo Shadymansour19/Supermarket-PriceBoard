@@ -8,7 +8,10 @@ decisions, [PLAN.md](./PLAN.md) for the phased build plan.
 ## Stack
 
 React + Vite + TypeScript + Tailwind (RTL-aware) on the frontend, Supabase
-(Postgres + Auth + Storage) on the backend.
+(Postgres + Auth + Storage) on the backend. Installable as a PWA
+(`vite-plugin-pwa`) — icons live in [public/pwa/](./public/pwa/), generated
+from [public/logo.jpg](./public/logo.jpg); manifest and service worker config
+is in [vite.config.ts](./vite.config.ts).
 
 ## Local setup
 

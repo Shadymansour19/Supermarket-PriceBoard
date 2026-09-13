@@ -23,6 +23,12 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-13 — Installable as a PWA.** `vite-plugin-pwa` generates the
+  manifest and service worker at build time (`vite.config.ts`); icons in
+  `public/pwa/` (192/512/maskable/apple-touch, via ImageMagick + pngquant)
+  are cropped from the existing `public/logo.jpg`, no new artwork. Manifest
+  `lang`/`dir` default to Arabic/RTL, matching the app's fallback language.
+
 - **2026-09-13 — Two discount types: limited-time and quantity-based, no
   history kept.** `limited_time_discounts` (one row per product, storing
   `new_price` and `duration_days`, with `ends_at` a DB-generated column so
