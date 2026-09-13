@@ -44,8 +44,10 @@ export function ProductCard({
         )}
       </div>
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <h3 className="line-clamp-2 text-sm font-medium text-neutral-900">{name}</h3>
-        {product.size && <span className="text-xs text-neutral-500">{product.size}</span>}
+        <h3 className="line-clamp-2 min-h-[2.5rem] text-sm font-medium text-neutral-900">{name}</h3>
+        {/* Always rendered (even without a size) so every card reserves the
+         * same vertical space here instead of shrinking. */}
+        <span className="text-xs text-neutral-500">{product.size || " "}</span>
         <div className="mt-auto flex items-center justify-between pt-1">
           {limitedTimeDiscount ? (
             <DiscountPrice
