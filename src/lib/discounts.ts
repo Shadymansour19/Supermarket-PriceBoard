@@ -47,18 +47,18 @@ export async function fetchActiveLimitedTimeDiscountMap(): Promise<Map<string, L
   return new Map(rows.map((row) => [row.product_id, row]));
 }
 
-/** Active limited-time discounts joined with their (visible) products,
- * soonest-to-expire first — for the home page section and the deals page. */
-export async function fetchActiveLimitedTimeDeals(
-  limit?: number,
-): Promise<{ product: Product; discount: LimitedTimeDiscount }[]> {
-  let query = supabase
+/** All active limited-time discounts joined with their (visible) products,
+ * soonest-to-expire first — for the home page teaser (which re-sorts by
+ * biggest discount) and the full deals page. */
+export async function fetchActiveLimitedTimeDeals(): Promise<
+  { product: Product; discount: LimitedTimeDiscount }[]
+> {
+  const query = supabase
     .from("limited_time_discounts")
     .select("*, product:products!inner(*)")
     .gt("ends_at", new Date().toISOString())
     .eq("product.is_active", true)
     .order("ends_at", { ascending: true });
-  if (limit) query = query.limit(limit);
 
   const { data, error } = await query;
   if (error) throw error;

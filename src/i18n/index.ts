@@ -238,8 +238,17 @@ const resources = {
         showMore: "عرض المزيد",
         pageTitle: "عروض لفترة محدودة",
         noActiveDeals: "لا توجد عروض نشطة حاليًا.",
+        // Arabic has six plural categories (zero/one/two/few/many/other),
+        // not just one/other like English — leaving any of these out means
+        // i18next falls back to showing the raw key for that count instead
+        // of translated text (e.g. a common 3-10 day discount hit "few",
+        // which wasn't defined here before this fix).
+        endsIn_zero: "ينتهي اليوم",
         endsIn_one: "ينتهي خلال يوم واحد",
-        endsIn_other: "ينتهي خلال {{count}} أيام",
+        endsIn_two: "ينتهي خلال يومين",
+        endsIn_few: "ينتهي خلال {{count}} أيام",
+        endsIn_many: "ينتهي خلال {{count}} يومًا",
+        endsIn_other: "ينتهي خلال {{count}} يوم",
         quantityDiscountTitle: "اشترِ أكثر ووفر أكثر",
         tierLabel: "{{count}}+ قطعة",
       },

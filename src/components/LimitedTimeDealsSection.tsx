@@ -2,24 +2,34 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { ProductCard } from "./ProductCard";
-import { fetchActiveLimitedTimeDeals } from "../lib/discounts";
+import { discountPercent, fetchActiveLimitedTimeDeals } from "../lib/discounts";
 import type { LimitedTimeDiscount, Product } from "../types/database";
 
 /** How many deals the home page teaser shows before "Show more" takes over. */
-const PREVIEW_LIMIT = 10;
+const PREVIEW_LIMIT = 5;
 
 /**
  * Home-page-only horizontally-scrolling teaser of active limited-time
- * discounts, linking to the full `/deals` page. Renders nothing if there
- * are none active, so it never leaves an empty section on the page.
+ * discounts, linking to the full `/deals` page. Shows the biggest
+ * percentage-off deals first, since a teaser is about grabbing attention —
+ * the full `/deals` page is where "everything, soonest-expiring first"
+ * lives. Renders nothing if there are none active, so it never leaves an
+ * empty section on the page.
  */
 export function LimitedTimeDealsSection() {
   const { t } = useTranslation();
   const [deals, setDeals] = useState<{ product: Product; discount: LimitedTimeDiscount }[] | null>(null);
 
   useEffect(() => {
-    fetchActiveLimitedTimeDeals(PREVIEW_LIMIT)
-      .then(setDeals)
+    fetchActiveLimitedTimeDeals()
+      .then((allDeals) => {
+        const byBiggestDiscount = [...allDeals].sort(
+          (a, b) =>
+            discountPercent(b.product.price, b.discount.new_price) -
+            discountPercent(a.product.price, a.discount.new_price),
+        );
+        setDeals(byBiggestDiscount.slice(0, PREVIEW_LIMIT));
+      })
       .catch(() => setDeals([]));
   }, []);
 
