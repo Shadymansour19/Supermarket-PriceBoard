@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link, Outlet } from "react-router-dom";
 import { ContactWidget } from "./ContactWidget";
+import { InstallBanner } from "./InstallBanner";
 import { LanguageToggle } from "./LanguageToggle";
 
 export function PublicLayout() {
@@ -17,6 +18,7 @@ export function PublicLayout() {
           <LanguageToggle />
         </div>
       </header>
+      <InstallBanner />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Outlet />
       </main>

@@ -23,6 +23,18 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-13 — One-tap install banner, since most users won't find a
+  browser's install menu on their own.** A dismissible banner
+  (`InstallBanner`, `usePwaInstall`) sits under the header on every public
+  page: on Chromium it captures `beforeinstallprompt` and triggers the
+  browser's native install-confirm dialog directly from an "Install"
+  button; on iOS Safari, which never fires that event, the same button
+  opens on-screen steps for the manual Share → Add to Home Screen flow
+  instead. Hidden once installed (`display-mode: standalone` /
+  `navigator.standalone`); dismissing it is remembered for the tab session
+  only (`sessionStorage`), not permanently, so it stays discoverable on a
+  later visit.
+
 - **2026-09-13 — Installable as a PWA.** `vite-plugin-pwa` generates the
   manifest and service worker at build time (`vite.config.ts`); icons in
   `public/pwa/` (192/512/maskable/apple-touch, via ImageMagick + pngquant)
