@@ -23,6 +23,23 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-13 — Two discount types: limited-time and quantity-based, no
+  history kept.** `limited_time_discounts` (one row per product, storing
+  `new_price` and `duration_days`, with `ends_at` a DB-generated column so
+  "still active" is just `ends_at > now()`) and `quantity_discounts` plus
+  `quantity_discount_tiers` (one row per product, plus a list of "buy N+ for
+  this price" tiers). Like `products.price`, neither type keeps a history —
+  disabling a discount deletes its row, and re-enabling one restarts it from
+  scratch, rather than soft-hiding/versioning it. Display is shared across
+  both types: original price struck through in red, the new price beside
+  it, and a savings percentage (`DiscountPrice` component). Only
+  limited-time discounts appear on the product card and the new home-page
+  "Limited-time deals" horizontally-scrolling section (with a "Show more"
+  link to `/deals`, the full list) — quantity tiers don't fit a compact card
+  and only show on the product detail page, as a small table. Admin manages
+  both from a "Discounts" action per product row (`ProductDiscountsModal`),
+  independent of the product create/edit form since a discount can only be
+  attached to a product that already exists.
 - **2026-09-13 — Contact Us moved from a `/contact` page to a floating
   button + dialog.** `ContactWidget` (rendered once in `PublicLayout`, so
   it floats over every public page) replaces the header nav link and the
@@ -160,6 +177,30 @@ products
   created_at    timestamptz default now()
   updated_at    timestamptz default now()
   updated_by    uuid FK -> profiles.id, nullable
+
+limited_time_discounts       -- at most one per product
+  id            uuid PK default gen_random_uuid()
+  product_id    uuid FK -> products.id, unique, not null
+  new_price     numeric(10,2) not null
+  starts_at     timestamptz default now()
+  duration_days int not null
+  ends_at       timestamptz generated always as (starts_at + duration_days days)
+  created_at    timestamptz default now()
+  updated_at    timestamptz default now()
+  updated_by    uuid FK -> profiles.id, nullable
+
+quantity_discounts            -- at most one per product
+  id            uuid PK default gen_random_uuid()
+  product_id    uuid FK -> products.id, unique, not null
+  created_at    timestamptz default now()
+  updated_at    timestamptz default now()
+  updated_by    uuid FK -> profiles.id, nullable
+
+quantity_discount_tiers        -- "buy min_quantity+ for price"
+  id                    uuid PK default gen_random_uuid()
+  quantity_discount_id  uuid FK -> quantity_discounts.id, not null
+  min_quantity          int not null  -- >= 2
+  price                 numeric(10,2) not null
 ```
 
 Storage: one public-read bucket (`product-images`). Images are resized/

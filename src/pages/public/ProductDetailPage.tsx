@@ -1,19 +1,29 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { DiscountPrice } from "../../components/DiscountPrice";
+import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
-import type { Product } from "../../types/database";
+import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
 
 export function ProductDetailPage() {
   const { t, i18n } = useTranslation();
   const { productId } = useParams();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
+  const [limitedTimeDiscount, setLimitedTimeDiscount] = useState<LimitedTimeDiscount | null>(null);
+  const [quantityDiscount, setQuantityDiscount] = useState<QuantityDiscount | null>(null);
 
   useEffect(() => {
     if (!productId) return;
     fetchProductById(productId).then(setProduct);
+    fetchLimitedTimeDiscount(productId)
+      .then((discount) => setLimitedTimeDiscount(discount && isLimitedTimeDiscountActive(discount) ? discount : null))
+      .catch(() => setLimitedTimeDiscount(null));
+    fetchQuantityDiscount(productId)
+      .then(setQuantityDiscount)
+      .catch(() => setQuantityDiscount(null));
   }, [productId]);
 
   if (product === undefined) {
@@ -57,12 +67,28 @@ export function ProductDetailPage() {
               {t("product.size")}: {product.size}
             </p>
           )}
-          <p className="text-2xl font-semibold text-emerald-700">
-            {formatPrice(product.price, i18n.language)}
-            {shouldShowUnit(product.unit) && (
-              <span className="text-base font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
+          <div className="flex flex-wrap items-baseline gap-2">
+            {limitedTimeDiscount ? (
+              <DiscountPrice
+                originalPrice={product.price}
+                newPrice={limitedTimeDiscount.new_price}
+                lang={i18n.language}
+                size="lg"
+              />
+            ) : (
+              <p className="text-2xl font-semibold text-emerald-700">
+                {formatPrice(product.price, i18n.language)}
+              </p>
             )}
-          </p>
+            {shouldShowUnit(product.unit) && (
+              <span className="text-base font-normal text-neutral-500">/ {t(`unit.${product.unit}`)}</span>
+            )}
+          </div>
+          {limitedTimeDiscount && (
+            <p className="text-sm text-red-600">
+              {t("deals.endsIn", { count: daysRemaining(limitedTimeDiscount.ends_at) })}
+            </p>
+          )}
           <span
             className={`inline-block rounded-full px-3 py-1 text-sm ${
               product.in_stock ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
@@ -71,8 +97,35 @@ export function ProductDetailPage() {
             {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
           </span>
           {description && <p className="text-neutral-600">{description}</p>}
+
+          {quantityDiscount && quantityDiscount.tiers.length > 0 && (
+            <div className="rounded-xl border border-neutral-200 p-3">
+              <h2 className="mb-2 text-sm font-semibold text-neutral-900">{t("deals.quantityDiscountTitle")}</h2>
+              <ul className="space-y-1.5">
+                {quantityDiscount.tiers.map((tier) => (
+                  <li key={tier.id} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-neutral-600">
+                      {t("deals.tierLabel", { count: tier.min_quantity })}
+                    </span>
+                    <DiscountPrice
+                      originalPrice={product.price}
+                      newPrice={tier.price}
+                      lang={i18n.language}
+                      size="sm"
+                    />
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       </div>
     </div>
   );
+}
+
+/** Whole days left until `endsAt`, floored at 0 (never shows negative). */
+function daysRemaining(endsAt: string): number {
+  const ms = new Date(endsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ProductDiscountsModal } from "../../components/admin/ProductDiscountsModal";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
 import { fetchCategoryTree } from "../../lib/categories";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
@@ -16,6 +17,7 @@ export function AdminProductsPage() {
   const [categoryTree, setCategoryTree] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<FormMode | null>(null);
+  const [discountsProduct, setDiscountsProduct] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
   const reload = useCallback(() => {
@@ -167,6 +169,13 @@ export function AdminProductsPage() {
                         </button>
                         <button
                           type="button"
+                          onClick={() => setDiscountsProduct(product)}
+                          className="text-emerald-700 hover:underline"
+                        >
+                          {t("admin.discounts")}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDelete(product)}
                           className="text-red-600 hover:underline"
                         >
@@ -180,6 +189,16 @@ export function AdminProductsPage() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {discountsProduct && (
+        <ProductDiscountsModal
+          product={discountsProduct}
+          onClose={() => {
+            setDiscountsProduct(null);
+            reload();
+          }}
+        />
       )}
     </div>
   );

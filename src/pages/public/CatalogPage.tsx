@@ -3,11 +3,13 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { CategoryNav } from "../../components/CategoryNav";
 import { Chevron } from "../../components/Chevron";
+import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
 import { SearchBar } from "../../components/SearchBar";
 import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
+import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { fetchProducts } from "../../lib/products";
-import type { CategoryWithChildren, Product } from "../../types/database";
+import type { CategoryWithChildren, LimitedTimeDiscount, Product } from "../../types/database";
 
 export function CatalogPage() {
   const { t } = useTranslation();
@@ -17,8 +19,10 @@ export function CatalogPage() {
 
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [discountMap, setDiscountMap] = useState<Map<string, LimitedTimeDiscount>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const isHome = !categoryId && !search;
   // Sidebar starts collapsed on mobile to save vertical space; always
   // visible at md+ regardless of this flag (see className below).
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -35,8 +39,11 @@ export function CatalogPage() {
     // Selecting a top-level category also matches all of its subcategories;
     // selecting a subcategory matches only itself.
     const filterCategoryId = categoryId ? getCategoryFilterIds(categories, categoryId) : undefined;
-    fetchProducts({ categoryId: filterCategoryId, search })
-      .then(setProducts)
+    Promise.all([fetchProducts({ categoryId: filterCategoryId, search }), fetchActiveLimitedTimeDiscountMap()])
+      .then(([fetchedProducts, discounts]) => {
+        setProducts(fetchedProducts);
+        setDiscountMap(discounts);
+      })
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [categoryId, search, categories]);
@@ -65,6 +72,8 @@ export function CatalogPage() {
       <section className="space-y-4">
         <SearchBar value={search} onChange={(q) => setSearchParams(q ? { q } : {})} />
 
+        {isHome && <LimitedTimeDealsSection />}
+
         {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
         {error && <p className="text-red-600">{t("common.error")}</p>}
         {!loading && !error && products.length === 0 && (
@@ -74,7 +83,11 @@ export function CatalogPage() {
         {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                limitedTimeDiscount={discountMap.get(product.id)}
+              />
             ))}
           </div>
         )}
