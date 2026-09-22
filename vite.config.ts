@@ -10,6 +10,11 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // main.tsx registers the service worker itself via
+      // `virtual:pwa-register`, so it can silently activate updates and
+      // reload instead of leaving a new SW stuck "waiting" — don't also
+      // inject the plugin's own bare registerSW.js script.
+      injectRegister: false,
       // Push notifications need a push-event listener, which the plugin's
       // default auto-generated service worker can't be extended with —
       // injectManifest lets src/sw.ts be a real (precache-aware) service

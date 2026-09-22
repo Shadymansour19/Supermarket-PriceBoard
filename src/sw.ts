@@ -6,6 +6,15 @@ import { precacheAndRoute } from "workbox-precaching";
 declare const self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 
+// registerType: 'autoUpdate' (vite.config.ts) relies on the page posting
+// this message to a waiting worker — generateSW injects this listener
+// automatically, but injectManifest doesn't, so a hand-authored sw.ts has
+// to add it itself or updates never activate until every tab/window for
+// the site is fully closed and reopened.
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
+});
+
 type DealPushPayload = {
   title: string;
   body: string;
