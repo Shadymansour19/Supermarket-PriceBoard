@@ -4,45 +4,25 @@ import { usePwaInstall } from "../hooks/usePwaInstall";
 import { CloseIcon } from "./ContactIcons";
 import { DownloadIcon, ShareIcon } from "./InstallIcons";
 
-const DISMISS_KEY = "pwaInstallBannerDismissed";
-
-function readDismissed() {
-  try {
-    return sessionStorage.getItem(DISMISS_KEY) === "1";
-  } catch {
-    return false;
-  }
-}
-
-function persistDismissed() {
-  try {
-    sessionStorage.setItem(DISMISS_KEY, "1");
-  } catch {
-    // Private-browsing storage can throw — dismissing is a one-tab nicety,
-    // not something worth failing over.
-  }
-}
-
 /**
- * A slim, dismissible banner (shown on every public page, once per tab
- * session) that puts installing the app one tap away — most users never
- * find a browser's "Install app" menu item on their own. On Chromium it
- * triggers the browser's own install-confirm dialog directly; on iOS
- * Safari, which never offers that dialog, it opens on-screen steps for the
- * manual Share → Add to Home Screen flow instead.
+ * A slim, dismissible banner (shown on every public page) that puts
+ * installing the app one tap away — most users never find a browser's
+ * "Install app" menu item on their own. On Chromium it triggers the
+ * browser's own install-confirm dialog directly; on iOS Safari, which
+ * never offers that dialog, it opens on-screen steps for the manual
+ * Share → Add to Home Screen flow instead. Dismissing it only hides it for
+ * the current page — not persisted — so it's back the next time the app
+ * isn't installed yet, rather than staying gone until the tab closes.
  */
 export function InstallBanner() {
   const { t } = useTranslation();
   const { installed, canPrompt, isIOS, promptInstall } = usePwaInstall();
-  const [dismissed, setDismissed] = useState(readDismissed);
+  const [dismissed, setDismissed] = useState(false);
   const [showIosSteps, setShowIosSteps] = useState(false);
 
   if (installed || dismissed || !(canPrompt || isIOS)) return null;
 
-  const dismiss = () => {
-    persistDismissed();
-    setDismissed(true);
-  };
+  const dismiss = () => setDismissed(true);
 
   const handleInstallClick = () => {
     if (canPrompt) {

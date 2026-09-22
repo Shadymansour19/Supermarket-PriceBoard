@@ -20,6 +20,8 @@ const resources = {
         backToCatalog: "Back to catalog",
         shareWhatsapp: "Share on WhatsApp",
         shareMessage: "{{name}} — {{price}} — {{url}}",
+        askDetails: "Ask for details",
+        askMessage: "Hi, I'd like to ask about this product: {{name}} — {{url}}",
       },
       favorites: {
         navLabel: "Favorites",
@@ -164,6 +166,8 @@ const resources = {
         backToCatalog: "العودة إلى الكتالوج",
         shareWhatsapp: "مشاركة عبر واتساب",
         shareMessage: "{{name}} — {{price}} — {{url}}",
+        askDetails: "استفسار عن المنتج",
+        askMessage: "مرحبًا، أريد الاستفسار عن هذا المنتج: {{name}} — {{url}}",
       },
       favorites: {
         navLabel: "المفضلة",

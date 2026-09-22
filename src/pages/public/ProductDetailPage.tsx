@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
+import { AskWhatsAppButton } from "../../components/AskWhatsAppButton";
 import { DiscountPrice } from "../../components/DiscountPrice";
 import { FavoriteButton } from "../../components/FavoriteButton";
 import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
@@ -102,6 +103,9 @@ export function ProductDetailPage() {
             >
               {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
             </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <AskWhatsAppButton product={product} />
             <ShareWhatsAppButton product={product} />
           </div>
           {description && <p className="text-neutral-600">{description}</p>}
