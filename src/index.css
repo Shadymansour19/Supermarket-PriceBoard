@@ -1,5 +1,18 @@
 @import "tailwindcss";
 
+/* Three type roles, each an English font chained before its Arabic
+   counterpart. CSS font fallback is per-glyph, not per-string, so Arabic
+   characters fall through to the second font automatically regardless of
+   page direction — no [dir="rtl"] override needed to pick the right
+   family for mixed-language text (e.g. an Arabic product name next to a
+   Latin price). Tailwind v4 turns these into font-heading/font-label/
+   font-body utilities. */
+@theme {
+  --font-heading: "Poppins", "Cairo", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-label: "Inter", "Tajawal", system-ui, "Segoe UI", Roboto, sans-serif;
+  --font-body: "Manrope", "IBM Plex Sans Arabic", system-ui, "Segoe UI", Roboto, sans-serif;
+}
+
 :root {
   color-scheme: light;
 }
@@ -12,23 +25,30 @@ body,
 
 body {
   margin: 0;
-  font-family:
-    "Inter",
-    system-ui,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
+  font-family: var(--font-body);
 }
 
-/* Arabic gets a touch more line-height — its script needs it to stay
-   legible — and the Cairo font, whether the whole page is RTL or it's just
-   an Arabic-name input inside an otherwise-LTR admin form. */
+/* Element-level defaults so every heading/label/input picks up its role's
+   font without needing a font-heading/font-label class at each call site —
+   the explicit utility classes elsewhere are for spans/divs standing in
+   for one of these roles (badges, price displays, nav links) that aren't
+   one of these elements themselves. */
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading);
+}
+
+label,
+button,
+input,
+select,
+textarea {
+  font-family: var(--font-label);
+}
+
+/* Arabic needs a touch more line-height to stay legible. */
 [dir="rtl"] {
-  font-family:
-    "Cairo",
-    system-ui,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
   line-height: 1.7;
 }

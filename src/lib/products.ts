@@ -40,6 +40,16 @@ export async function fetchProductById(id: string): Promise<Product | null> {
   return data as Product | null;
 }
 
+/** Products matching a set of ids (favorites) — only visible ones, same as
+ * the default `fetchProducts` behavior, so a since-hidden product quietly
+ * drops off the favorites list instead of erroring. */
+export async function fetchProductsByIds(ids: string[]): Promise<Product[]> {
+  if (ids.length === 0) return [];
+  const { data, error } = await supabase.from("products").select("*").in("id", ids).eq("is_active", true);
+  if (error) throw error;
+  return (data ?? []) as Product[];
+}
+
 export type ProductInput = {
   category_id: string;
   name_en: string;

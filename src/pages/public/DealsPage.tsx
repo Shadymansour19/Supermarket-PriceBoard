@@ -21,7 +21,7 @@ export function DealsPage() {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-lg font-semibold text-neutral-900">{t("deals.pageTitle")}</h1>
+      <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("deals.pageTitle")}</h1>
 
       {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
       {error && <p className="text-red-600">{t("common.error")}</p>}

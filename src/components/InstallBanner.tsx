@@ -57,13 +57,13 @@ export function InstallBanner() {
       <div className="flex items-center gap-3 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm">
         <img src="/logo.jpg" alt="" className="h-9 w-9 shrink-0 rounded-full object-cover" />
         <div className="min-w-0 flex-1">
-          <p className="font-medium text-emerald-900">{t("install.title")}</p>
+          <p className="font-heading font-medium text-emerald-900">{t("install.title")}</p>
           <p className="truncate text-emerald-700">{t("install.subtitle")}</p>
         </div>
         <button
           type="button"
           onClick={handleInstallClick}
-          className="flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 font-medium text-white hover:bg-emerald-700"
+          className="font-label flex shrink-0 items-center gap-1.5 rounded-full bg-emerald-600 px-3.5 py-1.5 font-medium text-white hover:bg-emerald-700"
         >
           <DownloadIcon className="h-4 w-4" />
           {t("install.install")}
@@ -88,7 +88,7 @@ export function InstallBanner() {
         >
           <div className="w-full max-w-sm space-y-4 rounded-xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900">{t("install.iosTitle")}</h2>
+              <h2 className="font-heading text-lg font-bold text-neutral-900">{t("install.iosTitle")}</h2>
               <button
                 type="button"
                 onClick={() => setShowIosSteps(false)}

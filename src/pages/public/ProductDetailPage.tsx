@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { DiscountPrice } from "../../components/DiscountPrice";
+import { FavoriteButton } from "../../components/FavoriteButton";
+import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
 import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
@@ -47,7 +49,7 @@ export function ProductDetailPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Link to="/" className="mb-4 inline-block text-sm text-emerald-700 underline">
+      <Link to="/" className="font-label mb-4 inline-block text-sm text-emerald-700 underline">
         {t("product.backToCatalog")}
       </Link>
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
@@ -61,13 +63,16 @@ export function ProductDetailPage() {
           )}
         </div>
         <div className="space-y-3">
-          <h1 className="text-2xl font-bold text-neutral-900">{name}</h1>
+          <div className="flex items-start justify-between gap-2">
+            <h1 className="font-heading text-2xl font-bold text-neutral-900">{name}</h1>
+            <FavoriteButton productId={product.id} className="h-9 w-9 shrink-0 border border-neutral-200" />
+          </div>
           {product.size && (
-            <p className="text-sm text-neutral-500">
+            <p className="font-label text-sm text-neutral-500">
               {t("product.size")}: {product.size}
             </p>
           )}
-          <div className="flex flex-wrap items-baseline gap-2">
+          <div className="font-label flex flex-wrap items-baseline gap-2">
             {limitedTimeDiscount ? (
               <DiscountPrice
                 originalPrice={product.price}
@@ -89,21 +94,24 @@ export function ProductDetailPage() {
               {t("deals.endsIn", { count: daysRemaining(limitedTimeDiscount.ends_at) })}
             </p>
           )}
-          <span
-            className={`inline-block rounded-full px-3 py-1 text-sm ${
-              product.in_stock ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
-            }`}
-          >
-            {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`font-label inline-block rounded-full px-3 py-1 text-sm ${
+                product.in_stock ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
+              }`}
+            >
+              {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
+            </span>
+            <ShareWhatsAppButton product={product} />
+          </div>
           {description && <p className="text-neutral-600">{description}</p>}
 
           {quantityDiscount && quantityDiscount.tiers.length > 0 && (
             <div className="rounded-xl border border-neutral-200 p-3">
-              <h2 className="mb-2 text-sm font-semibold text-neutral-900">{t("deals.quantityDiscountTitle")}</h2>
+              <h2 className="font-heading mb-2 text-sm font-semibold text-neutral-900">{t("deals.quantityDiscountTitle")}</h2>
               <ul className="space-y-1.5">
                 {quantityDiscount.tiers.map((tier) => (
-                  <li key={tier.id} className="flex items-center justify-between gap-3 text-sm">
+                  <li key={tier.id} className="font-label flex items-center justify-between gap-3 text-sm">
                     <span className="text-neutral-600">
                       {t("deals.tierLabel", { count: tier.min_quantity })}
                     </span>

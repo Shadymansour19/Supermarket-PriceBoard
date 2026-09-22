@@ -22,5 +22,10 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src"],
+  // The service worker runs in a WebWorker global scope, not DOM — its
+  // globals (self, ServiceWorkerGlobalScope, ...) conflict with this
+  // project's "DOM" lib, so it's excluded from tsc's project-wide check.
+  // Vite/esbuild still transpiles and bundles it at build time.
+  "exclude": ["src/sw.ts"]
 }

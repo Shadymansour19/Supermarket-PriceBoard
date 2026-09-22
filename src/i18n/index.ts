@@ -18,6 +18,19 @@ const resources = {
         size: "Size",
         notFound: "Product not found.",
         backToCatalog: "Back to catalog",
+        shareWhatsapp: "Share on WhatsApp",
+        shareMessage: "{{name}} — {{price}} — {{url}}",
+      },
+      favorites: {
+        navLabel: "Favorites",
+        title: "Your favorites",
+        empty: "You haven't saved any products yet.",
+        add: "Save to favorites",
+        remove: "Remove from favorites",
+      },
+      notifications: {
+        enable: "Get notified about new deals",
+        disable: "Turn off deal notifications",
       },
       unit: {
         each: "each",
@@ -149,6 +162,19 @@ const resources = {
         size: "الحجم",
         notFound: "المنتج غير موجود.",
         backToCatalog: "العودة إلى الكتالوج",
+        shareWhatsapp: "مشاركة عبر واتساب",
+        shareMessage: "{{name}} — {{price}} — {{url}}",
+      },
+      favorites: {
+        navLabel: "المفضلة",
+        title: "المفضلة لديك",
+        empty: "لم تحفظ أي منتجات بعد.",
+        add: "إضافة إلى المفضلة",
+        remove: "إزالة من المفضلة",
+      },
+      notifications: {
+        enable: "فعّل إشعارات العروض الجديدة",
+        disable: "إيقاف إشعارات العروض",
       },
       unit: {
         each: "قطعة",

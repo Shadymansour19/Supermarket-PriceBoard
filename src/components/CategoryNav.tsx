@@ -35,7 +35,7 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
         to="/"
         end
         className={({ isActive }) =>
-          `block rounded-md px-3 py-1.5 text-sm font-medium ${
+          `font-label block rounded-md px-3 py-1.5 text-sm font-medium ${
             isActive ? "bg-emerald-600 text-white" : "text-neutral-700 hover:bg-neutral-100"
           }`
         }
@@ -65,7 +65,7 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
                 <NavLink
                   to={`/category/${category.id}`}
                   className={({ isActive }) =>
-                    `block flex-1 rounded-md px-2 py-1.5 text-sm font-semibold ${
+                    `font-label block flex-1 rounded-md px-2 py-1.5 text-sm font-semibold ${
                       hasChildren ? "" : "ms-6"
                     } ${isActive ? "bg-emerald-600 text-white" : "text-neutral-900 hover:bg-neutral-100"}`
                   }
@@ -80,7 +80,7 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
                       <NavLink
                         to={`/category/${child.id}`}
                         className={({ isActive }) =>
-                          `block rounded-md px-2 py-1 text-sm ${
+                          `font-label block rounded-md px-2 py-1 text-sm ${
                             isActive
                               ? "bg-emerald-600 text-white"
                               : "text-neutral-600 hover:bg-neutral-100"

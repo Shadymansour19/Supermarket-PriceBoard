@@ -22,7 +22,7 @@ export function DiscountPrice({
   const originalPriceClass = size === "lg" ? "text-base" : "text-sm";
 
   return (
-    <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+    <span className="font-label inline-flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
       <span className={`text-red-500 line-through ${originalPriceClass}`}>{formatPrice(originalPrice, lang)}</span>
       <span className={`text-emerald-700 ${newPriceClass}`}>{formatPrice(newPrice, lang)}</span>
       {percent > 0 && (

@@ -23,6 +23,33 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-22 — Favorites, WhatsApp share, deal push notifications, and
+  role-based typography, to make the app worth returning to rather than
+  a one-off lookup.** Favorites (`FavoritesContext`, `FavoriteButton`) are
+  per-device via `localStorage` (`hamada_favorites`) — no accounts in this
+  app, so nothing is synced across devices; a heart toggle on
+  `ProductCard`/`ProductDetailPage` and a `/favorites` page with a header
+  count badge. `ShareWhatsAppButton` on the product detail page opens
+  `wa.me` with no fixed number (the customer's own contact picker), not
+  the store's WhatsApp — this is forwarding a deal to someone, not
+  contacting the store (that's still `ContactWidget`). Push notifications
+  for new limited-time deals needed switching `vite-plugin-pwa` from
+  `generateSW` to `strategies: 'injectManifest'` (`src/sw.ts`) since a
+  push-event listener can't be added to the auto-generated worker;
+  subscriptions live in `push_subscriptions`
+  (`0004_push_subscriptions.sql`), keyed by the browser's push `endpoint`
+  (again, no accounts) with no public read policy — only the
+  `notify-new-deal` Edge Function (service-role key) can list them. That
+  function is invoked by a Supabase Database Webhook on
+  `limited_time_discounts` INSERT, configured in the dashboard rather than
+  a SQL trigger, since this project has no linked Supabase CLI and applies
+  changes via the SQL editor by hand. Typography moved from one Inter/
+  Cairo pair to three roles — heading (Poppins/Cairo), label (Inter/
+  Tajawal), body (Manrope/IBM Plex Sans Arabic) — each a single font stack
+  with the Arabic font chained after the English one; CSS font fallback is
+  per-glyph, so this picks the right family per character without a
+  `[dir="rtl"]` override, unlike the old setup.
+
 - **2026-09-13 — One-tap install banner, since most users won't find a
   browser's install menu on their own.** A dismissible banner
   (`InstallBanner`, `usePwaInstall`) sits under the header on every public

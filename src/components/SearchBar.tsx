@@ -28,7 +28,7 @@ export function SearchBar({
       value={draft}
       onChange={(e) => setDraft(e.target.value)}
       placeholder={t("search.placeholder")}
-      className="w-full rounded-lg border border-neutral-300 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+      className="font-label w-full rounded-lg border border-neutral-300 px-4 py-2 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
     />
   );
 }

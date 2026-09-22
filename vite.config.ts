@@ -10,6 +10,13 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Push notifications need a push-event listener, which the plugin's
+      // default auto-generated service worker can't be extended with —
+      // injectManifest lets src/sw.ts be a real (precache-aware) service
+      // worker we author ourselves.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['logo.jpg'],
       manifest: {
         name: 'Super Market Hamada',
@@ -40,7 +47,7 @@ export default defineConfig({
           },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,jpg,jpeg,woff2}'],
       },
     }),

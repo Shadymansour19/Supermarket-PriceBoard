@@ -45,7 +45,7 @@ export function ContactWidget() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between">
-              <h2 className="text-lg font-bold text-neutral-900">{t("contact.title")}</h2>
+              <h2 className="font-heading text-lg font-bold text-neutral-900">{t("contact.title")}</h2>
               <button
                 type="button"
                 onClick={() => setOpen(false)}

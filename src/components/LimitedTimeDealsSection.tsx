@@ -38,8 +38,8 @@ export function LimitedTimeDealsSection() {
   return (
     <section className="space-y-3">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-neutral-900">{t("deals.sectionTitle")}</h2>
-        <Link to="/deals" className="text-sm font-medium text-emerald-700 hover:underline">
+        <h2 className="font-heading text-lg font-semibold text-neutral-900">{t("deals.sectionTitle")}</h2>
+        <Link to="/deals" className="font-label text-sm font-medium text-emerald-700 hover:underline">
           {t("deals.showMore")}
         </Link>
       </div>
