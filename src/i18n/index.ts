@@ -9,8 +9,10 @@ const resources = {
     translation: {
       app: { name: "Super Market Hamada" },
       hero: {
+        badge: "Deals refreshed daily",
         title: "Welcome to Super Market Hamada",
         subtitle: "Fresh groceries, great prices — browse the full catalog below.",
+        cta: "See today's deals",
       },
       nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
@@ -159,8 +161,10 @@ const resources = {
     translation: {
       app: { name: "سوبر ماركت حماده" },
       hero: {
+        badge: "عروض تتجدد يوميًا",
         title: "أهلاً بك في سوبر ماركت حماده",
         subtitle: "منتجات طازجة بأفضل الأسعار — تصفح الكتالوج الكامل بالأسفل.",
+        cta: "شاهد عروض اليوم",
       },
       nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },

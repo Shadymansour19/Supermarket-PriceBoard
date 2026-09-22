@@ -2,15 +2,18 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CONTACT } from "../config";
 import { ChatIcon, CloseIcon, FacebookIcon, LocationIcon, PhoneIcon, WhatsAppIcon } from "./ContactIcons";
+import { useScrollDirection } from "../hooks/useScrollDirection";
 
 /**
  * Floating "Contact us" button shown on every public page. Clicking it
  * pops open a dialog with all contact methods — no dedicated /contact
- * route needed.
+ * route needed. Tucks itself away while scrolling down (out of the way of
+ * reading) and slides back in on scrolling up.
  */
 export function ContactWidget() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const scrolledDown = useScrollDirection();
 
   useEffect(() => {
     if (!open) return;
@@ -27,7 +30,11 @@ export function ContactWidget() {
         type="button"
         onClick={() => setOpen(true)}
         aria-label={t("contact.title")}
-        className="fixed bottom-6 end-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg hover:bg-emerald-700"
+        aria-hidden={scrolledDown && !open}
+        tabIndex={scrolledDown && !open ? -1 : undefined}
+        className={`fixed bottom-6 end-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-all duration-300 hover:bg-emerald-700 ${
+          scrolledDown && !open ? "translate-y-24 opacity-0" : "translate-y-0 opacity-100"
+        }`}
       >
         <ChatIcon className="h-7 w-7" />
       </button>

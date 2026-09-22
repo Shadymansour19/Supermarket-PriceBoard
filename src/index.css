@@ -77,6 +77,46 @@ textarea {
   }
 }
 
+@keyframes hero-float-rotate {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-6deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(6deg);
+  }
+}
+
+@keyframes hero-gradient-shift {
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+@keyframes hero-shimmer {
+  0% {
+    transform: translateX(-100%) skewX(-12deg);
+  }
+  55%,
+  100% {
+    transform: translateX(420%) skewX(-12deg);
+  }
+}
+
+@keyframes hero-badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
 .hero-fade-in {
   animation: hero-fade-in 0.7s ease-out both;
 }
@@ -85,9 +125,29 @@ textarea {
   animation: hero-float 7s ease-in-out infinite;
 }
 
+.hero-float-rotate {
+  animation: hero-float-rotate 5.5s ease-in-out infinite;
+}
+
+.hero-gradient-shift {
+  animation: hero-gradient-shift 8s ease-in-out infinite;
+}
+
+.hero-shimmer {
+  animation: hero-shimmer 5s ease-in-out infinite;
+}
+
+.hero-badge-pulse {
+  animation: hero-badge-pulse 2.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-in,
-  .hero-float {
+  .hero-float,
+  .hero-float-rotate,
+  .hero-gradient-shift,
+  .hero-shimmer,
+  .hero-badge-pulse {
     animation: none;
   }
 }

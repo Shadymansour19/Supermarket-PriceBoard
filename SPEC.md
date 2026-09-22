@@ -7,7 +7,7 @@ Renamed from the working name "Bakala" to **Super Market Hamada** (سوبر
 
 A single-store product catalog with two sides:
 
-- **Admin** (small fixed team, same permissions): add/edit/remove products —
+- **Admin** (small fixed team, samex permissions): add/edit/remove products —
   name, category, price, image, availability.
 - **Public**: browse/view the catalog read-only, navigate by
   category → subcategory, search by name. No accounts required.
