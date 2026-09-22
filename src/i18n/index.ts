@@ -126,6 +126,7 @@ const resources = {
       deals: {
         sectionTitle: "Limited-time deals",
         showMore: "Show more",
+        goToSlide: "Go to deal {{count}}",
         pageTitle: "Limited-time deals",
         noActiveDeals: "No active deals right now.",
         endsIn_one: "Ends in {{count}} day",
@@ -278,6 +279,7 @@ const resources = {
       deals: {
         sectionTitle: "عروض لفترة محدودة",
         showMore: "عرض المزيد",
+        goToSlide: "الانتقال إلى العرض {{count}}",
         pageTitle: "عروض لفترة محدودة",
         noActiveDeals: "لا توجد عروض نشطة حاليًا.",
         // Arabic has six plural categories (zero/one/two/few/many/other),
@@ -329,7 +331,7 @@ i18n
     supportedLngs: ["en", "ar"],
     interpolation: { escapeValue: false },
     detection: {
-      order: ["localStorage", "navigator"],
+      order: ["localStorage"],
       caches: ["localStorage"],
       lookupLocalStorage: "bakala_lang",
     },
