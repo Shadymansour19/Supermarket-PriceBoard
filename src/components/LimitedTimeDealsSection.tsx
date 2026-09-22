@@ -160,7 +160,7 @@ export function LimitedTimeDealsSection() {
             ref={(el) => {
               cardRefs.current[index] = el;
             }}
-            className="w-40 shrink-0 sm:w-48"
+            className="w-[66vw] max-w-xs shrink-0"
           >
             <ProductCard product={product} limitedTimeDiscount={discount} />
           </div>
