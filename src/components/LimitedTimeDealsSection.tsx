@@ -128,9 +128,31 @@ export function LimitedTimeDealsSection() {
   }, [deals]);
 
   function goTo(index: number) {
+    const scroller = scrollerRef.current;
+    const card = cardRefs.current[index];
+    if (!scroller || !card) return;
+
     ignoreObserverUntilRef.current = Date.now() + PROGRAMMATIC_SCROLL_SETTLE_MS;
     setActiveIndex(index);
-    cardRefs.current[index]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+
+    // Deliberately not card.scrollIntoView() — it walks every scrollable
+    // ancestor, including the page itself, so if the user had scrolled
+    // elsewhere on the page, auto-advance would yank the whole page back
+    // to this section every few seconds. scrollBy on the strip's own
+    // element only ever moves that element, never an ancestor.
+    //
+    // getBoundingClientRect gives physical (left-to-right) viewport
+    // coordinates, and — verified empirically, not just assumed — the
+    // rectLeft-to-scrollLeft relationship turns out to be the same
+    // direction in RTL as in LTR; only the *valid range* of scrollLeft
+    // differs (negative in RTL, clamped there automatically), which
+    // doesn't affect this delta at all. No RTL sign flip needed — one was
+    // tried here and confirmed wrong (it doubled the error instead of
+    // centering the card).
+    const scrollerRect = scroller.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+    const delta = cardRect.left + cardRect.width / 2 - (scrollerRect.left + scrollerRect.width / 2);
+    scroller.scrollBy({ left: delta, behavior: "smooth" });
   }
 
   function pauseAutoAdvance() {
