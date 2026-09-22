@@ -1,4 +1,5 @@
 /// <reference lib="webworker" />
+import { clientsClaim } from "workbox-core";
 import { precacheAndRoute } from "workbox-precaching";
 
 // injectManifest strategy: vite-plugin-pwa/workbox-build replaces this at
@@ -6,14 +7,14 @@ import { precacheAndRoute } from "workbox-precaching";
 declare const self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 
-// registerType: 'autoUpdate' (vite.config.ts) relies on the page posting
-// this message to a waiting worker — generateSW injects this listener
+// registerType: 'autoUpdate' (vite.config.ts) expects a new worker to
+// activate immediately instead of sitting in "waiting" until every
+// tab/window for the site is fully closed — generateSW does this
 // automatically, but injectManifest doesn't, so a hand-authored sw.ts has
-// to add it itself or updates never activate until every tab/window for
-// the site is fully closed and reopened.
-self.addEventListener("message", (event) => {
-  if (event.data?.type === "SKIP_WAITING") self.skipWaiting();
-});
+// to call skipWaiting itself. main.tsx reloads the page once the new
+// worker activates.
+self.skipWaiting();
+clientsClaim();
 
 type DealPushPayload = {
   title: string;
