@@ -26,7 +26,7 @@ export function PublicLayout() {
             <Link
               to="/favorites"
               aria-label={t("favorites.navLabel")}
-              className="relative flex h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100"
+              className="relative hidden h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 md:flex"
             >
               <HeartIcon filled={favoriteIds.size > 0} />
               {favoriteIds.size > 0 && (
