@@ -130,7 +130,7 @@ export function LimitedTimeDealsSection() {
   function goTo(index: number) {
     ignoreObserverUntilRef.current = Date.now() + PROGRAMMATIC_SCROLL_SETTLE_MS;
     setActiveIndex(index);
-    cardRefs.current[index]?.scrollIntoView({ behavior: "smooth", inline: "start", block: "nearest" });
+    cardRefs.current[index]?.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
   }
 
   function pauseAutoAdvance() {
