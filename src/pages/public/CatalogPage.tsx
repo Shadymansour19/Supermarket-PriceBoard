@@ -1,19 +1,19 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useParams, useSearchParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 import { CategoryNav } from "../../components/CategoryNav";
-import { Chevron } from "../../components/Chevron";
 import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
 import { SearchBar } from "../../components/SearchBar";
 import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
+import { localizedField } from "../../lib/localize";
 import { fetchProducts } from "../../lib/products";
 import type { CategoryWithChildren, LimitedTimeDiscount, Product } from "../../types/database";
 
 export function CatalogPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { categoryId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
   const search = searchParams.get("q") ?? "";
@@ -24,9 +24,10 @@ export function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const isHome = !categoryId && !search;
-  // Sidebar starts collapsed on mobile to save vertical space; always
-  // visible at md+ regardless of this flag (see className below).
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Only set when `categoryId` is a top-level category (not a
+  // subcategory, which has no children of its own to drill into) — drives
+  // the mobile subcategory chip row below.
+  const currentTopCategory = categoryId ? categories.find((c) => c.id === categoryId) : undefined;
 
   useEffect(() => {
     fetchCategoryTree()
@@ -49,31 +50,32 @@ export function CatalogPage() {
       .finally(() => setLoading(false));
   }, [categoryId, search, categories]);
 
-  // Collapse the mobile sidebar again once a category selection is made.
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [categoryId]);
-
   return (
     <div className="space-y-6">
       {isHome && <HeroBanner />}
       <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-        <div className="md:hidden">
-          <button
-            type="button"
-            onClick={() => setSidebarOpen((open) => !open)}
-            aria-expanded={sidebarOpen}
-            className="font-label flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700"
-          >
-            {t("nav.categories")}
-            <Chevron open={sidebarOpen} />
-          </button>
-        </div>
-        <aside className={sidebarOpen ? "block" : "hidden md:block"}>
+        {/* Category navigation on mobile lives on its own /categories page
+         * (reached from the bottom nav bar) instead of an inline dropdown
+         * here — this sidebar is desktop/tablet-only. */}
+        <aside className="hidden md:block">
           <CategoryNav categories={categories} />
         </aside>
         <section className="space-y-4">
           <SearchBar value={search} onChange={(q) => setSearchParams(q ? { q } : {})} />
+
+          {currentTopCategory && currentTopCategory.children.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
+              {currentTopCategory.children.map((child) => (
+                <Link
+                  key={child.id}
+                  to={`/category/${child.id}`}
+                  className="font-label shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100"
+                >
+                  {localizedField(child, "name", i18n.language)}
+                </Link>
+              ))}
+            </div>
+          )}
 
           {isHome && <LimitedTimeDealsSection />}
 

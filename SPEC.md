@@ -23,6 +23,19 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-22 — Mobile bottom nav bar (Home/Categories); category
+  browsing moved off an inline dropdown onto its own page.** `BottomNavBar`
+  is fixed, `md:hidden` — desktop/tablet keep the existing persistent
+  sidebar (`CategoryNav`) instead, so there's no dropdown there either.
+  The old mobile-only "Categories" toggle button on `CatalogPage` (which
+  expanded the sidebar inline) is gone; its bottom-bar equivalent goes to
+  a new `/categories` page (`CategoriesPage`) listing top-level categories
+  only. Picking one goes to the existing `/category/:id` route, which
+  (mobile-only, since desktop already has the sidebar for this) now also
+  shows a horizontal chip row of that category's subcategories when it's
+  a top-level one — so the drill-down is category → subcategory → products
+  without needing the sidebar at any point on mobile.
+
 - **2026-09-22 — Limited-time deals strip auto-rotates, with dots tracking
   the current card.** `LimitedTimeDealsSection` advances one card every
   4s, pausing for a while after any manual scroll/swipe/dot click, and

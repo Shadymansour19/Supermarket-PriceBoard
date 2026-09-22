@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link, Outlet } from "react-router-dom";
+import { BottomNavBar } from "./BottomNavBar";
 import { ContactWidget } from "./ContactWidget";
 import { Footer } from "./Footer";
 import { HeartIcon } from "./Icons";
@@ -43,7 +44,11 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      {/* Clears the fixed mobile bottom nav bar so it never covers the
+       * tail end of the footer. */}
+      <div className="md:hidden" style={{ height: "calc(4rem + env(safe-area-inset-bottom))" }} />
       <ContactWidget />
+      <BottomNavBar />
     </div>
   );
 }

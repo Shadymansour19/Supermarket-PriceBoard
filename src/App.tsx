@@ -9,6 +9,7 @@ import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
 import { LoginPage } from "./pages/admin/LoginPage";
 import { CatalogPage } from "./pages/public/CatalogPage";
+import { CategoriesPage } from "./pages/public/CategoriesPage";
 import { DealsPage } from "./pages/public/DealsPage";
 import { FavoritesPage } from "./pages/public/FavoritesPage";
 import { ProductDetailPage } from "./pages/public/ProductDetailPage";
@@ -23,6 +24,7 @@ export default function App() {
           <Route element={<PublicLayout />}>
             <Route index element={<CatalogPage />} />
             <Route path="category/:categoryId" element={<CatalogPage />} />
+            <Route path="categories" element={<CategoriesPage />} />
             <Route path="deals" element={<DealsPage />} />
             <Route path="favorites" element={<FavoritesPage />} />
             <Route path="product/:productId" element={<ProductDetailPage />} />
