@@ -11,7 +11,7 @@ const resources = {
       hero: {
         badge: "Deals refreshed daily",
         title: "Welcome to Super Market Hamada",
-        subtitle: "Fresh groceries, great prices — browse the full catalog below.",
+        subtitle: "Everything your home needs, all in one place, at prices you'll love.",
         cta: "See today's deals",
       },
       nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
@@ -164,7 +164,7 @@ const resources = {
       hero: {
         badge: "عروض تتجدد يوميًا",
         title: "أهلاً بك في سوبر ماركت حماده",
-        subtitle: "منتجات طازجة بأفضل الأسعار — تصفح الكتالوج الكامل بالأسفل.",
+        subtitle: "كل اللي بيتك محتاجه، في مكان واحد وبأحلى الأسعار!",
         cta: "شاهد عروض اليوم",
       },
       nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
