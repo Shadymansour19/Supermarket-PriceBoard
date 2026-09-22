@@ -30,8 +30,15 @@ begin
   from vault.decrypted_secrets
   where name = 'notify_new_deal_function_secret';
 
+  -- NOTE: this must match whatever URL the Supabase dashboard actually
+  -- assigns the deployed function — it does NOT necessarily match the
+  -- function's display name. Ours was deployed via the dashboard and
+  -- came back as /functions/v1/hyper-worker despite being named
+  -- "notify-new-deal" in the dashboard's function list (confirmed
+  -- 2026-09-22 — a real mismatch, not a typo here). Check the exact URL
+  -- shown in the dashboard before assuming this value is still correct.
   perform net.http_post(
-    url := 'https://tyktbinxffpqcbbhvggd.supabase.co/functions/v1/notify-new-deal',
+    url := 'https://tyktbinxffpqcbbhvggd.supabase.co/functions/v1/hyper-worker',
     body := jsonb_build_object(
       'type', 'INSERT',
       'table', 'limited_time_discounts',
