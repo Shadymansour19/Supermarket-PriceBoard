@@ -7,7 +7,7 @@ Renamed from the working name "Bakala" to **Super Market Hamada** (سوبر
 
 A single-store product catalog with two sides:
 
-- **Admin** (small fixed team, samex permissions): add/edit/remove products —
+- **Admin** (small fixed team, same permissions): add/edit/remove products —
   name, category, price, image, availability.
 - **Public**: browse/view the catalog read-only, navigate by
   category → subcategory, search by name. No accounts required.
@@ -22,6 +22,25 @@ translated string table bolted onto an LTR layout.
 
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
+
+- **2026-09-22 — Limited-time deals strip auto-rotates, with dots tracking
+  the current card.** `LimitedTimeDealsSection` advances one card every
+  4s, pausing for a while after any manual scroll/swipe/dot click, and
+  never auto-advancing under `prefers-reduced-motion`. The active dot is
+  set directly by whatever moved the strip (auto-advance or a dot click)
+  rather than inferred from `IntersectionObserver` geometry — the strip is
+  wide enough to show more than one card fully at once (notably at either
+  scroll edge), so "most visible card" is genuinely ambiguous there, and
+  trusting geometry for that case picked the wrong card in testing. The
+  observer still drives the dots the rest of the time, so they stay
+  accurate if the user swipes the strip themselves; getting that
+  observer's "most visible" calculation right took two more fixes found
+  through testing — using each card's last-known ratio (a callback only
+  reports entries whose ratio just crossed a threshold, not every card's
+  current state) instead of just that callback's entries, and waiting for
+  `document.fonts.ready` before observing at all (the very first layout
+  pass can report a spurious tie before web fonts swap in and reflow the
+  strip).
 
 - **2026-09-22 — Favorites, WhatsApp share, deal push notifications, and
   role-based typography, to make the app worth returning to rather than
