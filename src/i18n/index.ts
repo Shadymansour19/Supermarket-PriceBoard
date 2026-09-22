@@ -12,7 +12,7 @@ const resources = {
         badge: "Deals refreshed daily",
         title: "Welcome to Super Market Hamada",
         subtitle: "Everything your home needs, all in one place, at prices you'll love.",
-        cta: "See today's deals",
+        cta: "Let's check out today's deals!",
       },
       nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
@@ -32,7 +32,7 @@ const resources = {
       favorites: {
         navLabel: "Favorites",
         title: "Your favorites",
-        empty: "You haven't saved any products yet.",
+        empty: "Nothing saved yet — go ahead and pick your favorites!",
         add: "Save to favorites",
         remove: "Remove from favorites",
       },
@@ -128,7 +128,7 @@ const resources = {
         showMore: "Show more",
         goToSlide: "Go to deal {{count}}",
         pageTitle: "Limited-time deals",
-        noActiveDeals: "No active deals right now.",
+        noActiveDeals: "No deals right now — check back soon!",
         endsIn_one: "Ends in {{count}} day",
         endsIn_other: "Ends in {{count}} days",
         quantityDiscountTitle: "Buy more, save more",
@@ -146,7 +146,7 @@ const resources = {
         directionsSoon: "Map link coming soon",
       },
       install: {
-        title: "Install this app",
+        title: "Get the app for easier shopping!",
         subtitle: "Add it to your home screen for quick, one-tap access.",
         install: "Install",
         notNow: "Not now",
@@ -165,7 +165,7 @@ const resources = {
         badge: "عروض تتجدد يوميًا",
         title: "أهلاً بك في سوبر ماركت حماده",
         subtitle: "كل اللي بيتك محتاجه، في مكان واحد وبأحلى الأسعار!",
-        cta: "شاهد عروض اليوم",
+        cta: "يلا بينا نشوف عروض النهاردة!",
       },
       nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
@@ -185,7 +185,7 @@ const resources = {
       favorites: {
         navLabel: "المفضلة",
         title: "المفضلة لديك",
-        empty: "لم تحفظ أي منتجات بعد.",
+        empty: "لسه مفيش حاجة في المفضلة... يلا اختار اللي يعجبك!",
         add: "إضافة إلى المفضلة",
         remove: "إزالة من المفضلة",
       },
@@ -281,7 +281,7 @@ const resources = {
         showMore: "عرض المزيد",
         goToSlide: "الانتقال إلى العرض {{count}}",
         pageTitle: "عروض لفترة محدودة",
-        noActiveDeals: "لا توجد عروض نشطة حاليًا.",
+        noActiveDeals: "مفيش عروض دلوقتي... تابعنا يوصلك كل جديد!",
         // Arabic has six plural categories (zero/one/two/few/many/other),
         // not just one/other like English — leaving any of these out means
         // i18next falls back to showing the raw key for that count instead
@@ -308,7 +308,7 @@ const resources = {
         directionsSoon: "رابط الخريطة قريبًا",
       },
       install: {
-        title: "ثبّت هذا التطبيق",
+        title: "نزّل التطبيق وخلي التسوق أسهل!",
         subtitle: "أضِفه إلى الشاشة الرئيسية للوصول السريع بلمسة واحدة.",
         install: "تثبيت",
         notNow: "ليس الآن",
