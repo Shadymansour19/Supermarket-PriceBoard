@@ -52,3 +52,42 @@ textarea {
 [dir="rtl"] {
   line-height: 1.7;
 }
+
+/* Home page hero banner: a gentle entrance and slow-floating background
+   blobs — decorative only, so both are disabled for users who've asked
+   for reduced motion. */
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-14px) scale(1.08);
+  }
+}
+
+.hero-fade-in {
+  animation: hero-fade-in 0.7s ease-out both;
+}
+
+.hero-float {
+  animation: hero-float 7s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-fade-in,
+  .hero-float {
+    animation: none;
+  }
+}

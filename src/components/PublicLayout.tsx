@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link, Outlet } from "react-router-dom";
 import { ContactWidget } from "./ContactWidget";
+import { Footer } from "./Footer";
 import { HeartIcon } from "./Icons";
 import { InstallBanner } from "./InstallBanner";
 import { LanguageToggle } from "./LanguageToggle";
@@ -41,6 +42,7 @@ export function PublicLayout() {
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Outlet />
       </main>
+      <Footer />
       <ContactWidget />
     </div>
   );

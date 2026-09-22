@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useParams, useSearchParams } from "react-router-dom";
 import { CategoryNav } from "../../components/CategoryNav";
 import { Chevron } from "../../components/Chevron";
+import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
 import { SearchBar } from "../../components/SearchBar";
@@ -54,44 +55,47 @@ export function CatalogPage() {
   }, [categoryId]);
 
   return (
-    <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
-      <div className="md:hidden">
-        <button
-          type="button"
-          onClick={() => setSidebarOpen((open) => !open)}
-          aria-expanded={sidebarOpen}
-          className="font-label flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700"
-        >
-          {t("nav.categories")}
-          <Chevron open={sidebarOpen} />
-        </button>
+    <div className="space-y-6">
+      {isHome && <HeroBanner />}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
+        <div className="md:hidden">
+          <button
+            type="button"
+            onClick={() => setSidebarOpen((open) => !open)}
+            aria-expanded={sidebarOpen}
+            className="font-label flex w-full items-center justify-between rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-medium text-neutral-700"
+          >
+            {t("nav.categories")}
+            <Chevron open={sidebarOpen} />
+          </button>
+        </div>
+        <aside className={sidebarOpen ? "block" : "hidden md:block"}>
+          <CategoryNav categories={categories} />
+        </aside>
+        <section className="space-y-4">
+          <SearchBar value={search} onChange={(q) => setSearchParams(q ? { q } : {})} />
+
+          {isHome && <LimitedTimeDealsSection />}
+
+          {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+          {error && <p className="text-red-600">{t("common.error")}</p>}
+          {!loading && !error && products.length === 0 && (
+            <p className="text-neutral-500">{t("search.noResults")}</p>
+          )}
+
+          {!loading && !error && products.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  limitedTimeDiscount={discountMap.get(product.id)}
+                />
+              ))}
+            </div>
+          )}
+        </section>
       </div>
-      <aside className={sidebarOpen ? "block" : "hidden md:block"}>
-        <CategoryNav categories={categories} />
-      </aside>
-      <section className="space-y-4">
-        <SearchBar value={search} onChange={(q) => setSearchParams(q ? { q } : {})} />
-
-        {isHome && <LimitedTimeDealsSection />}
-
-        {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
-        {error && <p className="text-red-600">{t("common.error")}</p>}
-        {!loading && !error && products.length === 0 && (
-          <p className="text-neutral-500">{t("search.noResults")}</p>
-        )}
-
-        {!loading && !error && products.length > 0 && (
-          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                limitedTimeDiscount={discountMap.get(product.id)}
-              />
-            ))}
-          </div>
-        )}
-      </section>
     </div>
   );
 }

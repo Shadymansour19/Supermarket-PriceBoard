@@ -8,6 +8,10 @@ const resources = {
   en: {
     translation: {
       app: { name: "Super Market Hamada" },
+      hero: {
+        title: "Welcome to Super Market Hamada",
+        subtitle: "Fresh groceries, great prices — browse the full catalog below.",
+      },
       nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
       product: {
@@ -154,6 +158,10 @@ const resources = {
   ar: {
     translation: {
       app: { name: "سوبر ماركت حماده" },
+      hero: {
+        title: "أهلاً بك في سوبر ماركت حماده",
+        subtitle: "منتجات طازجة بأفضل الأسعار — تصفح الكتالوج الكامل بالأسفل.",
+      },
       nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
       product: {
