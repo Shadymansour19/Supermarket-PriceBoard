@@ -219,7 +219,12 @@ export function ProductForm({
       <div className="sm:col-span-2">
         <label className="mb-1 block text-sm text-neutral-600">{t("admin.image")}</label>
         <div className="flex items-center gap-3">
-          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+          <button
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            aria-label={t("admin.uploadPhoto")}
+            className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100"
+          >
             {previewUrl ? (
               <img src={previewUrl} alt="" className="h-full w-full object-cover" />
             ) : (
@@ -227,7 +232,10 @@ export function ProductForm({
                 <span className="text-2xl">🛒</span>
               </div>
             )}
-          </div>
+            <span className="absolute inset-0 flex items-center justify-center bg-black/0 text-xs font-medium text-transparent transition group-hover:bg-black/40 group-hover:text-white">
+              {t("admin.uploadPhoto")}
+            </span>
+          </button>
           <div className="flex flex-col gap-1">
             <div className="flex gap-2">
               <button

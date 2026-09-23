@@ -1,9 +1,14 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryForm, type CategoryFormValues } from "../../components/admin/CategoryForm";
 import { Chevron } from "../../components/Chevron";
+import { SearchBar } from "../../components/SearchBar";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
 import type { Category, CategoryWithChildren } from "../../types/database";
+
+function matchesSearch(category: Category, query: string) {
+  return category.name_en.toLowerCase().includes(query.toLowerCase()) || category.name_ar.includes(query);
+}
 
 type FormMode =
   | { kind: "create"; parentId?: string }
@@ -30,6 +35,23 @@ export function AdminCategoriesPage() {
   const [formMode, setFormMode] = useState<FormMode | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [search, setSearch] = useState("");
+  const trimmedSearch = search.trim();
+
+  // While searching, a category is kept if it or any of its children
+  // matches; only matching children are shown under it (all of them, if
+  // the parent itself is the match) so results stay easy to scan.
+  const visibleCategories = useMemo(() => {
+    if (!trimmedSearch) return categories;
+    return categories
+      .map((category) => {
+        const selfMatch = matchesSearch(category, trimmedSearch);
+        const matchingChildren = category.children.filter((child) => matchesSearch(child, trimmedSearch));
+        if (!selfMatch && matchingChildren.length === 0) return null;
+        return { ...category, children: selfMatch ? category.children : matchingChildren };
+      })
+      .filter((c): c is CategoryWithChildren => c !== null);
+  }, [categories, trimmedSearch]);
 
   function toggleExpanded(id: string) {
     setExpanded((prev) => {
@@ -98,6 +120,10 @@ export function AdminCategoriesPage() {
 
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}
 
+      {!loading && categories.length > 0 && (
+        <SearchBar value={search} onChange={setSearch} placeholder={t("admin.searchCategories")} />
+      )}
+
       {formMode && (
         <div className="rounded-xl border border-neutral-200 bg-white p-4">
           <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
@@ -125,21 +151,28 @@ export function AdminCategoriesPage() {
         <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
           {t("admin.noCategories")}
         </p>
+      ) : visibleCategories.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
+          {t("admin.noSearchResults")}
+        </p>
       ) : (
         <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
-          {categories.map((category, index) => {
-            const isOpen = expanded.has(category.id);
+          {visibleCategories.map((category, index) => {
             const hasChildren = category.children.length > 0;
+            // Force expanded while searching, so matching subcategories are
+            // visible without an extra tap — falls back to manual toggling
+            // once the search is cleared.
+            const isOpen = trimmedSearch ? hasChildren : expanded.has(category.id);
 
             return (
               <li key={category.id}>
                 <div
-                  role={hasChildren ? "button" : undefined}
-                  tabIndex={hasChildren ? 0 : undefined}
+                  role={hasChildren && !trimmedSearch ? "button" : undefined}
+                  tabIndex={hasChildren && !trimmedSearch ? 0 : undefined}
                   aria-expanded={hasChildren ? isOpen : undefined}
-                  onClick={hasChildren ? () => toggleExpanded(category.id) : undefined}
+                  onClick={hasChildren && !trimmedSearch ? () => toggleExpanded(category.id) : undefined}
                   onKeyDown={
-                    hasChildren
+                    hasChildren && !trimmedSearch
                       ? (e) => {
                           if (e.key === "Enter" || e.key === " ") {
                             e.preventDefault();
@@ -149,7 +182,7 @@ export function AdminCategoriesPage() {
                       : undefined
                   }
                   className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 ${
-                    hasChildren ? "cursor-pointer hover:bg-neutral-50" : ""
+                    hasChildren && !trimmedSearch ? "cursor-pointer hover:bg-neutral-50" : ""
                   }`}
                 >
                   <div className="flex min-w-0 items-center gap-2.5">

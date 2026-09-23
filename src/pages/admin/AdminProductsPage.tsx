@@ -1,7 +1,8 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProductDiscountsModal } from "../../components/admin/ProductDiscountsModal";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
+import { SearchBar } from "../../components/SearchBar";
 import { fetchCategoryTree } from "../../lib/categories";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
@@ -71,6 +72,15 @@ export function AdminProductsPage() {
   const [formMode, setFormMode] = useState<FormMode | null>(null);
   const [discountsProduct, setDiscountsProduct] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [search, setSearch] = useState("");
+
+  const visibleProducts = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return products;
+    return products.filter(
+      (p) => p.name_en.toLowerCase().includes(q) || p.name_ar.includes(search.trim()),
+    );
+  }, [products, search]);
 
   const reload = useCallback(() => {
     setLoading(true);
@@ -157,6 +167,10 @@ export function AdminProductsPage() {
 
       {actionError && <p className="text-sm text-red-600">{actionError}</p>}
 
+      {!loading && products.length > 0 && (
+        <SearchBar value={search} onChange={setSearch} placeholder={t("admin.searchProducts")} />
+      )}
+
       {formMode && (
         <div className="rounded-xl border border-neutral-200 bg-white p-4">
           <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
@@ -177,13 +191,17 @@ export function AdminProductsPage() {
         <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
           {t("admin.noProducts")}
         </p>
+      ) : visibleProducts.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
+          {t("admin.noSearchResults")}
+        </p>
       ) : (
         <>
           {/* Mobile: a dense multi-column table doesn't fit a phone screen
            * at all, so this is a card list instead — the table below is
            * desktop/tablet-only. */}
           <div className="space-y-3 md:hidden">
-            {products.map((product) => {
+            {visibleProducts.map((product) => {
               const imageUrl = productImageUrl(product.image_path);
               return (
                 <div key={product.id} className="flex gap-3 rounded-xl border border-neutral-200 bg-white p-3">
@@ -229,7 +247,7 @@ export function AdminProductsPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
-                {products.map((product) => {
+                {visibleProducts.map((product) => {
                   const imageUrl = productImageUrl(product.image_path);
                   return (
                     <tr key={product.id} className="hover:bg-neutral-50">
