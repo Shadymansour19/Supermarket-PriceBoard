@@ -171,7 +171,7 @@ export function LimitedTimeDealsSection() {
       </div>
       <div
         ref={scrollerRef}
-        className="scrollbar-hide flex items-center gap-4 overflow-x-auto py-3"
+        className="scrollbar-hide flex items-center gap-4 overflow-x-auto py-2"
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}
@@ -182,8 +182,15 @@ export function LimitedTimeDealsSection() {
             ref={(el) => {
               cardRefs.current[index] = el;
             }}
-            className={`relative w-[58vw] max-w-[260px] shrink-0 transition-transform duration-300 ease-out ${
-              index === activeIndex ? "z-10 scale-110" : "scale-100"
+            // The reserved layout box is already sized for the *active*
+            // card — inactive ones scale down inside it instead of the
+            // active one scaling up beyond it. Scaling up (the previous
+            // approach) made the enlarged card bigger than the space the
+            // scroller had reserved for it, and overflow-x-auto clips
+            // anything beyond that — cropping the image. Shrinking never
+            // needs extra space, so nothing can ever clip.
+            className={`w-[64vw] max-w-[300px] shrink-0 transition-transform duration-300 ease-out ${
+              index === activeIndex ? "scale-100" : "scale-90"
             }`}
           >
             <ProductCard product={product} limitedTimeDiscount={discount} />
