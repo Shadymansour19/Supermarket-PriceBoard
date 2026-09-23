@@ -36,8 +36,8 @@ export function ProductCard({
         </span>
       ) : (
         cheapestTier && (
-          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-amber-600 px-2 py-0.5 text-xs font-semibold text-white">
-            {t("deals.wholesaleBadge")}
+          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
+            -{discountPercent(product.price, cheapestTier.price)}%
           </span>
         )
       )}
@@ -65,34 +65,41 @@ export function ProductCard({
         {/* Always rendered (even without a size) so every card reserves the
          * same vertical space here instead of shrinking. */}
         <span className="font-label text-xs text-neutral-500">{product.size || " "}</span>
-        <div className="font-label mt-auto flex items-center justify-between pt-1">
-          {limitedTimeDiscount ? (
-            <DiscountPrice
-              originalPrice={product.price}
-              newPrice={limitedTimeDiscount.new_price}
-              lang={i18n.language}
-              size="sm"
-            />
-          ) : cheapestTier ? (
-            <span className="font-semibold text-emerald-700">
-              {formatPrice(cheapestTier.price, i18n.language)}
-              <span className="text-xs font-normal text-neutral-500">
-                {" "}
-                {t("deals.tierLabel", { count: cheapestTier.min_quantity })}
+        <div className="font-label mt-auto flex flex-col gap-0.5 pt-1">
+          <div className="flex items-center justify-between">
+            {limitedTimeDiscount ? (
+              <DiscountPrice
+                originalPrice={product.price}
+                newPrice={limitedTimeDiscount.new_price}
+                lang={i18n.language}
+                size="sm"
+              />
+            ) : cheapestTier ? (
+              <DiscountPrice
+                originalPrice={product.price}
+                newPrice={cheapestTier.price}
+                lang={i18n.language}
+                size="sm"
+              />
+            ) : (
+              <span className="font-semibold text-emerald-700">
+                {formatPrice(product.price, i18n.language)}
+                {shouldShowUnit(product.unit) && (
+                  <span className="text-xs font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
+                )}
               </span>
-            </span>
-          ) : (
-            <span className="font-semibold text-emerald-700">
-              {formatPrice(product.price, i18n.language)}
-              {shouldShowUnit(product.unit) && (
-                <span className="text-xs font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
-              )}
-            </span>
-          )}
-          {!product.in_stock && (
-            <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
-              {t("product.outOfStock")}
-            </span>
+            )}
+            {!product.in_stock && (
+              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
+                {t("product.outOfStock")}
+              </span>
+            )}
+          </div>
+          {/* The badge/price alone would read as an unconditional price
+           * drop — this is the only place left saying it only applies
+           * when buying the minimum quantity. */}
+          {cheapestTier && !limitedTimeDiscount && (
+            <span className="text-xs text-neutral-500">{t("deals.tierLabel", { count: cheapestTier.min_quantity })}</span>
           )}
         </div>
       </div>

@@ -40,14 +40,22 @@ export function usePushNotifications() {
       .catch(() => setSubscribed(false));
   }, []);
 
+  const [error, setError] = useState<string | null>(null);
+
   // Returns the resulting permission so the caller can react to a fresh
   // "denied" right away (e.g. show a hint) — distinct from `blocked`,
   // which also reflects a denial from a previous visit and shouldn't by
   // itself pop up any UI on mount (that'd be exactly the repeated-nagging
-  // browsers block re-prompting to prevent).
+  // browsers block re-prompting to prevent). Previously had no try/catch
+  // at all around the subscribe/register calls, so any failure (network,
+  // a misbehaving device, anything) just vanished as an unhandled
+  // rejection — the button would stop spinning and nothing else would
+  // happen, with zero way to tell what went wrong. Confirmed as a real
+  // cause of "I enabled it but nothing arrives" reports, not hypothetical.
   const subscribe = useCallback(async (): Promise<NotificationPermission> => {
     if (!isSupported()) return "default";
     setLoading(true);
+    setError(null);
     try {
       const permission = await Notification.requestPermission();
       setBlocked(permission === "denied");
@@ -61,6 +69,9 @@ export function usePushNotifications() {
       await registerPushSubscription(subscription, i18n.language);
       setSubscribed(true);
       return permission;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -69,6 +80,7 @@ export function usePushNotifications() {
   const unsubscribe = useCallback(async () => {
     if (!isSupported()) return;
     setLoading(true);
+    setError(null);
     try {
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.getSubscription();
@@ -77,10 +89,13 @@ export function usePushNotifications() {
         await subscription.unsubscribe();
       }
       setSubscribed(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
+      throw err;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  return { supported: isSupported(), subscribed, loading, blocked, subscribe, unsubscribe };
+  return { supported: isSupported(), subscribed, loading, blocked, error, subscribe, unsubscribe };
 }

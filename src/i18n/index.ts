@@ -44,6 +44,8 @@ const resources = {
           "You previously declined this. Tap the lock or info icon next to your address bar, open site settings, and set Notifications to Allow.",
         blockedBodyIos:
           "You previously declined this. Open your iPhone's Settings app, find this app in the list, and turn on Allow Notifications.",
+        errorTitle: "Something went wrong",
+        errorBody: "Couldn't turn notifications on or off. Try again — if it keeps happening, share the message below with us.",
       },
       unit: {
         each: "each",
@@ -140,7 +142,6 @@ const resources = {
         tierLabel: "{{count}}+ units",
         wholesaleSectionTitle: "Buy at Wholesale Price",
         wholesalePageTitle: "Buy at Wholesale Price",
-        wholesaleBadge: "Bulk price",
         noActiveWholesaleDeals: "No bulk deals right now — check back soon!",
       },
       contact: {
@@ -206,6 +207,8 @@ const resources = {
           "تم رفض الإذن من قبل. اضغط على أيقونة القفل أو المعلومات بجانب شريط العنوان، وافتح إعدادات الموقع، وفعّل الإشعارات.",
         blockedBodyIos:
           "تم رفض الإذن من قبل. افتح تطبيق الإعدادات في هاتفك، ابحث عن هذا التطبيق في القائمة، وفعّل خيار السماح بالإشعارات.",
+        errorTitle: "حدث خطأ ما",
+        errorBody: "تعذّر تفعيل أو إيقاف الإشعارات. حاول مرة أخرى، وإذا استمرت المشكلة شاركنا الرسالة اللي تحت.",
       },
       unit: {
         each: "قطعة",
@@ -311,7 +314,6 @@ const resources = {
         tierLabel: "{{count}}+ قطعة",
         wholesaleSectionTitle: "اشتري بسعر الجملة",
         wholesalePageTitle: "اشتري بسعر الجملة",
-        wholesaleBadge: "بالجملة",
         noActiveWholesaleDeals: "مفيش عروض جملة دلوقتي... تابعنا يوصلك كل جديد!",
       },
       contact: {
