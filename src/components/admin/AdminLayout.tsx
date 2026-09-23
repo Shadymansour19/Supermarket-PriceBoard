@@ -1,16 +1,11 @@
 import { useTranslation } from "react-i18next";
-import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
+import { AdminBottomNavBar } from "./AdminBottomNavBar";
+import { AdminMenu } from "./AdminMenu";
 import { LanguageToggle } from "../LanguageToggle";
-import { signOutAdmin } from "../../lib/auth";
 
 export function AdminLayout() {
   const { t } = useTranslation();
-  const navigate = useNavigate();
-
-  async function handleSignOut() {
-    await signOutAdmin();
-    navigate("/admin/login", { replace: true });
-  }
 
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     `rounded-md px-3 py-1.5 text-sm font-medium ${
@@ -23,26 +18,30 @@ export function AdminLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3">
           <span className="text-lg font-bold text-emerald-700">{t("app.name")} · Admin</span>
           <nav className="flex items-center gap-2">
-            <NavLink to="/admin/products" className={linkClass}>
+            {/* Products/Categories move to the bottom tab bar on mobile —
+             * these stay for desktop/tablet only, same split as the
+             * public site's nav. */}
+            <NavLink
+              to="/admin/products"
+              className={({ isActive }) => `hidden md:block ${linkClass({ isActive })}`}
+            >
               {t("admin.products")}
             </NavLink>
-            <NavLink to="/admin/categories" className={linkClass}>
+            <NavLink
+              to="/admin/categories"
+              className={({ isActive }) => `hidden md:block ${linkClass({ isActive })}`}
+            >
               {t("admin.categories")}
             </NavLink>
             <LanguageToggle />
-            <button
-              type="button"
-              onClick={handleSignOut}
-              className="rounded-md px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
-            >
-              {t("admin.signOut")}
-            </button>
+            <AdminMenu />
           </nav>
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="mx-auto max-w-6xl px-4 py-6 pb-20 md:pb-6">
         <Outlet />
       </main>
+      <AdminBottomNavBar />
     </div>
   );
 }
