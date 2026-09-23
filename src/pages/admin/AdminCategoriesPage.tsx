@@ -181,7 +181,7 @@ export function AdminCategoriesPage() {
                         }
                       : undefined
                   }
-                  className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 ${
+                  className={`flex flex-col gap-2 px-4 py-3 ${
                     hasChildren && !trimmedSearch ? "cursor-pointer hover:bg-neutral-50" : ""
                   }`}
                 >
@@ -225,7 +225,7 @@ export function AdminCategoriesPage() {
                 {hasChildren && isOpen && (
                   <ul className="ms-6 space-y-0.5 border-s border-neutral-200 ps-3 pb-2">
                     {category.children.map((child) => (
-                      <li key={child.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5 pe-2">
+                      <li key={child.id} className="flex flex-col gap-1.5 py-1.5 pe-2">
                         <span className="text-sm text-neutral-700">
                           {child.name_en} / {child.name_ar}
                         </span>
