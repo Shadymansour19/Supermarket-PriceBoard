@@ -171,7 +171,7 @@ export function LimitedTimeDealsSection() {
       </div>
       <div
         ref={scrollerRef}
-        className="flex gap-4 overflow-x-auto pb-2"
+        className="scrollbar-hide flex items-center gap-4 overflow-x-auto py-3"
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}
@@ -182,7 +182,9 @@ export function LimitedTimeDealsSection() {
             ref={(el) => {
               cardRefs.current[index] = el;
             }}
-            className="w-[66vw] max-w-xs shrink-0"
+            className={`relative w-[58vw] max-w-[260px] shrink-0 transition-transform duration-300 ease-out ${
+              index === activeIndex ? "z-10 scale-110" : "scale-100"
+            }`}
           >
             <ProductCard product={product} limitedTimeDiscount={discount} />
           </div>

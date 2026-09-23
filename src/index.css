@@ -151,3 +151,15 @@ textarea {
     animation: none;
   }
 }
+
+/* Hides the scrollbar on a horizontally-scrolling strip (e.g. the deals
+   carousel) while keeping it fully scrollable — the custom dots below it
+   are the only position indicator we want, not a second, native one. */
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge/IE */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
