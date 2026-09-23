@@ -133,21 +133,29 @@ export function AdminCategoriesPage() {
 
             return (
               <li key={category.id}>
-                <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                <div
+                  role={hasChildren ? "button" : undefined}
+                  tabIndex={hasChildren ? 0 : undefined}
+                  aria-expanded={hasChildren ? isOpen : undefined}
+                  onClick={hasChildren ? () => toggleExpanded(category.id) : undefined}
+                  onKeyDown={
+                    hasChildren
+                      ? (e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            toggleExpanded(category.id);
+                          }
+                        }
+                      : undefined
+                  }
+                  className={`flex flex-wrap items-center justify-between gap-2 px-4 py-3 ${
+                    hasChildren ? "cursor-pointer hover:bg-neutral-50" : ""
+                  }`}
+                >
                   <div className="flex min-w-0 items-center gap-2.5">
-                    {hasChildren ? (
-                      <button
-                        type="button"
-                        onClick={() => toggleExpanded(category.id)}
-                        aria-expanded={isOpen}
-                        aria-label={isOpen ? t("common.hide") : t("common.show")}
-                        className="w-5 shrink-0 text-center text-neutral-400 hover:text-neutral-700"
-                      >
-                        <Chevron open={isOpen} />
-                      </button>
-                    ) : (
-                      <span className="w-5 shrink-0" />
-                    )}
+                    <span className="w-5 shrink-0 text-center text-neutral-400" aria-hidden="true">
+                      {hasChildren && <Chevron open={isOpen} />}
+                    </span>
                     <span
                       className={`font-heading flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
                         AVATAR_COLORS[index % AVATAR_COLORS.length]
@@ -160,7 +168,9 @@ export function AdminCategoriesPage() {
                       {category.name_en} / {category.name_ar}
                     </span>
                   </div>
-                  <div className="flex flex-wrap items-center gap-1.5">
+                  {/* Stops a click here from also bubbling up to the
+                   * row's own expand/collapse handler. */}
+                  <div className="flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                     {!formMode && (
                       <button
                         type="button"
