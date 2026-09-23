@@ -138,6 +138,10 @@ const resources = {
         endsIn_other: "Ends in {{count}} days",
         quantityDiscountTitle: "Buy more, save more",
         tierLabel: "{{count}}+ units",
+        wholesaleSectionTitle: "Buy at Wholesale Price",
+        wholesalePageTitle: "Buy at Wholesale Price",
+        wholesaleBadge: "Bulk price",
+        noActiveWholesaleDeals: "No bulk deals right now — check back soon!",
       },
       contact: {
         title: "Contact us",
@@ -305,6 +309,10 @@ const resources = {
         endsIn_other: "ينتهي خلال {{count}} يوم",
         quantityDiscountTitle: "اشترِ أكثر ووفر أكثر",
         tierLabel: "{{count}}+ قطعة",
+        wholesaleSectionTitle: "اشتري بسعر الجملة",
+        wholesalePageTitle: "اشتري بسعر الجملة",
+        wholesaleBadge: "بالجملة",
+        noActiveWholesaleDeals: "مفيش عروض جملة دلوقتي... تابعنا يوصلك كل جديد!",
       },
       contact: {
         title: "تواصل معنا",

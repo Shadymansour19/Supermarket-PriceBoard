@@ -163,3 +163,23 @@ export async function removeQuantityDiscount(productId: string): Promise<void> {
   const { error } = await supabase.from("quantity_discounts").delete().eq("product_id", productId);
   if (error) throw error;
 }
+
+/** Every product with an active quantity discount (at least one tier),
+ * joined with its (visible) product, newest deal first — for the home
+ * page teaser (which re-sorts by biggest discount on the cheapest tier)
+ * and the full wholesale-deals page. */
+export async function fetchActiveQuantityDeals(): Promise<{ product: Product; discount: QuantityDiscount }[]> {
+  const { data, error } = await supabase
+    .from("quantity_discounts")
+    .select("*, tiers:quantity_discount_tiers(*), product:products!inner(*)")
+    .eq("product.is_active", true)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+
+  return ((data ?? []) as (QuantityDiscount & { tiers: QuantityDiscountTier[]; product: Product })[])
+    .filter((row) => row.tiers.length > 0)
+    .map(({ product, tiers, ...discount }) => ({
+      product,
+      discount: { ...(discount as QuantityDiscount), tiers: [...tiers].sort((a, b) => a.min_quantity - b.min_quantity) },
+    }));
+}

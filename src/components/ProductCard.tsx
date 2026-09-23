@@ -5,30 +5,41 @@ import { FavoriteButton } from "./FavoriteButton";
 import { discountPercent } from "../lib/discounts";
 import { productImageUrl } from "../lib/supabase";
 import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
-import type { LimitedTimeDiscount, Product } from "../types/database";
+import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
 
 export function ProductCard({
   product,
   limitedTimeDiscount,
+  quantityDiscount,
 }: {
   product: Product;
-  /** Pass the product's active limited-time discount, if any — quantity
-   * discounts aren't shown on the card, only on the product detail page. */
   limitedTimeDiscount?: LimitedTimeDiscount;
+  /** Only the cheapest (lowest min_quantity) tier is shown, to keep the
+   * card compact — the full tier table stays a product-detail-page thing.
+   * Ignored if `limitedTimeDiscount` is also passed; a card only ever
+   * headlines one kind of deal. */
+  quantityDiscount?: QuantityDiscount;
 }) {
   const { t, i18n } = useTranslation();
   const imageUrl = productImageUrl(product.image_path);
   const name = localizedField(product, "name", i18n.language);
+  const cheapestTier = quantityDiscount?.tiers[0];
 
   return (
     <Link
       to={`/product/${product.id}`}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:shadow-md"
     >
-      {limitedTimeDiscount && (
+      {limitedTimeDiscount ? (
         <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
           -{discountPercent(product.price, limitedTimeDiscount.new_price)}%
         </span>
+      ) : (
+        cheapestTier && (
+          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-amber-600 px-2 py-0.5 text-xs font-semibold text-white">
+            {t("deals.wholesaleBadge")}
+          </span>
+        )
       )}
       <FavoriteButton
         productId={product.id}
@@ -62,6 +73,14 @@ export function ProductCard({
               lang={i18n.language}
               size="sm"
             />
+          ) : cheapestTier ? (
+            <span className="font-semibold text-emerald-700">
+              {formatPrice(cheapestTier.price, i18n.language)}
+              <span className="text-xs font-normal text-neutral-500">
+                {" "}
+                {t("deals.tierLabel", { count: cheapestTier.min_quantity })}
+              </span>
+            </span>
           ) : (
             <span className="font-semibold text-emerald-700">
               {formatPrice(product.price, i18n.language)}

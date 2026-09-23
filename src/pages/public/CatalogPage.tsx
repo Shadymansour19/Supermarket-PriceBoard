@@ -5,6 +5,7 @@ import { CategoryNav } from "../../components/CategoryNav";
 import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
+import { QuantityDealsSection } from "../../components/QuantityDealsSection";
 import { SearchBar } from "../../components/SearchBar";
 import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
@@ -78,6 +79,7 @@ export function CatalogPage() {
           )}
 
           {isHome && <LimitedTimeDealsSection />}
+          {isHome && <QuantityDealsSection />}
 
           {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
           {error && <p className="text-red-600">{t("common.error")}</p>}

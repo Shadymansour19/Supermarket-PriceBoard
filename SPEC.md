@@ -23,6 +23,23 @@ translated string table bolted onto an LTR layout.
 Decisions are dated and kept even after superseded, so the reasoning stays
 visible. Newest first.
 
+- **2026-09-23 — Added a "Buy at Wholesale Price" (اشتري بسعر الجملة) home
+  section for quantity discounts, mirroring the limited-time deals one.**
+  The carousel mechanics (auto-advance, dots, IntersectionObserver
+  tracking, RTL-safe centering, no-page-scroll, scale animation — several
+  rounds of real bugs fixed in that code) were extracted from
+  `LimitedTimeDealsSection` into a generic `DealsCarousel<T>` so both
+  sections share one implementation instead of drifting apart; each
+  section is now just a thin data-fetching wrapper passing its own
+  `renderCard`. `ProductCard` gained an optional `quantityDiscount` prop
+  (mutually exclusive with `limitedTimeDiscount` — a card only headlines
+  one deal type): an amber "بالجملة" badge instead of the red "-X%" one,
+  and the *cheapest* tier's price/quantity shown instead of a plain price
+  (the full tier table stays a product-detail-page thing). Ranked, on both
+  the teaser and its full `/wholesale-deals` page, by discount percent on
+  that same cheapest tier — the easiest-to-reach one, more motivating for
+  a teaser than a product's deepest (highest-minimum) tier.
+
 - **2026-09-22 — Mobile bottom nav bar (Home/Categories); category
   browsing moved off an inline dropdown onto its own page.** `BottomNavBar`
   is fixed, `md:hidden` — desktop/tablet keep the existing persistent
