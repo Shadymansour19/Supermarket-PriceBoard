@@ -1,12 +1,19 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
-import { flattenCategoryTree } from "../../lib/categories";
 import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
 import { CameraCaptureModal } from "./CameraCaptureModal";
 import { ImageCropModal } from "./ImageCropModal";
 
 const supportsLiveCamera = typeof navigator !== "undefined" && !!navigator.mediaDevices?.getUserMedia;
+
+/** A product's category can be a top-level category directly, or one of its
+ * subcategories — this finds which top-level entry (if any) `categoryId`
+ * belongs under, so the picker can preselect the right top category. */
+function findTopCategoryId(categoryTree: CategoryWithChildren[], categoryId: string): string {
+  const top = categoryTree.find((c) => c.id === categoryId || c.children.some((child) => child.id === categoryId));
+  return top?.id ?? categoryTree[0]?.id ?? "";
+}
 
 export type ProductFormValues = {
   name_en: string;
@@ -33,7 +40,6 @@ export function ProductForm({
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
-  const flatCategories = flattenCategoryTree(categoryTree);
 
   const [nameEn, setNameEn] = useState(initial?.name_en ?? "");
   const [nameAr, setNameAr] = useState(initial?.name_ar ?? "");
@@ -42,7 +48,20 @@ export function ProductForm({
   const [price, setPrice] = useState(initial ? String(initial.price) : "");
   const [unit, setUnit] = useState<ProductUnit>(initial?.unit ?? "each");
   const [size, setSize] = useState(initial?.size ?? "");
-  const [categoryId, setCategoryId] = useState(initial?.category_id ?? flatCategories[0]?.category.id ?? "");
+  const [categoryId, setCategoryId] = useState(initial?.category_id ?? categoryTree[0]?.id ?? "");
+  // Which top-level category the picker below is showing subcategories
+  // for — derived once from the product's current category, then tracked
+  // separately so switching it doesn't require re-deriving from categoryId.
+  const [topCategoryId, setTopCategoryId] = useState(() =>
+    findTopCategoryId(categoryTree, initial?.category_id ?? categoryTree[0]?.id ?? ""),
+  );
+  const subcategories = categoryTree.find((c) => c.id === topCategoryId)?.children ?? [];
+
+  function handleTopCategoryChange(newTopId: string) {
+    setTopCategoryId(newTopId);
+    // Default to the top category itself ("general") until a subcategory is chosen.
+    setCategoryId(newTopId);
+  }
   const [inStock, setInStock] = useState(initial?.in_stock ?? true);
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -200,22 +219,39 @@ export function ProductForm({
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
         />
       </div>
-      <div>
+      <div className={subcategories.length > 0 ? "" : "sm:col-span-2"}>
         <label className="mb-1 block text-sm text-neutral-600">{t("product.category")}</label>
         <select
           required
-          value={categoryId}
-          onChange={(e) => setCategoryId(e.target.value)}
+          value={topCategoryId}
+          onChange={(e) => handleTopCategoryChange(e.target.value)}
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
         >
-          {flatCategories.map(({ category, depth }) => (
+          {categoryTree.map((category) => (
             <option key={category.id} value={category.id}>
-              {"— ".repeat(depth)}
               {category.name_en} / {category.name_ar}
             </option>
           ))}
         </select>
       </div>
+      {subcategories.length > 0 && (
+        <div>
+          <label className="mb-1 block text-sm text-neutral-600">{t("admin.subcategory")}</label>
+          <select
+            required
+            value={categoryId}
+            onChange={(e) => setCategoryId(e.target.value)}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          >
+            <option value={topCategoryId}>{t("admin.noSubcategory")}</option>
+            {subcategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name_en} / {category.name_ar}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="sm:col-span-2">
         <label className="mb-1 block text-sm text-neutral-600">{t("admin.image")}</label>
         <div className="flex items-center gap-3">
