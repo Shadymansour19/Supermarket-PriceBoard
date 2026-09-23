@@ -1,10 +1,7 @@
 -- Per-device Web Push subscriptions for "new deal" notifications (see
 -- SPEC.md decision log). No accounts in this app, so subscriptions are
 -- keyed by the browser's own push `endpoint`, not a user id — anyone can
--- register/update/unregister their own device's row, and there is no
--- public read policy at all, so subscriber endpoints are never exposed to
--- anon clients. Only the notify-new-deal Edge Function (service-role key,
--- bypasses RLS) can list them to fan out a push.
+-- register/update/unregister their own device's row.
 create table public.push_subscriptions (
   id         uuid primary key default gen_random_uuid(),
   endpoint   text not null unique,
@@ -24,6 +21,22 @@ create policy "push_subscriptions_public_insert"
   on public.push_subscriptions for insert
   to anon, authenticated
   with check (true);
+
+-- A SELECT policy was originally left out on purpose, to keep subscriber
+-- endpoints unreadable by anon clients. That broke re-subscribing (upsert
+-- on `endpoint`) and unsubscribing (delete by `endpoint`) silently —
+-- confirmed directly in SQL (`UPDATE 0`, `DELETE 0`, no error) — because
+-- Postgres RLS requires row *visibility* (a SELECT-capable policy) before
+-- UPDATE/DELETE can locate a specific existing row at all, regardless of
+-- what that command's own USING clause says. A public SELECT policy is
+-- the fix. The privacy cost is a push `endpoint` (+ its non-secret
+-- p256dh/auth encryption keys) becoming anon-readable — low-sensitivity
+-- on its own, since sending an actual push still needs this project's
+-- private VAPID key, which stays server-side only.
+create policy "push_subscriptions_public_select"
+  on public.push_subscriptions for select
+  to anon, authenticated
+  using (true);
 
 -- Needed so re-subscribing the same device (upsert on `endpoint`) doesn't
 -- fail once the row already exists.
