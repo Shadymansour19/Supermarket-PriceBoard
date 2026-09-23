@@ -32,8 +32,14 @@ export function LoginPage() {
   }
 
   return (
-    <div className="mx-auto mt-16 max-w-sm rounded-xl border border-neutral-200 bg-white p-6">
-      <h1 className="mb-4 text-lg font-semibold text-neutral-900">{t("admin.login")}</h1>
+    <div className="mx-auto mt-16 max-w-sm rounded-xl border border-neutral-200 bg-white p-6 shadow-sm">
+      <div className="mb-5 flex flex-col items-center gap-2 text-center">
+        <img src="/logo.jpg" alt="" className="h-14 w-14 rounded-full object-cover" />
+        <div>
+          <p className="font-heading font-bold text-emerald-700">{t("app.name")}</p>
+          <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("admin.login")}</h1>
+        </div>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-3">
         <div>
           <label className="mb-1 block text-sm text-neutral-600">{t("admin.email")}</label>

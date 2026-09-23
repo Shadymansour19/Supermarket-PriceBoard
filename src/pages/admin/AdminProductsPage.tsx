@@ -11,6 +11,58 @@ import type { CategoryWithChildren, Product } from "../../types/database";
 
 type FormMode = { kind: "create" } | { kind: "edit"; product: Product };
 
+/** A yes/no fact about a row (in stock, visible to customers) — a colored
+ * pill instead of a bare ✅/— glyph reads faster and matches the badge
+ * style already used on the public site. */
+function StatusBadge({ ok, yesLabel, noLabel }: { ok: boolean; yesLabel: string; noLabel: string }) {
+  return (
+    <span
+      className={`inline-block rounded-full px-2 py-0.5 text-xs font-medium ${
+        ok ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
+      }`}
+    >
+      {ok ? yesLabel : noLabel}
+    </span>
+  );
+}
+
+function ProductActions({
+  onEdit,
+  onDiscounts,
+  onDelete,
+}: {
+  onEdit: () => void;
+  onDiscounts: () => void;
+  onDelete: () => void;
+}) {
+  const { t } = useTranslation();
+  return (
+    <div className="flex flex-wrap gap-1.5">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+      >
+        {t("common.edit")}
+      </button>
+      <button
+        type="button"
+        onClick={onDiscounts}
+        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+      >
+        {t("admin.discounts")}
+      </button>
+      <button
+        type="button"
+        onClick={onDelete}
+        className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+      >
+        {t("common.delete")}
+      </button>
+    </div>
+  );
+}
+
 export function AdminProductsPage() {
   const { t, i18n } = useTranslation();
   const [products, setProducts] = useState<Product[]>([]);
@@ -91,7 +143,7 @@ export function AdminProductsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-neutral-900">{t("admin.products")}</h1>
+        <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("admin.products")}</h1>
         {!formMode && (
           <button
             type="button"
@@ -107,7 +159,7 @@ export function AdminProductsPage() {
 
       {formMode && (
         <div className="rounded-xl border border-neutral-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-900">
+          <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
             {formMode.kind === "edit" ? t("admin.editProduct") : t("admin.newProduct")}
           </h2>
           <ProductForm
@@ -121,74 +173,101 @@ export function AdminProductsPage() {
 
       {loading ? (
         <p className="text-neutral-500">{t("common.loading")}</p>
+      ) : products.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
+          {t("admin.noProducts")}
+        </p>
       ) : (
-        <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white">
-          <table className="w-full text-start text-sm">
-            <thead className="border-b border-neutral-200 text-neutral-500">
-              <tr>
-                <th className="px-4 py-2 text-start"></th>
-                <th className="px-4 py-2 text-start">{t("admin.nameEn")}</th>
-                <th className="px-4 py-2 text-start">{t("admin.price")}</th>
-                <th className="px-4 py-2 text-start">{t("admin.inStock")}</th>
-                <th className="px-4 py-2 text-start">{t("admin.active")}</th>
-                <th className="px-4 py-2 text-start"></th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {products.map((product) => {
-                const imageUrl = productImageUrl(product.image_path);
-                return (
-                  <tr key={product.id}>
-                    <td className="px-4 py-2">
-                      <div className="h-10 w-10 overflow-hidden rounded bg-neutral-100">
-                        {imageUrl && (
-                          <img src={imageUrl} alt="" className="h-full w-full object-cover" />
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-2 font-medium text-neutral-900">
+        <>
+          {/* Mobile: a dense multi-column table doesn't fit a phone screen
+           * at all, so this is a card list instead — the table below is
+           * desktop/tablet-only. */}
+          <div className="space-y-3 md:hidden">
+            {products.map((product) => {
+              const imageUrl = productImageUrl(product.image_path);
+              return (
+                <div key={product.id} className="flex gap-3 rounded-xl border border-neutral-200 bg-white p-3">
+                  <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+                    {imageUrl && <img src={imageUrl} alt="" className="h-full w-full object-cover" />}
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1.5">
+                    <p className="truncate font-medium text-neutral-900">
                       {product.name_en} / {product.name_ar}
-                      {product.size && <span className="ms-1 text-neutral-400">({product.size})</span>}
-                    </td>
-                    <td className="px-4 py-2">
+                      {product.size && <span className="text-neutral-400"> ({product.size})</span>}
+                    </p>
+                    <p className="text-sm text-neutral-600">
                       {formatPrice(product.price, i18n.language)}
                       {shouldShowUnit(product.unit) && (
                         <span className="text-neutral-400"> / {t(`unit.${product.unit}`)}</span>
                       )}
-                    </td>
-                    <td className="px-4 py-2">{product.in_stock ? "✅" : "—"}</td>
-                    <td className="px-4 py-2">{product.is_active ? "✅" : "—"}</td>
-                    <td className="px-4 py-2">
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setFormMode({ kind: "edit", product })}
-                          className="text-emerald-700 hover:underline"
-                        >
-                          {t("common.edit")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setDiscountsProduct(product)}
-                          className="text-emerald-700 hover:underline"
-                        >
-                          {t("admin.discounts")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDelete(product)}
-                          className="text-red-600 hover:underline"
-                        >
-                          {t("common.delete")}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                    </p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <StatusBadge ok={product.in_stock} yesLabel={t("admin.inStock")} noLabel={t("product.outOfStock")} />
+                      <StatusBadge ok={product.is_active} yesLabel={t("admin.active")} noLabel={t("admin.hidden")} />
+                    </div>
+                    <ProductActions
+                      onEdit={() => setFormMode({ kind: "edit", product })}
+                      onDiscounts={() => setDiscountsProduct(product)}
+                      onDelete={() => handleDelete(product)}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="hidden overflow-x-auto rounded-xl border border-neutral-200 bg-white md:block">
+            <table className="w-full text-start text-sm">
+              <thead className="border-b border-neutral-200 text-neutral-500">
+                <tr>
+                  <th className="px-4 py-2 text-start"></th>
+                  <th className="px-4 py-2 text-start">{t("admin.nameEn")}</th>
+                  <th className="px-4 py-2 text-start">{t("admin.price")}</th>
+                  <th className="px-4 py-2 text-start">{t("admin.inStock")}</th>
+                  <th className="px-4 py-2 text-start">{t("admin.active")}</th>
+                  <th className="px-4 py-2 text-start"></th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {products.map((product) => {
+                  const imageUrl = productImageUrl(product.image_path);
+                  return (
+                    <tr key={product.id} className="hover:bg-neutral-50">
+                      <td className="px-4 py-2">
+                        <div className="h-10 w-10 overflow-hidden rounded-lg bg-neutral-100">
+                          {imageUrl && <img src={imageUrl} alt="" className="h-full w-full object-cover" />}
+                        </div>
+                      </td>
+                      <td className="px-4 py-2 font-medium text-neutral-900">
+                        {product.name_en} / {product.name_ar}
+                        {product.size && <span className="ms-1 text-neutral-400">({product.size})</span>}
+                      </td>
+                      <td className="px-4 py-2">
+                        {formatPrice(product.price, i18n.language)}
+                        {shouldShowUnit(product.unit) && (
+                          <span className="text-neutral-400"> / {t(`unit.${product.unit}`)}</span>
+                        )}
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatusBadge ok={product.in_stock} yesLabel={t("admin.inStock")} noLabel={t("product.outOfStock")} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <StatusBadge ok={product.is_active} yesLabel={t("admin.active")} noLabel={t("admin.hidden")} />
+                      </td>
+                      <td className="px-4 py-2">
+                        <ProductActions
+                          onEdit={() => setFormMode({ kind: "edit", product })}
+                          onDiscounts={() => setDiscountsProduct(product)}
+                          onDelete={() => handleDelete(product)}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
 
       {discountsProduct && (

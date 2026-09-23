@@ -9,6 +9,20 @@ type FormMode =
   | { kind: "create"; parentId?: string }
   | { kind: "edit"; category: Category };
 
+/** Same palette as the public CategoriesPage, cycled by row index, so a
+ * category reads as a distinct section at a glance here too instead of a
+ * flat wall of text — categories have no icon/image of their own. */
+const AVATAR_COLORS = [
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700",
+  "bg-sky-100 text-sky-700",
+  "bg-rose-100 text-rose-700",
+  "bg-violet-100 text-violet-700",
+  "bg-teal-100 text-teal-700",
+  "bg-orange-100 text-orange-700",
+  "bg-indigo-100 text-indigo-700",
+];
+
 export function AdminCategoriesPage() {
   const { t } = useTranslation();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
@@ -70,7 +84,7 @@ export function AdminCategoriesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-neutral-900">{t("admin.categories")}</h1>
+        <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("admin.categories")}</h1>
         {!formMode && (
           <button
             type="button"
@@ -86,7 +100,7 @@ export function AdminCategoriesPage() {
 
       {formMode && (
         <div className="rounded-xl border border-neutral-200 bg-white p-4">
-          <h2 className="mb-3 text-sm font-semibold text-neutral-900">
+          <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
             {formMode.kind === "edit" ? t("admin.editCategory") : t("admin.newCategory")}
             {formMode.kind === "create" && formMode.parentId && (
               <span className="ms-1 font-normal text-neutral-500">
@@ -107,32 +121,46 @@ export function AdminCategoriesPage() {
 
       {loading ? (
         <p className="text-neutral-500">{t("common.loading")}</p>
+      ) : categories.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-neutral-500">
+          {t("admin.noCategories")}
+        </p>
       ) : (
         <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
-          {categories.map((category) => {
+          {categories.map((category, index) => {
             const isOpen = expanded.has(category.id);
             const hasChildren = category.children.length > 0;
 
             return (
               <li key={category.id}>
-                <div className="flex items-center justify-between px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    {hasChildren && (
+                <div className="flex flex-wrap items-center justify-between gap-2 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    {hasChildren ? (
                       <button
                         type="button"
                         onClick={() => toggleExpanded(category.id)}
                         aria-expanded={isOpen}
-                        aria-label={isOpen ? "Collapse" : "Expand"}
+                        aria-label={isOpen ? t("common.hide") : t("common.show")}
                         className="w-5 shrink-0 text-center text-neutral-400 hover:text-neutral-700"
                       >
                         <Chevron open={isOpen} />
                       </button>
+                    ) : (
+                      <span className="w-5 shrink-0" />
                     )}
-                    <span className={`font-medium text-neutral-900 ${hasChildren ? "" : "ms-5"}`}>
+                    <span
+                      className={`font-heading flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
+                        AVATAR_COLORS[index % AVATAR_COLORS.length]
+                      }`}
+                      aria-hidden="true"
+                    >
+                      {category.name_en.charAt(0)}
+                    </span>
+                    <span className="min-w-0 truncate font-medium text-neutral-900">
                       {category.name_en} / {category.name_ar}
                     </span>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-1.5">
                     {!formMode && (
                       <button
                         type="button"
@@ -140,27 +168,25 @@ export function AdminCategoriesPage() {
                           setExpanded((prev) => new Set(prev).add(category.id));
                           setFormMode({ kind: "create", parentId: category.id });
                         }}
-                        className="text-sm text-emerald-700 hover:underline"
+                        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
                       >
                         + {t("admin.addSubcategory")}
                       </button>
                     )}
                     <CategoryActions
-                      category={category}
                       onEdit={() => setFormMode({ kind: "edit", category })}
                       onDelete={() => handleDelete(category)}
                     />
                   </div>
                 </div>
                 {hasChildren && isOpen && (
-                  <ul className="divide-y divide-neutral-100 ps-8">
+                  <ul className="ms-6 space-y-0.5 border-s border-neutral-200 ps-3 pb-2">
                     {category.children.map((child) => (
-                      <li key={child.id} className="flex items-center justify-between px-4 py-2">
+                      <li key={child.id} className="flex flex-wrap items-center justify-between gap-2 py-1.5 pe-2">
                         <span className="text-sm text-neutral-700">
                           {child.name_en} / {child.name_ar}
                         </span>
                         <CategoryActions
-                          category={child}
                           onEdit={() => setFormMode({ kind: "edit", category: child })}
                           onDelete={() => handleDelete(child)}
                         />
@@ -177,21 +203,22 @@ export function AdminCategoriesPage() {
   );
 }
 
-function CategoryActions({
-  onEdit,
-  onDelete,
-}: {
-  category: Category;
-  onEdit: () => void;
-  onDelete: () => void;
-}) {
+function CategoryActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
   const { t } = useTranslation();
   return (
-    <div className="flex gap-2">
-      <button type="button" onClick={onEdit} className="text-sm text-emerald-700 hover:underline">
+    <div className="flex gap-1.5">
+      <button
+        type="button"
+        onClick={onEdit}
+        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+      >
         {t("common.edit")}
       </button>
-      <button type="button" onClick={onDelete} className="text-sm text-red-600 hover:underline">
+      <button
+        type="button"
+        onClick={onDelete}
+        className="rounded-md px-2 py-1 text-xs font-medium text-red-600 hover:bg-red-50"
+      >
         {t("common.delete")}
       </button>
     </div>
