@@ -41,7 +41,9 @@ const resources = {
         disable: "Turn off deal notifications",
         blockedTitle: "Notifications are blocked",
         blockedBody:
-          "You previously declined this. To turn deal alerts back on, enable notifications for this site in your browser's settings.",
+          "You previously declined this. Tap the lock or info icon next to your address bar, open site settings, and set Notifications to Allow.",
+        blockedBodyIos:
+          "You previously declined this. Open your iPhone's Settings app, find this app in the list, and turn on Allow Notifications.",
       },
       unit: {
         each: "each",
@@ -196,7 +198,10 @@ const resources = {
         enable: "فعّل إشعارات العروض الجديدة",
         disable: "إيقاف إشعارات العروض",
         blockedTitle: "الإشعارات محظورة",
-        blockedBody: "تم رفض الإذن من قبل. لتفعيل تنبيهات العروض مرة أخرى، فعّل الإشعارات لهذا الموقع من إعدادات متصفحك.",
+        blockedBody:
+          "تم رفض الإذن من قبل. اضغط على أيقونة القفل أو المعلومات بجانب شريط العنوان، وافتح إعدادات الموقع، وفعّل الإشعارات.",
+        blockedBodyIos:
+          "تم رفض الإذن من قبل. افتح تطبيق الإعدادات في هاتفك، ابحث عن هذا التطبيق في القائمة، وفعّل خيار السماح بالإشعارات.",
       },
       unit: {
         each: "قطعة",

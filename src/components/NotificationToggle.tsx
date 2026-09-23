@@ -4,6 +4,16 @@ import { CloseIcon } from "./ContactIcons";
 import { BellIcon } from "./Icons";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 
+/** No web page can deep-link into a browser's own site-settings UI —
+ * browsers block that on purpose, so nothing here can be a real "open
+ * settings" button. The best available fallback is telling people exactly
+ * where to look, which differs enough by platform to be worth detecting:
+ * on iOS, an installed PWA's notification permission lives in the iOS
+ * Settings app, not inside the browser at all. */
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(window.navigator.userAgent);
+}
+
 /** Header bell toggle for "new deal" push notifications — hidden entirely
  * when the browser doesn't support the Push API (e.g. iOS Safari below
  * 16.4) rather than showing a button that can't do anything. */
@@ -62,7 +72,9 @@ export function NotificationToggle() {
               <CloseIcon className="h-4 w-4" />
             </button>
           </div>
-          <p className="mt-1 text-neutral-600">{t("notifications.blockedBody")}</p>
+          <p className="mt-1 text-neutral-600">
+            {t(isIOS() ? "notifications.blockedBodyIos" : "notifications.blockedBody")}
+          </p>
         </div>
       )}
     </div>
