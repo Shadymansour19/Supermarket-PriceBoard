@@ -1,4 +1,6 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CloseIcon } from "./ContactIcons";
 import { BellIcon } from "./Icons";
 import { usePushNotifications } from "../hooks/usePushNotifications";
 
@@ -7,23 +9,62 @@ import { usePushNotifications } from "../hooks/usePushNotifications";
  * 16.4) rather than showing a button that can't do anything. */
 export function NotificationToggle() {
   const { t } = useTranslation();
-  const { supported, subscribed, loading, subscribe, unsubscribe } = usePushNotifications();
+  const { supported, subscribed, loading, blocked, subscribe, unsubscribe } = usePushNotifications();
+  const [showBlockedHint, setShowBlockedHint] = useState(false);
 
   if (!supported) return null;
 
+  // Once the browser's permission prompt gets an explicit "block", it
+  // never shows again — surface that immediately (either right after this
+  // click causes it, or on a later click while already blocked) instead
+  // of the button silently doing nothing. Deliberately not shown just
+  // because `blocked` happens to already be true on mount (e.g. denied on
+  // a previous visit) — popping this up unprompted on every page load
+  // would be exactly the repeated-nagging browsers block re-prompting to
+  // prevent.
+  async function handleClick() {
+    if (subscribed) {
+      void unsubscribe();
+    } else if (blocked) {
+      setShowBlockedHint(true);
+    } else {
+      const result = await subscribe();
+      if (result === "denied") setShowBlockedHint(true);
+    }
+  }
+
   return (
-    <button
-      type="button"
-      disabled={loading}
-      onClick={() => (subscribed ? unsubscribe() : subscribe())}
-      aria-pressed={subscribed}
-      aria-label={t(subscribed ? "notifications.disable" : "notifications.enable")}
-      title={t(subscribed ? "notifications.disable" : "notifications.enable")}
-      className={`flex h-9 w-9 items-center justify-center rounded-full transition disabled:opacity-50 ${
-        subscribed ? "bg-emerald-50 text-emerald-700" : "text-neutral-600 hover:bg-neutral-100"
-      }`}
-    >
-      <BellIcon slashed={!subscribed} className="h-5 w-5" />
-    </button>
+    <div className="relative">
+      <button
+        type="button"
+        disabled={loading}
+        onClick={handleClick}
+        aria-pressed={subscribed}
+        aria-label={t(subscribed ? "notifications.disable" : "notifications.enable")}
+        title={t(subscribed ? "notifications.disable" : "notifications.enable")}
+        className={`flex h-9 w-9 items-center justify-center rounded-full transition disabled:opacity-50 ${
+          subscribed ? "bg-emerald-50 text-emerald-700" : "text-neutral-600 hover:bg-neutral-100"
+        }`}
+      >
+        <BellIcon slashed={!subscribed} className="h-5 w-5" />
+      </button>
+
+      {showBlockedHint && (
+        <div className="font-label absolute top-full z-40 mt-2 w-64 rounded-lg border border-neutral-200 bg-white p-3 text-sm text-neutral-700 shadow-lg end-0">
+          <div className="flex items-start justify-between gap-2">
+            <p className="font-medium text-neutral-900">{t("notifications.blockedTitle")}</p>
+            <button
+              type="button"
+              onClick={() => setShowBlockedHint(false)}
+              aria-label={t("common.close")}
+              className="shrink-0 rounded-full p-0.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+            >
+              <CloseIcon className="h-4 w-4" />
+            </button>
+          </div>
+          <p className="mt-1 text-neutral-600">{t("notifications.blockedBody")}</p>
+        </div>
+      )}
+    </div>
   );
 }

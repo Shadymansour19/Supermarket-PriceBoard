@@ -26,6 +26,11 @@ export function usePushNotifications() {
   const { i18n } = useTranslation();
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Once a user explicitly denies the permission prompt, browsers never
+  // show it again for this site — Notification.requestPermission() just
+  // silently re-resolves "denied" forever after. Tracking this lets the
+  // UI say so instead of the button looking like it does nothing.
+  const [blocked, setBlocked] = useState(() => isSupported() && Notification.permission === "denied");
 
   useEffect(() => {
     if (!isSupported()) return;
@@ -35,12 +40,18 @@ export function usePushNotifications() {
       .catch(() => setSubscribed(false));
   }, []);
 
-  const subscribe = useCallback(async () => {
-    if (!isSupported()) return;
+  // Returns the resulting permission so the caller can react to a fresh
+  // "denied" right away (e.g. show a hint) — distinct from `blocked`,
+  // which also reflects a denial from a previous visit and shouldn't by
+  // itself pop up any UI on mount (that'd be exactly the repeated-nagging
+  // browsers block re-prompting to prevent).
+  const subscribe = useCallback(async (): Promise<NotificationPermission> => {
+    if (!isSupported()) return "default";
     setLoading(true);
     try {
       const permission = await Notification.requestPermission();
-      if (permission !== "granted") return;
+      setBlocked(permission === "denied");
+      if (permission !== "granted") return permission;
 
       const registration = await navigator.serviceWorker.ready;
       const subscription = await registration.pushManager.subscribe({
@@ -49,6 +60,7 @@ export function usePushNotifications() {
       });
       await registerPushSubscription(subscription, i18n.language);
       setSubscribed(true);
+      return permission;
     } finally {
       setLoading(false);
     }
@@ -70,5 +82,5 @@ export function usePushNotifications() {
     }
   }, []);
 
-  return { supported: isSupported(), subscribed, loading, subscribe, unsubscribe };
+  return { supported: isSupported(), subscribed, loading, blocked, subscribe, unsubscribe };
 }

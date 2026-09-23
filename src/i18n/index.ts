@@ -39,6 +39,9 @@ const resources = {
       notifications: {
         enable: "Get notified about new deals",
         disable: "Turn off deal notifications",
+        blockedTitle: "Notifications are blocked",
+        blockedBody:
+          "You previously declined this. To turn deal alerts back on, enable notifications for this site in your browser's settings.",
       },
       unit: {
         each: "each",
@@ -192,6 +195,8 @@ const resources = {
       notifications: {
         enable: "فعّل إشعارات العروض الجديدة",
         disable: "إيقاف إشعارات العروض",
+        blockedTitle: "الإشعارات محظورة",
+        blockedBody: "تم رفض الإذن من قبل. لتفعيل تنبيهات العروض مرة أخرى، فعّل الإشعارات لهذا الموقع من إعدادات متصفحك.",
       },
       unit: {
         each: "قطعة",
