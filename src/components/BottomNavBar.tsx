@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { CategoriesIcon, HeartIcon, HomeIcon } from "./Icons";
+import { BellIcon, CategoriesIcon, HeartIcon, HomeIcon } from "./Icons";
 import { useFavorites } from "../context/FavoritesContext";
 
 /**
@@ -17,6 +17,7 @@ export function BottomNavBar() {
   const homeActive = pathname === "/";
   const categoriesActive = pathname === "/categories" || pathname.startsWith("/category/");
   const favoritesActive = pathname === "/favorites";
+  const notificationsActive = pathname === "/notifications";
 
   const linkClass = (active: boolean) =>
     `font-label relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
@@ -46,6 +47,10 @@ export function BottomNavBar() {
           )}
         </span>
         {t("favorites.navLabel")}
+      </Link>
+      <Link to="/notifications" aria-current={notificationsActive} className={linkClass(notificationsActive)}>
+        <BellIcon className="h-6 w-6" />
+        {t("notifications.navLabel")}
       </Link>
     </nav>
   );

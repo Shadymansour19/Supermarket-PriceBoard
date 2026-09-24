@@ -12,6 +12,7 @@ import { CatalogPage } from "./pages/public/CatalogPage";
 import { CategoriesPage } from "./pages/public/CategoriesPage";
 import { DealsPage } from "./pages/public/DealsPage";
 import { FavoritesPage } from "./pages/public/FavoritesPage";
+import { NotificationsPage } from "./pages/public/NotificationsPage";
 import { ProductDetailPage } from "./pages/public/ProductDetailPage";
 import { WholesaleDealsPage } from "./pages/public/WholesaleDealsPage";
 
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="deals" element={<DealsPage />} />
             <Route path="wholesale-deals" element={<WholesaleDealsPage />} />
             <Route path="favorites" element={<FavoritesPage />} />
+            <Route path="notifications" element={<NotificationsPage />} />
             <Route path="product/:productId" element={<ProductDetailPage />} />
           </Route>
 

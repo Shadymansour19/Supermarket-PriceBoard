@@ -1,6 +1,7 @@
 /// <reference lib="webworker" />
 import { clientsClaim } from "workbox-core";
 import { precacheAndRoute } from "workbox-precaching";
+import { logReceivedNotification } from "./lib/notificationLog";
 
 // injectManifest strategy: vite-plugin-pwa/workbox-build replaces this at
 // build time with the list of built assets to precache.
@@ -28,12 +29,29 @@ self.addEventListener("push", (event) => {
   const payload = event.data.json() as DealPushPayload;
 
   event.waitUntil(
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-      icon: "/pwa/icon-192.png",
-      badge: "/pwa/icon-192.png",
-      data: { url: payload.url },
-    }),
+    (async () => {
+      // Logged before (and independent of) showNotification, so a push that
+      // arrives but fails to display — a permission quirk, an OS
+      // suppressing it, a bad payload — still shows up in the in-app
+      // notification history instead of looking exactly like one that
+      // never arrived at all.
+      await logReceivedNotification({
+        title: payload.title,
+        body: payload.body,
+        url: payload.url,
+        receivedAt: Date.now(),
+      }).catch(() => {});
+
+      const clients = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+      clients.forEach((client) => client.postMessage({ type: "push-received" }));
+
+      await self.registration.showNotification(payload.title, {
+        body: payload.body,
+        icon: "/pwa/icon-192.png",
+        badge: "/pwa/icon-192.png",
+        data: { url: payload.url },
+      });
+    })(),
   );
 });
 

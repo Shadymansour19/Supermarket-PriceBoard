@@ -3,10 +3,9 @@ import { Link, Outlet } from "react-router-dom";
 import { BottomNavBar } from "./BottomNavBar";
 import { ContactWidget } from "./ContactWidget";
 import { Footer } from "./Footer";
-import { HeartIcon } from "./Icons";
+import { BellIcon, HeartIcon } from "./Icons";
 import { InstallBanner } from "./InstallBanner";
 import { LanguageToggle } from "./LanguageToggle";
-import { NotificationToggle } from "./NotificationToggle";
 import { useFavorites } from "../context/FavoritesContext";
 
 export function PublicLayout() {
@@ -22,7 +21,13 @@ export function PublicLayout() {
             {t("app.name")}
           </Link>
           <div className="flex items-center gap-2">
-            <NotificationToggle />
+            <Link
+              to="/notifications"
+              aria-label={t("notifications.navLabel")}
+              className="hidden h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 md:flex"
+            >
+              <BellIcon />
+            </Link>
             <Link
               to="/favorites"
               aria-label={t("favorites.navLabel")}

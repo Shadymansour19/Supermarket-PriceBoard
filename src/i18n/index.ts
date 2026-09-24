@@ -37,6 +37,7 @@ const resources = {
         remove: "Remove from favorites",
       },
       notifications: {
+        navLabel: "Notifications",
         enable: "Get notified about new deals",
         disable: "Turn off deal notifications",
         blockedTitle: "Notifications are blocked",
@@ -46,6 +47,15 @@ const resources = {
           "You previously declined this. Open your iPhone's Settings app, find this app in the list, and turn on Allow Notifications.",
         errorTitle: "Something went wrong",
         errorBody: "Couldn't turn notifications on or off. Try again — if it keeps happening, share the message below with us.",
+        notSupported: "Push notifications aren't supported in this browser.",
+        statusEnabled: "You're set up to get notified about new deals on this device.",
+        statusDisabled: "Turn this on to get notified as soon as a new deal is posted.",
+        historyTitle: "Notification history",
+        historyHint:
+          "Every notification your device receives is logged here, even if it didn't show up as a system notification — useful for checking whether they're arriving at all.",
+        historyEmpty: "Nothing received yet.",
+        clearHistory: "Clear history",
+        confirmClearHistory: "Clear all notification history on this device?",
       },
       unit: {
         each: "each",
@@ -210,6 +220,7 @@ const resources = {
         remove: "إزالة من المفضلة",
       },
       notifications: {
+        navLabel: "الإشعارات",
         enable: "فعّل إشعارات العروض الجديدة",
         disable: "إيقاف إشعارات العروض",
         blockedTitle: "الإشعارات محظورة",
@@ -219,6 +230,15 @@ const resources = {
           "تم رفض الإذن من قبل. افتح تطبيق الإعدادات في هاتفك، ابحث عن هذا التطبيق في القائمة، وفعّل خيار السماح بالإشعارات.",
         errorTitle: "حدث خطأ ما",
         errorBody: "تعذّر تفعيل أو إيقاف الإشعارات. حاول مرة أخرى، وإذا استمرت المشكلة شاركنا الرسالة اللي تحت.",
+        notSupported: "إشعارات الدفع غير مدعومة في هذا المتصفح.",
+        statusEnabled: "إشعارات العروض الجديدة مفعّلة على هذا الجهاز.",
+        statusDisabled: "فعّل الإشعارات عشان توصلك أول ما يتضاف عرض جديد.",
+        historyTitle: "سجل الإشعارات",
+        historyHint:
+          "كل إشعار يوصل لجهازك يتسجل هنا، حتى لو مظهرش كإشعار نظام — ده مفيد عشان تتأكد إذا كان بيوصل أصلاً أم لا.",
+        historyEmpty: "لسه ملوصلش أي إشعار.",
+        clearHistory: "مسح السجل",
+        confirmClearHistory: "هل تريد مسح كل سجل الإشعارات على هذا الجهاز؟",
       },
       unit: {
         each: "قطعة",
