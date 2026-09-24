@@ -51,8 +51,7 @@ const resources = {
         statusEnabled: "You're set up to get notified about new deals on this device.",
         statusDisabled: "Turn this on to get notified as soon as a new deal is posted.",
         historyTitle: "Notification history",
-        historyHint:
-          "Every notification your device receives is logged here, even if it didn't show up as a system notification — useful for checking whether they're arriving at all.",
+        historyHint: "Every deal notification you've received is saved here — tap one to open that product.",
         historyEmpty: "Nothing received yet.",
         clearHistory: "Clear history",
         confirmClearHistory: "Clear all notification history on this device?",
@@ -234,8 +233,7 @@ const resources = {
         statusEnabled: "إشعارات العروض الجديدة مفعّلة على هذا الجهاز.",
         statusDisabled: "فعّل الإشعارات عشان توصلك أول ما يتضاف عرض جديد.",
         historyTitle: "سجل الإشعارات",
-        historyHint:
-          "كل إشعار يوصل لجهازك يتسجل هنا، حتى لو مظهرش كإشعار نظام — ده مفيد عشان تتأكد إذا كان بيوصل أصلاً أم لا.",
+        historyHint: "كل إشعار عرض وصلك متسجل هنا — دوس على أي واحد عشان تفتح المنتج بتاعه.",
         historyEmpty: "لسه ملوصلش أي إشعار.",
         clearHistory: "مسح السجل",
         confirmClearHistory: "هل تريد مسح كل سجل الإشعارات على هذا الجهاز؟",

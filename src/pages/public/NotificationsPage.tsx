@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { CloseIcon } from "../../components/ContactIcons";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { clearNotificationLog, getNotificationLog, type NotificationLogEntry } from "../../lib/notificationLog";
@@ -27,9 +28,8 @@ export function NotificationsPage() {
 
   useEffect(() => {
     loadLog();
-    // Live-refreshes the history while this page is open, so a push that
-    // arrives during a test shows up immediately without a manual reload —
-    // exactly the case this page exists to help debug.
+    // Live-refreshes the history while this page is open, so a new deal
+    // notification shows up here right away without a manual reload.
     function handleMessage(event: MessageEvent) {
       if ((event.data as { type?: string } | undefined)?.type === "push-received") loadLog();
     }
@@ -165,14 +165,19 @@ export function NotificationsPage() {
         ) : (
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
             {log.map((entry) => (
-              <li key={entry.id} className="space-y-0.5 px-4 py-3">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="font-medium text-neutral-900">{entry.title}</p>
-                  <span className="shrink-0 text-xs text-neutral-400">
-                    {new Date(entry.receivedAt).toLocaleString(i18n.language === "ar" ? "ar" : "en")}
-                  </span>
-                </div>
-                <p className="text-sm text-neutral-600">{entry.body}</p>
+              <li key={entry.id}>
+                <Link to={entry.url} className="flex items-start gap-3 px-4 py-3 hover:bg-neutral-50">
+                  <img src="/pwa/icon-192.png" alt="" className="h-9 w-9 shrink-0 rounded-lg object-cover" />
+                  <div className="min-w-0 flex-1 space-y-0.5">
+                    <div className="flex items-baseline justify-between gap-2">
+                      <p className="font-medium text-neutral-900">{entry.title}</p>
+                      <span className="shrink-0 text-xs text-neutral-400">
+                        {new Date(entry.receivedAt).toLocaleString(i18n.language === "ar" ? "ar" : "en")}
+                      </span>
+                    </div>
+                    <p className="text-sm text-neutral-600">{entry.body}</p>
+                  </div>
+                </Link>
               </li>
             ))}
           </ul>

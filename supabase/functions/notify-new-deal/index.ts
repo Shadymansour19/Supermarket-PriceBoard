@@ -67,7 +67,7 @@ Deno.serve(async (req) => {
       try {
         await webpush.sendNotification(
           { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-          JSON.stringify({ title, body, url: "/deals" }),
+          JSON.stringify({ title, body, url: `/product/${payload.record.product_id}` }),
         );
       } catch (err) {
         // 404/410 means the browser dropped this subscription — clean it
