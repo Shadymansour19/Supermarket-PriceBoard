@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./components/admin/ProtectedRoute";
 import { PublicLayout } from "./components/PublicLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
+import { useAdminManifest } from "./hooks/useAdminManifest";
 import { useDocumentDirection } from "./hooks/useDocumentDirection";
 import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
@@ -18,6 +19,7 @@ import { WholesaleDealsPage } from "./pages/public/WholesaleDealsPage";
 
 export default function App() {
   useDocumentDirection();
+  useAdminManifest();
 
   return (
     <AuthProvider>
