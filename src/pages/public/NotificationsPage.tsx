@@ -37,6 +37,14 @@ export function NotificationsPage() {
     return () => navigator.serviceWorker?.removeEventListener("message", handleMessage);
   }, []);
 
+  // Surfaces the hook's background re-registration failure (see
+  // usePushNotifications' mount effect) even though nothing was clicked —
+  // otherwise the page would keep showing "enabled" with no indication
+  // that the server-side row still doesn't exist.
+  useEffect(() => {
+    if (error) setShowErrorHint(true);
+  }, [error]);
+
   async function handleToggleClick() {
     setShowErrorHint(false);
     try {

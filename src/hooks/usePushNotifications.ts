@@ -32,15 +32,32 @@ export function usePushNotifications() {
   // UI say so instead of the button looking like it does nothing.
   const [blocked, setBlocked] = useState(() => isSupported() && Notification.permission === "denied");
 
+  const [error, setError] = useState<string | null>(null);
+
   useEffect(() => {
     if (!isSupported()) return;
     navigator.serviceWorker.ready
       .then((registration) => registration.pushManager.getSubscription())
-      .then((existing) => setSubscribed(existing !== null))
+      .then((existing) => {
+        setSubscribed(existing !== null);
+        if (!existing) return;
+        // The browser can have a live push subscription that was never
+        // successfully saved server-side (e.g. it registered before the
+        // RLS fix that made inserts here silently fail) — the UI would
+        // otherwise show "enabled" forever with no way to actually
+        // receive anything. Re-upserting is idempotent and cheap, so it
+        // runs on every mount to self-heal that mismatch instead of
+        // requiring the user to notice and manually toggle it off/on.
+        registerPushSubscription(existing, i18n.language).catch((err) => {
+          setError(err instanceof Error ? err.message : String(err));
+        });
+      })
       .catch(() => setSubscribed(false));
+    // Only needs to run once per mount — re-registering on every language
+    // change would be excessive; the current language is still read fresh
+    // each time via the closure.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  const [error, setError] = useState<string | null>(null);
 
   // Returns the resulting permission so the caller can react to a fresh
   // "denied" right away (e.g. show a hint) — distinct from `blocked`,
