@@ -77,9 +77,7 @@ export function NotificationsPage() {
         ) : (
           <>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm text-neutral-700">
-                {t(subscribed ? "notifications.statusEnabled" : "notifications.statusDisabled")}
-              </p>
+              <p className="text-sm font-medium text-neutral-900">{t("notifications.navLabel")}</p>
               <button
                 type="button"
                 disabled={loading}
@@ -141,10 +139,7 @@ export function NotificationsPage() {
 
       <div className="space-y-2">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-heading text-sm font-semibold text-neutral-900">{t("notifications.historyTitle")}</h2>
-            <p className="mt-0.5 text-xs text-neutral-500">{t("notifications.historyHint")}</p>
-          </div>
+          <h2 className="font-heading text-sm font-semibold text-neutral-900">{t("notifications.historyTitle")}</h2>
           {log.length > 0 && (
             <button
               type="button"
