@@ -54,7 +54,7 @@ export function CatalogPage() {
   return (
     <div className="space-y-6">
       {isHome && <HeroBanner />}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_1fr]">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-[220px_minmax(0,1fr)]">
         {/* Category navigation on mobile lives on its own /categories page
          * (reached from the bottom nav bar) instead of an inline dropdown
          * here — this sidebar is desktop/tablet-only. */}

@@ -235,15 +235,15 @@ export function AdminProductsPage() {
           </div>
 
           <div className="hidden overflow-x-auto rounded-xl border border-neutral-200 bg-white md:block">
-            <table className="w-full text-start text-sm">
+            <table className="w-full table-fixed text-start text-sm">
               <thead className="border-b border-neutral-200 text-neutral-500">
                 <tr>
-                  <th className="px-4 py-2 text-start"></th>
+                  <th className="w-14 px-4 py-2 text-start"></th>
                   <th className="px-4 py-2 text-start">{t("admin.nameEn")}</th>
-                  <th className="px-4 py-2 text-start">{t("admin.price")}</th>
-                  <th className="px-4 py-2 text-start">{t("admin.inStock")}</th>
-                  <th className="px-4 py-2 text-start">{t("admin.active")}</th>
-                  <th className="px-4 py-2 text-start"></th>
+                  <th className="w-32 px-4 py-2 text-start">{t("admin.price")}</th>
+                  <th className="w-32 px-4 py-2 text-start">{t("admin.inStock")}</th>
+                  <th className="w-32 px-4 py-2 text-start">{t("admin.active")}</th>
+                  <th className="w-56 px-4 py-2 text-start"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100">
@@ -256,7 +256,7 @@ export function AdminProductsPage() {
                           {imageUrl && <img src={imageUrl} alt="" className="h-full w-full object-cover" />}
                         </div>
                       </td>
-                      <td className="px-4 py-2 font-medium text-neutral-900">
+                      <td className="truncate px-4 py-2 font-medium text-neutral-900">
                         {product.name_en} / {product.name_ar}
                         {product.size && <span className="ms-1 text-neutral-400">({product.size})</span>}
                       </td>

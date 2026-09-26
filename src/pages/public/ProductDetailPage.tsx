@@ -49,11 +49,11 @@ export function ProductDetailPage() {
   const description = localizedField(product, "description", i18n.language);
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-4xl">
       <Link to="/" className="font-label mb-4 inline-block text-sm text-emerald-700 underline">
         {t("product.backToCatalog")}
       </Link>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
         <div className="aspect-square overflow-hidden rounded-xl bg-neutral-100">
           {imageUrl ? (
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
