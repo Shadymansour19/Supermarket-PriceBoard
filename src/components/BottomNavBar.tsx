@@ -42,7 +42,7 @@ export function BottomNavBar() {
        * `path()` doesn't support). */}
       <div
         aria-hidden="true"
-        className="absolute inset-x-0 top-0 left-1/2 h-32 w-[800px] -translate-x-1/2 bg-[#0f3d2e]"
+        className="absolute top-0 left-1/2 h-32 w-[800px] -translate-x-1/2 bg-[#0f3d2e]"
         style={{ clipPath: "path('M0 0 L315 0 C355 0 360 34 400 34 C440 34 445 0 485 0 L800 0 L800 130 L0 130 Z')" }}
       />
 
