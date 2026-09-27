@@ -183,6 +183,10 @@ const resources = {
         sectionTitle: "Recently viewed",
         goToSlide: "Go to product {{count}}",
       },
+      similarProducts: {
+        sectionTitle: "Similar products",
+        goToSlide: "Go to product {{count}}",
+      },
       contact: {
         title: "Contact us",
         whatsapp: "WhatsApp",
@@ -392,6 +396,10 @@ const resources = {
       },
       recentlyViewed: {
         sectionTitle: "شوفته قبل كده",
+        goToSlide: "الانتقال إلى المنتج {{count}}",
+      },
+      similarProducts: {
+        sectionTitle: "منتجات مشابهة",
         goToSlide: "الانتقال إلى المنتج {{count}}",
       },
       contact: {

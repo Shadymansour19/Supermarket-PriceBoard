@@ -6,6 +6,7 @@ import { DiscountPrice } from "../../components/DiscountPrice";
 import { FavoriteButton } from "../../components/FavoriteButton";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
+import { SimilarProductsSection } from "../../components/SimilarProductsSection";
 import { useCart } from "../../context/CartContext";
 import { flyToCart } from "../../lib/cartFlyAnimation";
 import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
@@ -180,6 +181,9 @@ export function ProductDetailPage() {
             </button>
           </div>
         </div>
+      </div>
+      <div className="mt-8">
+        <SimilarProductsSection product={product} />
       </div>
     </div>
   );

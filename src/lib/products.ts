@@ -34,6 +34,21 @@ export async function fetchProducts(filter: ProductFilter = {}): Promise<Product
   return (data ?? []) as Product[];
 }
 
+/** Other active products in the same category, closest in price first — a
+ * simple, always-available "similar products" signal for a catalog this
+ * size. No purchase/view history exists to build real recommendations
+ * from (checkout is a WhatsApp message, not a stored order; recently-
+ * viewed is per-device only), so same category + price proximity is the
+ * strongest signal available without new infrastructure — see the
+ * evaluated options in the SPEC.md decision log. */
+export async function fetchSimilarProducts(product: Product, limit = 8): Promise<Product[]> {
+  const inCategory = await fetchProducts({ categoryId: product.category_id });
+  return inCategory
+    .filter((p) => p.id !== product.id)
+    .sort((a, b) => Math.abs(a.price - product.price) - Math.abs(b.price - product.price))
+    .slice(0, limit);
+}
+
 export async function fetchProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
   if (error) throw error;
