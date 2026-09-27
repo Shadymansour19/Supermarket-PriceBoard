@@ -34,10 +34,19 @@ export function BottomNavBar() {
        * crowding right up against the cart button/notch between them. A
        * solid dark-green bar (the same brand color as the hero banner and
        * the PWA's theme-color) instead of near-white, so it reads clearly
-       * as its own distinct element rather than blending into the page. */}
+       * as its own distinct element rather than blending into the page.
+       *
+       * The notch is a real hole, not a painted shape: a mask on the bar
+       * itself, punching out a soft-edged circle (the cart button's own
+       * shape, inverted) around where the button sits — genuinely
+       * transparent there instead of a solid color standing in for one. */}
       <nav
         className="relative grid grid-cols-5 bg-[#0f3d2e]"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+        style={{
+          paddingBottom: "env(safe-area-inset-bottom)",
+          maskImage: "radial-gradient(circle at 50% -8px, transparent 38px, black 48px)",
+          WebkitMaskImage: "radial-gradient(circle at 50% -8px, transparent 38px, black 48px)",
+        }}
       >
         <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
           <HomeIcon className="h-6 w-6" />
@@ -64,37 +73,6 @@ export function BottomNavBar() {
           {t("notifications.navLabel")}
         </Link>
       </nav>
-
-      {/* The notch itself: a wide, deep, smoothly-curved cut into the bar's
-       * top edge, painted in the page's own flat background color rather
-       * than made truly transparent — whatever's scrolled behind a fixed
-       * element isn't a flat color, so an actual see-through hole would
-       * look inconsistent depending on scroll position. Painting a
-       * matching shade here is what actually sells the illusion of a
-       * carved-out dip. Drawn after (so visually on top of) the bar, but
-       * under the button and its shadow. */}
-      <svg
-        className="pointer-events-none absolute inset-x-0 top-0 mx-auto -translate-y-px"
-        width="66"
-        height="27"
-        viewBox="0 0 66 27"
-        aria-hidden="true"
-      >
-        {/* A true circular arc, sized to the button's own radius (no ring,
-         * no extra margin) — the button fully covers this cut with no
-         * light-colored halo showing around it, so the notch reads as
-         * shaping the *bar's* edge around the button rather than as a
-         * separate decorative ring. */}
-        <path d="M1 0 A 33 33 0 1 1 65 0 Z" className="fill-neutral-50" />
-      </svg>
-
-      {/* A soft blurred shadow cast into the notch, right under where the
-       * button sits — without this the button reads as flat / pasted on
-       * rather than a raised disc with real depth. */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 top-2 mx-auto h-8 w-14 rounded-full bg-neutral-900/15 blur-md"
-      />
 
       {/* The button sits inside that notch, raised well above the bar
        * (most of it above, only its lower edge nestling into the cut) for
