@@ -3,14 +3,16 @@ import { Link, Outlet } from "react-router-dom";
 import { BottomNavBar } from "./BottomNavBar";
 import { ContactWidget } from "./ContactWidget";
 import { Footer } from "./Footer";
-import { BellIcon, HeartIcon } from "./Icons";
+import { BellIcon, CartIcon, HeartIcon } from "./Icons";
 import { InstallBanner } from "./InstallBanner";
 import { LanguageToggle } from "./LanguageToggle";
+import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 
 export function PublicLayout() {
   const { t } = useTranslation();
   const { favoriteIds } = useFavorites();
+  const { itemCount } = useCart();
 
   return (
     <div className="min-h-screen bg-neutral-50">
@@ -40,18 +42,30 @@ export function PublicLayout() {
                 </span>
               )}
             </Link>
+            <Link
+              to="/cart"
+              aria-label={t("cart.navLabel")}
+              className="relative hidden h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 md:flex"
+            >
+              <CartIcon />
+              {itemCount > 0 && (
+                <span className="font-label absolute -end-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-emerald-600 px-1 text-[10px] font-semibold text-white">
+                  {itemCount}
+                </span>
+              )}
+            </Link>
             <LanguageToggle />
           </div>
         </div>
       </header>
       <InstallBanner />
-      <main className="mx-auto max-w-6xl px-4 py-6">
+      <main className="pb-mobile-fab-safe mx-auto max-w-6xl px-4 pt-6">
         <Outlet />
       </main>
       <Footer />
-      {/* Clears the fixed mobile bottom nav bar so it never covers the
-       * tail end of the footer. */}
-      <div className="md:hidden" style={{ height: "calc(4rem + env(safe-area-inset-bottom))" }} />
+      {/* Clears the fixed mobile bottom nav bar and floating cart button
+       * so neither ever covers the tail end of the footer. */}
+      <div className="pb-mobile-fab-safe md:hidden" />
       <ContactWidget />
       <BottomNavBar />
     </div>

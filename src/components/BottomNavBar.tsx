@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "react-router-dom";
-import { BellIcon, CategoriesIcon, HeartIcon, HomeIcon } from "./Icons";
+import { BellIcon, CartIcon, CategoriesIcon, HeartIcon, HomeIcon } from "./Icons";
+import { useCart } from "../context/CartContext";
 import { useFavorites } from "../context/FavoritesContext";
 
 /**
@@ -14,10 +15,12 @@ export function BottomNavBar() {
   const { t } = useTranslation();
   const { pathname } = useLocation();
   const { favoriteIds } = useFavorites();
+  const { itemCount } = useCart();
   const homeActive = pathname === "/";
   const categoriesActive = pathname === "/categories" || pathname.startsWith("/category/");
   const favoritesActive = pathname === "/favorites";
   const notificationsActive = pathname === "/notifications";
+  const cartActive = pathname === "/cart";
 
   const linkClass = (active: boolean) =>
     `font-label relative flex flex-1 flex-col items-center gap-0.5 py-2 text-xs ${
@@ -25,33 +28,53 @@ export function BottomNavBar() {
     }`;
 
   return (
-    <nav
-      className="fixed inset-x-0 bottom-0 z-30 flex border-t border-neutral-200 bg-white md:hidden"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-    >
-      <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
-        <HomeIcon className="h-6 w-6" />
-        {t("nav.home")}
+    <>
+      {/* Raised above the bar (not one of its flex items) so it reads as
+       * the app's primary action, the way a raised center button does in
+       * most bottom-tab-bar apps. */}
+      <Link
+        to="/cart"
+        aria-current={cartActive}
+        aria-label={t("cart.navLabel")}
+        className="fixed inset-x-0 z-40 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 md:hidden"
+        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom) + 0.75rem)" }}
+      >
+        <CartIcon className="h-6 w-6" />
+        {itemCount > 0 && (
+          <span className="font-label absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
+            {itemCount}
+          </span>
+        )}
       </Link>
-      <Link to="/categories" aria-current={categoriesActive} className={linkClass(categoriesActive)}>
-        <CategoriesIcon className="h-6 w-6" />
-        {t("nav.categories")}
-      </Link>
-      <Link to="/favorites" aria-current={favoritesActive} className={linkClass(favoritesActive)}>
-        <span className="relative">
-          <HeartIcon className="h-6 w-6" filled={favoritesActive || favoriteIds.size > 0} />
-          {favoriteIds.size > 0 && (
-            <span className="absolute -end-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-emerald-600 px-0.5 text-[9px] font-semibold text-white">
-              {favoriteIds.size}
-            </span>
-          )}
-        </span>
-        {t("favorites.navLabel")}
-      </Link>
-      <Link to="/notifications" aria-current={notificationsActive} className={linkClass(notificationsActive)}>
-        <BellIcon className="h-6 w-6" />
-        {t("notifications.navLabel")}
-      </Link>
-    </nav>
+
+      <nav
+        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-neutral-200 bg-white md:hidden"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
+          <HomeIcon className="h-6 w-6" />
+          {t("nav.home")}
+        </Link>
+        <Link to="/categories" aria-current={categoriesActive} className={linkClass(categoriesActive)}>
+          <CategoriesIcon className="h-6 w-6" />
+          {t("nav.categories")}
+        </Link>
+        <Link to="/favorites" aria-current={favoritesActive} className={linkClass(favoritesActive)}>
+          <span className="relative">
+            <HeartIcon className="h-6 w-6" filled={favoritesActive || favoriteIds.size > 0} />
+            {favoriteIds.size > 0 && (
+              <span className="absolute -end-1.5 -top-1 flex h-3.5 min-w-3.5 items-center justify-center rounded-full bg-emerald-600 px-0.5 text-[9px] font-semibold text-white">
+                {favoriteIds.size}
+              </span>
+            )}
+          </span>
+          {t("favorites.navLabel")}
+        </Link>
+        <Link to="/notifications" aria-current={notificationsActive} className={linkClass(notificationsActive)}>
+          <BellIcon className="h-6 w-6" />
+          {t("notifications.navLabel")}
+        </Link>
+      </nav>
+    </>
   );
 }
