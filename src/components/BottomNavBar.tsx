@@ -33,7 +33,7 @@ export function BottomNavBar() {
        * Categories/Favorites sit further out from center instead of
        * crowding right up against the cart button/notch between them. */}
       <nav
-        className="relative grid grid-cols-5 border-t border-neutral-200 bg-white"
+        className="relative grid grid-cols-5 border-t border-neutral-200 bg-emerald-50"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
