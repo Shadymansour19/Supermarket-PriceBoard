@@ -36,8 +36,10 @@ export function DealsCarousel<T>({
   slideLabel,
 }: {
   title: string;
-  showMoreHref: string;
-  showMoreLabel: string;
+  /** Omit both together for a strip with no dedicated "see all" page (e.g.
+   * recently viewed) — the header then shows just the title. */
+  showMoreHref?: string;
+  showMoreLabel?: string;
   items: T[];
   getKey: (item: T) => string;
   renderCard: (item: T) => ReactNode;
@@ -158,9 +160,11 @@ export function DealsCarousel<T>({
     <section className="space-y-3">
       <div className="flex items-center justify-between">
         <h2 className="font-heading text-lg font-semibold text-neutral-900">{title}</h2>
-        <Link to={showMoreHref} className="font-label text-sm font-medium text-emerald-700 hover:underline">
-          {showMoreLabel}
-        </Link>
+        {showMoreHref && (
+          <Link to={showMoreHref} className="font-label text-sm font-medium text-emerald-700 hover:underline">
+            {showMoreLabel}
+          </Link>
+        )}
       </div>
       <div
         ref={scrollerRef}

@@ -178,6 +178,10 @@ const resources = {
         wholesalePageTitle: "Buy at Wholesale Price",
         noActiveWholesaleDeals: "No bulk deals right now — check back soon!",
       },
+      recentlyViewed: {
+        sectionTitle: "Recently viewed",
+        goToSlide: "Go to product {{count}}",
+      },
       contact: {
         title: "Contact us",
         whatsapp: "WhatsApp",
@@ -383,6 +387,10 @@ const resources = {
         wholesaleSectionTitle: "اشتري بسعر الجملة",
         wholesalePageTitle: "اشتري بسعر الجملة",
         noActiveWholesaleDeals: "مفيش عروض جملة دلوقتي... تابعنا يوصلك كل جديد!",
+      },
+      recentlyViewed: {
+        sectionTitle: "شوفته قبل كده",
+        goToSlide: "الانتقال إلى المنتج {{count}}",
       },
       contact: {
         title: "تواصل معنا",

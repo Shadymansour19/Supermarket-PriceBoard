@@ -10,6 +10,7 @@ import { useCart } from "../../context/CartContext";
 import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
+import { recordProductView } from "../../lib/recentlyViewed";
 import { productImageUrl } from "../../lib/supabase";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
 
@@ -25,7 +26,10 @@ export function ProductDetailPage() {
 
   useEffect(() => {
     if (!productId) return;
-    fetchProductById(productId).then(setProduct);
+    fetchProductById(productId).then((fetchedProduct) => {
+      setProduct(fetchedProduct);
+      if (fetchedProduct) recordProductView(fetchedProduct.id);
+    });
     fetchLimitedTimeDiscount(productId)
       .then((discount) => setLimitedTimeDiscount(discount && isLimitedTimeDiscountActive(discount) ? discount : null))
       .catch(() => setLimitedTimeDiscount(null));
