@@ -45,6 +45,7 @@ export function PublicLayout() {
             <Link
               to="/cart"
               aria-label={t("cart.navLabel")}
+              data-cart-target
               className="relative hidden h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100 md:flex"
             >
               <CartIcon />

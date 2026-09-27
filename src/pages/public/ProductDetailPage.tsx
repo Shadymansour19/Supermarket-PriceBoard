@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { AskWhatsAppButton } from "../../components/AskWhatsAppButton";
@@ -7,6 +7,7 @@ import { FavoriteButton } from "../../components/FavoriteButton";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
 import { useCart } from "../../context/CartContext";
+import { flyToCart } from "../../lib/cartFlyAnimation";
 import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
@@ -23,6 +24,7 @@ export function ProductDetailPage() {
   const [quantityDiscount, setQuantityDiscount] = useState<QuantityDiscount | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
+  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!productId) return;
@@ -60,9 +62,14 @@ export function ProductDetailPage() {
   function handleAddToCart() {
     // Safe: this handler is only ever wired up to a button below, which
     // only renders once the early returns above have ruled out null/undefined.
-    addToCart(product!.id, quantity);
+    const id = product!.id;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
+    if (imageContainerRef.current) {
+      flyToCart(imageContainerRef.current, imageUrl, () => addToCart(id, quantity));
+    } else {
+      addToCart(id, quantity);
+    }
   }
 
   return (
@@ -76,7 +83,7 @@ export function ProductDetailPage() {
          * behind the fixed bottom nav/cart button on shorter phones — capped
          * shorter here, back to a full square from `sm:` up where the
          * two-column layout means it's no longer stacked above that content. */}
-        <div className="h-64 w-full overflow-hidden rounded-xl bg-neutral-100 sm:aspect-square sm:h-auto">
+        <div ref={imageContainerRef} className="h-64 w-full overflow-hidden rounded-xl bg-neutral-100 sm:aspect-square sm:h-auto">
           {imageUrl ? (
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
           ) : (
@@ -126,34 +133,9 @@ export function ProductDetailPage() {
               {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
             </span>
           </div>
-          {/* Sticky (not fixed) on mobile, clamped just above the floating
-           * cart button/bottom nav — a plain in-flow row here can land
-           * exactly behind those on shorter phones, since a full-width
-           * product image plus everything above it can easily exceed a
-           * short viewport's height on its own. `sticky` still scrolls
-           * normally the rest of the time, it just refuses to go further
-           * than that safe distance from the bottom — both button rows are
-           * inside the same sticky box so they clamp together as one unit
-           * instead of the second row drifting back into the danger zone.
-           * Reverts to normal inline rows from `sm:` up, where the two-
-           * column layout means neither ever nears the bottom of the
-           * viewport. */}
-          <div className="sticky bottom-[var(--mobile-fab-safe)] z-20 space-y-2 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:static sm:z-auto sm:space-y-3 sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-            <div className="flex flex-wrap items-center gap-3">
-              <QuantityStepper value={quantity} onChange={setQuantity} />
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                disabled={!product.in_stock}
-                className="font-label flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:flex-none"
-              >
-                {justAdded ? t("cart.added") : t("cart.addToCart")}
-              </button>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <AskWhatsAppButton product={product} />
-              <ShareWhatsAppButton product={product} />
-            </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <AskWhatsAppButton product={product} />
+            <ShareWhatsAppButton product={product} />
           </div>
           {description && <p className="text-neutral-600">{description}</p>}
 
@@ -177,6 +159,27 @@ export function ProductDetailPage() {
               </ul>
             </div>
           )}
+
+          {/* Sticky (not fixed) on mobile, clamped just above the notched
+           * cart button/bottom nav — a plain in-flow row here can land
+           * exactly behind those on shorter phones, since a full-width
+           * product image plus everything above it can easily exceed a
+           * short viewport's height on its own. `sticky` still scrolls
+           * normally the rest of the time, it just refuses to go further
+           * than that safe distance from the bottom. Reverts to a normal
+           * inline row from `sm:` up, where the two-column layout means
+           * this never gets anywhere near the bottom of the viewport. */}
+          <div className="sticky bottom-[var(--mobile-fab-safe)] z-20 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:static sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
+            <QuantityStepper value={quantity} onChange={setQuantity} />
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              disabled={!product.in_stock}
+              className="font-label flex-1 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-emerald-700 disabled:opacity-50 sm:flex-none"
+            >
+              {justAdded ? t("cart.added") : t("cart.addToCart")}
+            </button>
+          </div>
         </div>
       </div>
     </div>

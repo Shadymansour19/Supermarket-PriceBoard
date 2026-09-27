@@ -82,6 +82,7 @@ export function BottomNavBar() {
         to="/cart"
         aria-current={cartActive}
         aria-label={t("cart.navLabel")}
+        data-cart-target
         className="absolute inset-x-0 top-0 z-10 mx-auto flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700"
       >
         <CartIcon className="h-6 w-6" />

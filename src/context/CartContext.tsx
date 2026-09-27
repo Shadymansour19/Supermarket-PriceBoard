@@ -28,7 +28,8 @@ function persist(items: CartItem[]) {
 
 type CartState = {
   items: CartItem[];
-  /** Sum of every item's quantity — what the FAB/header badges show. */
+  /** Number of distinct products in the cart (not total quantity/pieces)
+   * — what the FAB/header badges show. */
   itemCount: number;
   quantityOf: (productId: string) => number;
   /** Adds to whatever quantity of this product is already in the cart. */
@@ -89,7 +90,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     persist([]);
   }
 
-  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const itemCount = items.length;
 
   return (
     <CartContext.Provider

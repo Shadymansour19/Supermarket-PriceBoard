@@ -74,6 +74,11 @@ export function CartPage() {
     clearCart();
   }
 
+  function handleRemove(productId: string) {
+    if (!confirm(t("cart.confirmRemoveItem"))) return;
+    removeFromCart(productId);
+  }
+
   function handleOrderViaWhatsApp() {
     const lines = rows.map((row) =>
       t("cart.whatsappLine", {
@@ -127,7 +132,7 @@ export function CartPage() {
                       </Link>
                       <button
                         type="button"
-                        onClick={() => removeFromCart(product.id)}
+                        onClick={() => handleRemove(product.id)}
                         aria-label={t("cart.remove")}
                         className="shrink-0 rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
                       >
