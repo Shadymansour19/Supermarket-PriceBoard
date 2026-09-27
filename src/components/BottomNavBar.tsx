@@ -75,16 +75,17 @@ export function BottomNavBar() {
        * under the button and its shadow. */}
       <svg
         className="pointer-events-none absolute inset-x-0 top-0 mx-auto -translate-y-px"
-        width="84"
-        height="34"
-        viewBox="0 0 84 34"
+        width="66"
+        height="27"
+        viewBox="0 0 66 27"
         aria-hidden="true"
       >
-        {/* A true circular arc (radius 40, just a touch bigger than the
-         * button+ring's own ~36px radius) instead of a hand-tuned bezier
-         * wave — hugs the button's own circle closely rather than a
-         * loose, generic dip. */}
-        <path d="M2.8 0 A 40 40 0 1 1 81.2 0 Z" className="fill-neutral-50" />
+        {/* A true circular arc, sized to the button's own radius (no ring,
+         * no extra margin) — the button fully covers this cut with no
+         * light-colored halo showing around it, so the notch reads as
+         * shaping the *bar's* edge around the button rather than as a
+         * separate decorative ring. */}
+        <path d="M1 0 A 33 33 0 1 1 65 0 Z" className="fill-neutral-50" />
       </svg>
 
       {/* A soft blurred shadow cast into the notch, right under where the
@@ -97,14 +98,13 @@ export function BottomNavBar() {
 
       {/* The button sits inside that notch, raised well above the bar
        * (most of it above, only its lower edge nestling into the cut) for
-       * a bigger, more prominent "primary action" presence, with a soft
-       * halo ring separating it from the notch behind it. */}
+       * a bigger, more prominent "primary action" presence. */}
       <Link
         to="/cart"
         aria-current={cartActive}
         aria-label={t("cart.navLabel")}
         data-cart-target
-        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[62%] items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl ring-4 ring-neutral-50 transition hover:bg-emerald-700"
+        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[62%] items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl transition hover:bg-emerald-700"
       >
         <CartIcon className="h-7 w-7" />
         {itemCount > 0 && (
