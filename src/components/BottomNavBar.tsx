@@ -62,34 +62,44 @@ export function BottomNavBar() {
         </Link>
       </nav>
 
-      {/* The notch itself: a shape cut into the bar's top edge, painted in
-       * the page's own flat background color rather than made truly
-       * transparent — whatever's scrolled behind a fixed element isn't a
-       * flat color, so an actual see-through hole would look inconsistent
-       * depending on scroll position. Painting a matching shade here is
-       * what actually sells the illusion of a carved-out dip. Drawn after
-       * (so visually on top of) the bar, but under the button. */}
+      {/* The notch itself: a wide, deep, smoothly-curved cut into the bar's
+       * top edge, painted in the page's own flat background color rather
+       * than made truly transparent — whatever's scrolled behind a fixed
+       * element isn't a flat color, so an actual see-through hole would
+       * look inconsistent depending on scroll position. Painting a
+       * matching shade here is what actually sells the illusion of a
+       * carved-out dip. Drawn after (so visually on top of) the bar, but
+       * under the button and its shadow. */}
       <svg
         className="pointer-events-none absolute inset-x-0 top-0 mx-auto -translate-y-px"
-        width="88"
-        height="36"
-        viewBox="0 0 88 36"
+        width="128"
+        height="48"
+        viewBox="0 0 128 48"
         aria-hidden="true"
       >
-        <path d="M0 0 C 20 0 22 34 44 34 C 66 34 68 0 88 0 Z" className="fill-neutral-50" />
+        <path d="M0 0 C 30 0 34 48 64 48 C 94 48 98 0 128 0 Z" className="fill-neutral-50" />
       </svg>
 
-      {/* The button sits inside that notch — centered on the bar's top
-       * edge, so half of it pokes above the bar and half nestles into the
-       * cut, instead of floating separately above with a gap. */}
+      {/* A soft blurred shadow cast into the notch, right under where the
+       * button sits — without this the button reads as flat / pasted on
+       * rather than a raised disc with real depth. */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 top-2 mx-auto h-8 w-14 rounded-full bg-neutral-900/15 blur-md"
+      />
+
+      {/* The button sits inside that notch, raised well above the bar
+       * (most of it above, only its lower edge nestling into the cut) for
+       * a bigger, more prominent "primary action" presence, with a soft
+       * halo ring separating it from the notch behind it. */}
       <Link
         to="/cart"
         aria-current={cartActive}
         aria-label={t("cart.navLabel")}
         data-cart-target
-        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700"
+        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[62%] items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl ring-4 ring-neutral-50 transition hover:bg-emerald-700"
       >
-        <CartIcon className="h-6 w-6" />
+        <CartIcon className="h-7 w-7" />
         {itemCount > 0 && (
           <span className="font-label absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
             {itemCount}

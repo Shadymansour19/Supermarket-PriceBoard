@@ -165,7 +165,7 @@ textarea {
 }
 
 /* Reserves enough space for the mobile bottom nav bar *and* the cart
-   button nested in its notch (half its height pokes above the bar) —
+   button nested in its notch (most of its height pokes above the bar) —
    without this, a short page's last piece of content (e.g. a product's
    "Add to cart" row), or the footer's own tail, can end up rendered
    directly underneath those fixed-position elements instead of above
@@ -174,7 +174,7 @@ textarea {
    Tailwind's default `md` breakpoint, where neither fixed element
    exists. */
 :root {
-  --mobile-fab-safe: calc(4rem + env(safe-area-inset-bottom) + 1.75rem + 0.5rem);
+  --mobile-fab-safe: calc(4rem + env(safe-area-inset-bottom) + 2.5rem + 0.75rem);
 }
 
 @media (min-width: 768px) {
