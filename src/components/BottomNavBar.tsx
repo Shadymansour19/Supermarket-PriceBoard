@@ -75,12 +75,16 @@ export function BottomNavBar() {
        * under the button and its shadow. */}
       <svg
         className="pointer-events-none absolute inset-x-0 top-0 mx-auto -translate-y-px"
-        width="128"
-        height="48"
-        viewBox="0 0 128 48"
+        width="84"
+        height="34"
+        viewBox="0 0 84 34"
         aria-hidden="true"
       >
-        <path d="M0 0 C 30 0 34 48 64 48 C 94 48 98 0 128 0 Z" className="fill-neutral-50" />
+        {/* A true circular arc (radius 40, just a touch bigger than the
+         * button+ring's own ~36px radius) instead of a hand-tuned bezier
+         * wave — hugs the button's own circle closely rather than a
+         * loose, generic dip. */}
+        <path d="M2.8 0 A 40 40 0 1 1 81.2 0 Z" className="fill-neutral-50" />
       </svg>
 
       {/* A soft blurred shadow cast into the notch, right under where the
