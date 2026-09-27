@@ -28,27 +28,9 @@ export function BottomNavBar() {
     }`;
 
   return (
-    <>
-      {/* Raised above the bar (not one of its flex items) so it reads as
-       * the app's primary action, the way a raised center button does in
-       * most bottom-tab-bar apps. */}
-      <Link
-        to="/cart"
-        aria-current={cartActive}
-        aria-label={t("cart.navLabel")}
-        className="fixed inset-x-0 z-40 mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700 md:hidden"
-        style={{ bottom: "calc(4rem + env(safe-area-inset-bottom) + 0.75rem)" }}
-      >
-        <CartIcon className="h-6 w-6" />
-        {itemCount > 0 && (
-          <span className="font-label absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
-            {itemCount}
-          </span>
-        )}
-      </Link>
-
+    <div className="fixed inset-x-0 bottom-0 z-30 md:hidden">
       <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex border-t border-neutral-200 bg-white md:hidden"
+        className="relative flex border-t border-neutral-200 bg-white"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
@@ -75,6 +57,40 @@ export function BottomNavBar() {
           {t("notifications.navLabel")}
         </Link>
       </nav>
-    </>
+
+      {/* The notch itself: a shape cut into the bar's top edge, painted in
+       * the page's own flat background color rather than made truly
+       * transparent — whatever's scrolled behind a fixed element isn't a
+       * flat color, so an actual see-through hole would look inconsistent
+       * depending on scroll position. Painting a matching shade here is
+       * what actually sells the illusion of a carved-out dip. Drawn after
+       * (so visually on top of) the bar, but under the button. */}
+      <svg
+        className="pointer-events-none absolute inset-x-0 top-0 mx-auto -translate-y-px"
+        width="88"
+        height="36"
+        viewBox="0 0 88 36"
+        aria-hidden="true"
+      >
+        <path d="M0 0 C 20 0 22 34 44 34 C 66 34 68 0 88 0 Z" className="fill-neutral-50" />
+      </svg>
+
+      {/* The button sits inside that notch — centered on the bar's top
+       * edge, so half of it pokes above the bar and half nestles into the
+       * cut, instead of floating separately above with a gap. */}
+      <Link
+        to="/cart"
+        aria-current={cartActive}
+        aria-label={t("cart.navLabel")}
+        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-14 w-14 -translate-y-1/2 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition hover:bg-emerald-700"
+      >
+        <CartIcon className="h-6 w-6" />
+        {itemCount > 0 && (
+          <span className="font-label absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
+            {itemCount}
+          </span>
+        )}
+      </Link>
+    </div>
   );
 }
