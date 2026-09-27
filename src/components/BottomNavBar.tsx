@@ -29,24 +29,31 @@ export function BottomNavBar() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 md:hidden">
+      {/* The bar's solid color lives on this dedicated layer, not on <nav>
+       * itself, so the notch can be a real clip-path cutout (crisp — fully
+       * transparent inside it, no gradient/partial-alpha band at all) with
+       * smoothly-filleted edges where it meets the flat top line, instead
+       * of a blurred mask. clip-path's coordinates are fixed pixels, not
+       * percentages, so this layer is deliberately oversized (800px, wider
+       * than any real phone) with the notch fixed at its own center and
+       * centered under the viewport via left-1/2/-translate-x-1/2 — that
+       * combination keeps the notch correctly centered on any screen
+       * width without needing percentage-based path coordinates (which
+       * `path()` doesn't support). */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-x-0 top-0 left-1/2 h-32 w-[800px] -translate-x-1/2 bg-[#0f3d2e]"
+        style={{ clipPath: "path('M0 0 L350 0 C362 0 364 32 400 32 C436 32 438 0 450 0 L800 0 L800 120 L0 120 Z')" }}
+      />
+
       {/* Five columns, not four — the middle one is deliberately empty, so
        * Categories/Favorites sit further out from center instead of
-       * crowding right up against the cart button/notch between them. A
-       * solid dark-green bar (the same brand color as the hero banner and
-       * the PWA's theme-color) instead of near-white, so it reads clearly
-       * as its own distinct element rather than blending into the page.
-       *
-       * The notch is a real hole, not a painted shape: a mask on the bar
-       * itself, punching out a soft-edged circle (the cart button's own
-       * shape, inverted) around where the button sits — genuinely
-       * transparent there instead of a solid color standing in for one. */}
+       * crowding right up against the cart button/notch between them. No
+       * background of its own — the layer above provides it (with the
+       * notch already cut out), so this is just the tab content. */}
       <nav
-        className="relative grid grid-cols-5 bg-[#0f3d2e]"
-        style={{
-          paddingBottom: "env(safe-area-inset-bottom)",
-          maskImage: "radial-gradient(circle at 50% -8px, transparent 38px, black 48px)",
-          WebkitMaskImage: "radial-gradient(circle at 50% -8px, transparent 38px, black 48px)",
-        }}
+        className="relative grid grid-cols-5"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
           <HomeIcon className="h-6 w-6" />
