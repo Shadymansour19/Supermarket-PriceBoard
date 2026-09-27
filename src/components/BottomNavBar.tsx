@@ -24,16 +24,19 @@ export function BottomNavBar() {
 
   const linkClass = (active: boolean) =>
     `font-label relative flex flex-col items-center gap-0.5 py-2 text-xs ${
-      active ? "text-emerald-700" : "text-neutral-500"
+      active ? "text-white" : "text-emerald-200/70"
     }`;
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-30 md:hidden">
       {/* Five columns, not four — the middle one is deliberately empty, so
        * Categories/Favorites sit further out from center instead of
-       * crowding right up against the cart button/notch between them. */}
+       * crowding right up against the cart button/notch between them. A
+       * solid dark-green bar (the same brand color as the hero banner and
+       * the PWA's theme-color) instead of near-white, so it reads clearly
+       * as its own distinct element rather than blending into the page. */}
       <nav
-        className="relative grid grid-cols-5 border-t border-neutral-200 bg-emerald-50"
+        className="relative grid grid-cols-5 bg-[#0f3d2e]"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <Link to="/" aria-current={homeActive} className={linkClass(homeActive)}>
