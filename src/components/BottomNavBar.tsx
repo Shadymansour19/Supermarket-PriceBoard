@@ -43,7 +43,7 @@ export function BottomNavBar() {
       <div
         aria-hidden="true"
         className="absolute top-0 left-1/2 h-32 w-[800px] -translate-x-1/2 bg-[#0f3d2e]"
-        style={{ clipPath: "path('M0 0 L315 0 C355 0 360 34 400 34 C440 34 445 0 485 0 L800 0 L800 130 L0 130 Z')" }}
+        style={{ clipPath: "path('M0 0 L345 0 C365 0 368 34 400 34 C432 34 435 0 455 0 L800 0 L800 130 L0 130 Z')" }}
       />
 
       {/* Five columns, not four — the middle one is deliberately empty, so
