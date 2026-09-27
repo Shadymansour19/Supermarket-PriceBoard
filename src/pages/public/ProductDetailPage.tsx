@@ -78,12 +78,11 @@ export function ProductDetailPage() {
         {t("product.backToCatalog")}
       </Link>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-        {/* A full aspect-square image at mobile's single-column width pushes
-         * the buttons below it (add-to-cart, ask/share) low enough to land
-         * behind the fixed bottom nav/cart button on shorter phones — capped
-         * shorter here, back to a full square from `sm:` up where the
-         * two-column layout means it's no longer stacked above that content. */}
-        <div ref={imageContainerRef} className="h-64 w-full overflow-hidden rounded-xl bg-neutral-100 sm:aspect-square sm:h-auto">
+        {/* Square, matching the admin upload/capture crop exactly — the
+         * add-to-cart row is sticky-clamped near the bottom independently
+         * of this, so a taller image no longer risks landing it behind
+         * the fixed bottom nav/cart button on shorter phones. */}
+        <div ref={imageContainerRef} className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
           {imageUrl ? (
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
           ) : (
