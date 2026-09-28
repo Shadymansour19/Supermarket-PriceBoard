@@ -117,20 +117,44 @@ textarea {
   }
 }
 
-/* A warm glowing halo around a "hot deal" product card — a pulsing
-   box-shadow rather than an actual flame graphic, so it reads as an aura
-   around the whole card without needing extra assets. */
+/* Soft ambient warmth cast by the flame emoji ring (below) around a "hot
+   deal" product card — kept gentle since the actual "fire" read now comes
+   from the flickering flames themselves, not this glow. */
 @keyframes card-fire-glow {
   0%,
   100% {
     box-shadow:
-      0 0 0 2px rgba(249, 115, 22, 0.4),
-      0 0 14px 2px rgba(239, 68, 68, 0.3);
+      0 0 0 1px rgba(249, 115, 22, 0.3),
+      0 0 10px 1px rgba(239, 68, 68, 0.2);
   }
   50% {
     box-shadow:
-      0 0 0 2px rgba(249, 115, 22, 0.7),
-      0 0 26px 6px rgba(239, 68, 68, 0.5);
+      0 0 0 1px rgba(249, 115, 22, 0.5),
+      0 0 16px 3px rgba(239, 68, 68, 0.32);
+  }
+}
+
+/* Each flame emoji around a hot-deal card's border flickers on its own
+   (staggered via each instance's own `animation-delay`) — scale + a small
+   side-to-side rotation + opacity dip, so the ring reads as a handful of
+   independently-licking flames instead of one thing pulsing in sync. */
+@keyframes flame-flicker {
+  0%,
+  100% {
+    transform: scale(1) rotate(-4deg);
+    opacity: 0.85;
+  }
+  25% {
+    transform: scale(1.18) rotate(3deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.92) rotate(-3deg);
+    opacity: 0.8;
+  }
+  75% {
+    transform: scale(1.12) rotate(4deg);
+    opacity: 1;
   }
 }
 
@@ -162,6 +186,10 @@ textarea {
   animation: card-fire-glow 2s ease-in-out infinite;
 }
 
+.flame-flicker {
+  animation: flame-flicker 1.1s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-in,
   .hero-float,
@@ -169,7 +197,8 @@ textarea {
   .hero-gradient-shift,
   .hero-shimmer,
   .hero-badge-pulse,
-  .card-fire-glow {
+  .card-fire-glow,
+  .flame-flicker {
     animation: none;
   }
 }

@@ -14,6 +14,20 @@ import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/da
  * discounted card in a full grid pulsing at once. */
 const HOT_DEAL_THRESHOLD = 20;
 
+/** Six flames spaced around the card's edge — corners plus top/bottom
+ * mid-points — each with its own negative animation-delay so they start
+ * mid-flicker and out of sync with each other instead of all igniting
+ * together. Positions use logical start/end (not left/right), so the
+ * ring is correct in RTL too. */
+const FLAME_POSITIONS: { className: string; delay: string }[] = [
+  { className: "-top-2.5 start-2", delay: "0s" },
+  { className: "-top-3 start-1/2 -translate-x-1/2", delay: "-0.35s" },
+  { className: "-top-2.5 end-2", delay: "-0.7s" },
+  { className: "-bottom-2.5 start-2", delay: "-0.15s" },
+  { className: "-bottom-3 start-1/2 -translate-x-1/2", delay: "-0.5s" },
+  { className: "-bottom-2.5 end-2", delay: "-0.85s" },
+];
+
 export function ProductCard({
   product,
   limitedTimeDiscount,
@@ -41,10 +55,27 @@ export function ProductCard({
   return (
     <Link
       to={`/product/${product.id}`}
-      className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white transition hover:shadow-md ${
+      className={`group relative flex flex-col rounded-xl border bg-white transition hover:shadow-md ${
         isHotDeal ? "card-fire-glow border-orange-300" : "border-neutral-200"
       }`}
     >
+      {/* A ring of small flame emoji, each flickering on its own
+       * staggered timer — deliberately positioned to poke slightly
+       * outside the card's own edge (this is why `overflow-hidden` moved
+       * from this outer element down to just the image below), so it
+       * reads as actual licking flames around the card rather than a
+       * flat glowing border. */}
+      {isHotDeal &&
+        FLAME_POSITIONS.map(({ className: posClass, delay }, index) => (
+          <span
+            key={index}
+            aria-hidden="true"
+            className={`flame-flicker pointer-events-none absolute z-10 text-base ${posClass}`}
+            style={{ animationDelay: delay }}
+          >
+            🔥
+          </span>
+        ))}
       {(limitedTimeDiscount || cheapestTier) && (
         <span
           className={`font-label absolute start-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white ${
@@ -59,7 +90,7 @@ export function ProductCard({
         stopNavigation
         className="absolute end-2 top-2 z-10 h-8 w-8 bg-white/90 shadow-sm hover:bg-white"
       />
-      <div className="aspect-square w-full bg-neutral-100">
+      <div className="aspect-square w-full overflow-hidden rounded-t-xl bg-neutral-100">
         {imageUrl ? (
           <img
             src={imageUrl}
