@@ -80,41 +80,18 @@ export function ProductCard({
              * lands on the correct (non-colliding) corner next to the
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
-              <span className="relative z-10 h-7 w-7 shrink-0">
-                <img src="/hot-badge.svg" alt="" className="h-full w-full drop-shadow" />
-                {/* A fanned trio (not one centered flame) — closer to the
-                 * reference badge, where several tall tongues erupt from
-                 * the ball's top-right corner and lean down into the pill,
-                 * instead of one flame sitting centered above the ball. */}
-                <img
-                  src="/flame.svg"
-                  alt=""
-                  aria-hidden="true"
-                  className="flame-flicker absolute h-3.5 w-3"
-                  style={{ top: -6, left: 8, transform: "rotate(-20deg)", animationDelay: "0.1s" }}
-                />
-                <img
-                  src="/flame.svg"
-                  alt=""
-                  aria-hidden="true"
-                  className="flame-flicker absolute h-5 w-4"
-                  style={{ top: -11, left: 14, transform: "rotate(4deg)", animationDelay: "0.3s" }}
-                />
-                <img
-                  src="/flame.svg"
-                  alt=""
-                  aria-hidden="true"
-                  className="flame-flicker absolute h-4 w-3.5"
-                  style={{ top: -6, left: 21, transform: "rotate(28deg)", animationDelay: "0.2s" }}
-                />
-              </span>
-              <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-yellow-300 shadow-md">
+              {/* One merged image — the ball, "HOT", and its flame are all
+               * baked into hot-badge.svg itself (rather than layering the
+               * flame separately on top), so there's exactly one asset
+               * whose internal layout can never drift apart. */}
+              <img src="/hot-badge.svg" alt="" className="relative z-10 h-11 w-[3.35rem] shrink-0 drop-shadow" />
+              <span className="font-label -ml-4 rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-5 pr-3 text-sm font-bold text-yellow-300 shadow-md">
                 -{percentOff}%
               </span>
             </div>
           </div>
         ) : (
-          <span className="font-label absolute start-2 top-2 z-30 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
+          <span className="font-label absolute start-2 top-2 z-30 rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
             -{percentOff}%
           </span>
         ))}
