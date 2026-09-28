@@ -8,25 +8,11 @@ import { productImageUrl } from "../lib/supabase";
 import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
 
-/** From this percent off up, a deal is "hot" enough to earn the flame +
- * pulse treatment — below it, the gradient badge alone is enough. Keeps
- * the animation meaningful (a genuinely standout deal) instead of every
- * discounted card in a full grid pulsing at once. */
+/** From this percent off up, a deal is "hot" enough to earn the
+ * flame-badge + glow treatment — below it, the plain gradient badge alone
+ * is enough. Keeps it meaningful (a genuinely standout deal) instead of
+ * every discounted card in a full grid getting the same treatment. */
 const HOT_DEAL_THRESHOLD = 20;
-
-/** Six flames spaced around the card's edge — corners plus top/bottom
- * mid-points — each with its own negative animation-delay so they start
- * mid-flicker and out of sync with each other instead of all igniting
- * together. Positions use logical start/end (not left/right), so the
- * ring is correct in RTL too. */
-const FLAME_POSITIONS: { className: string; delay: string }[] = [
-  { className: "-top-2.5 start-2", delay: "0s" },
-  { className: "-top-3 start-1/2 -translate-x-1/2", delay: "-0.35s" },
-  { className: "-top-2.5 end-2", delay: "-0.7s" },
-  { className: "-bottom-2.5 start-2", delay: "-0.15s" },
-  { className: "-bottom-3 start-1/2 -translate-x-1/2", delay: "-0.5s" },
-  { className: "-bottom-2.5 end-2", delay: "-0.85s" },
-];
 
 export function ProductCard({
   product,
@@ -59,32 +45,32 @@ export function ProductCard({
         isHotDeal ? "card-fire-glow border-orange-300" : "border-neutral-200"
       }`}
     >
-      {/* A ring of small flame emoji, each flickering on its own
-       * staggered timer — deliberately positioned to poke slightly
-       * outside the card's own edge (this is why `overflow-hidden` moved
-       * from this outer element down to just the image below), so it
-       * reads as actual licking flames around the card rather than a
-       * flat glowing border. */}
-      {isHotDeal &&
-        FLAME_POSITIONS.map(({ className: posClass, delay }, index) => (
-          <span
-            key={index}
-            aria-hidden="true"
-            className={`flame-flicker pointer-events-none absolute z-10 text-base ${posClass}`}
-            style={{ animationDelay: delay }}
-          >
-            🔥
+      {(limitedTimeDiscount || cheapestTier) &&
+        (isHotDeal ? (
+          // "Comet" badge — a HOT bubble with a single flickering flame
+          // trailing off it, overlapping into the percentage pill —
+          // replaces the plain badge for deals that clear the hot-deal
+          // threshold, instead of stacking a separate flame ring around
+          // the whole card.
+          <div className="absolute start-2 top-2 z-10 flex items-center">
+            <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-500 shadow-md">
+              <span className="font-label text-[9px] font-extrabold leading-none text-red-600">HOT</span>
+              <span
+                aria-hidden="true"
+                className="flame-flicker absolute -top-2.5 start-1/2 -translate-x-1/2 text-base"
+              >
+                🔥
+              </span>
+            </span>
+            <span className="font-label -ms-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 ps-4 pe-2.5 text-xs font-bold text-white shadow-md">
+              -{percentOff}%
+            </span>
+          </div>
+        ) : (
+          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
+            -{percentOff}%
           </span>
         ))}
-      {(limitedTimeDiscount || cheapestTier) && (
-        <span
-          className={`font-label absolute start-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white ${
-            isHotDeal ? "hero-badge-pulse" : ""
-          }`}
-        >
-          {isHotDeal && <span aria-hidden="true">🔥</span>}-{percentOff}%
-        </span>
-      )}
       <FavoriteButton
         productId={product.id}
         stopNavigation
