@@ -64,6 +64,7 @@ const resources = {
         reorder: "Reorder",
         clearHistory: "Clear history",
         confirmClearHistory: "Clear your order history?",
+        confirmReorderDiscard: "This will replace what's currently in your cart. Continue?",
       },
       notifications: {
         navLabel: "Notifications",
@@ -280,6 +281,7 @@ const resources = {
         reorder: "إعادة الطلب",
         clearHistory: "مسح السجل",
         confirmClearHistory: "هل تريد مسح سجل الطلبات؟",
+        confirmReorderDiscard: "ده هيستبدل اللي موجود في السلة دلوقتي. تكمل؟",
       },
       notifications: {
         navLabel: "الإشعارات",

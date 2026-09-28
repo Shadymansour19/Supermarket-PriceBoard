@@ -8,7 +8,7 @@ import { clearOrderHistory, getOrderHistory, type OrderHistoryEntry } from "../.
 
 export function OrderHistoryPage() {
   const { t, i18n } = useTranslation();
-  const { addToCart } = useCart();
+  const { items, addToCart, clearCart } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderHistoryEntry[]>([]);
 
@@ -22,10 +22,14 @@ export function OrderHistoryPage() {
     setOrders([]);
   }
 
-  /** Puts this past order's items back in the cart and goes there — not a
-   * one-tap resend, since the customer might want to adjust quantities or
-   * add a few more things before actually sending it via WhatsApp again. */
+  /** Replaces whatever's currently in the cart with this past order's
+   * items and goes there — not a one-tap resend, since the customer might
+   * want to adjust quantities or add a few more things before actually
+   * sending it via WhatsApp again. Confirms first if that would actually
+   * discard something, since it's a destructive replace, not a merge. */
   function handleReorder(order: OrderHistoryEntry) {
+    if (items.length > 0 && !confirm(t("orderHistory.confirmReorderDiscard"))) return;
+    clearCart();
     for (const item of order.items) addToCart(item.productId, item.quantity);
     navigate("/cart");
   }
