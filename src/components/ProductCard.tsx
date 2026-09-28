@@ -46,21 +46,33 @@ export function ProductCard({
       }`}
     >
       {isHotDeal && (
-        // One self-contained image (baked-in flames + glowing outline,
-        // with its own internal flicker animation) instead of many
-        // separately-positioned flame icons — sized/positioned via
-        // percentages so its built-in "window" lines up with the card's
-        // own box exactly, whatever the card's actual pixel size. z-20 is
-        // above every other card's own z-10 badge/favorite button, so a
-        // flame poking into a neighboring card's territory — above it in
-        // the grid, or to its side — always paints on top of that card's
-        // opaque white background instead of disappearing behind it.
+        // One self-contained image (baked-in flame, with its own internal
+        // flicker animation) — sized off the card's WIDTH only (`height:
+        // auto` lets the SVG's own aspect ratio drive it), never its
+        // height. Cards vary a lot in height (a wrapped product name, an
+        // out-of-stock badge, a tier line) but the flame is meant to be a
+        // fixed-proportion "cap" near the top regardless, not something
+        // stretched to fit whatever height a given card happens to be —
+        // stretching it to match height was distorting the flame shapes
+        // on any card that wasn't exactly the one size this was tuned
+        // against. `margin-top` as a negative percentage relies on a real
+        // (if easily-forgotten) CSS rule: percentages on vertical margins
+        // resolve against the *width* of the containing block, not its
+        // height — which is exactly the width-relative offset this needs.
+        // The glowing border line itself is the card's own `border-2` +
+        // `card-fire-glow` below, which already adapts to any height on
+        // its own, so it's no longer duplicated inside this image. z-20
+        // is above every other card's own z-10 badge/favorite button, so
+        // a flame poking into a neighboring card's territory — above it
+        // in the grid, or to its side — always paints on top of that
+        // card's opaque white background instead of disappearing behind
+        // it.
         <img
           src="/fire-frame.svg"
           alt=""
           aria-hidden="true"
           className="pointer-events-none absolute z-20"
-          style={{ left: "-6.667%", top: "-25.714%", width: "113.333%", height: "131.429%" }}
+          style={{ left: "-7.333%", top: 0, width: "114.667%", height: "auto", marginTop: "-16%" }}
         />
       )}
       {(limitedTimeDiscount || cheapestTier) &&
@@ -82,7 +94,13 @@ export function ProductCard({
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
               <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0" />
-              <span className="font-label -ml-11 rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-14 pr-3 text-sm font-bold text-yellow-300 shadow-md">
+              {/* The ball inside hot-badge.png sits well below the
+               * image's own vertical center (the flame reaches much
+               * higher above it than the ball extends below it) — flex
+               * `items-center` alone aligns the pill to the image's
+               * midpoint, not the ball, so it's nudged down to the ball's
+               * actual center (measured at ~65% of the image's height). */}
+              <span className="font-label -ml-11 translate-y-[8px] rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-14 pr-3 text-sm font-bold text-yellow-300 shadow-md">
                 -{percentOff}%
               </span>
             </div>
