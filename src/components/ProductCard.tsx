@@ -71,7 +71,12 @@ export function ProductCard({
           src="/fire-frame.svg"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute z-20"
+          // Tailwind's preflight sets a blanket `img { max-width: 100% }`
+          // (to stop normal content images overflowing their container) —
+          // it was silently capping this at 100% of the card's width
+          // instead of the intended 114.667%, undoing the whole
+          // width-relative sizing below and clipping off the side bulges.
+          className="pointer-events-none absolute z-20 max-w-none"
           style={{ left: "-7.333%", top: 0, width: "114.667%", height: "auto", marginTop: "-16%" }}
         />
       )}
@@ -93,7 +98,7 @@ export function ProductCard({
              * lands on the correct (non-colliding) corner next to the
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
-              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0" />
+              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0 translate-x-[10px]" />
               {/* The ball inside hot-badge.png sits well below the
                * image's own vertical center (the flame reaches much
                * higher above it than the ball extends below it) — flex
