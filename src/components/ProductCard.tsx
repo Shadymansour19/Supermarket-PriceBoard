@@ -82,8 +82,10 @@ export function ProductCard({
                 transform: `translateX(-50%) rotate(${f.rotate}deg)`,
               }}
             >
-              <span
-                className="card-flame-shape flame-flicker block h-full w-full"
+              <img
+                src="/flame.svg"
+                alt=""
+                className="flame-flicker block h-full w-full"
                 style={{ animationDelay: `${f.delay}s` }}
               />
             </span>
@@ -107,14 +109,14 @@ export function ProductCard({
              * lands on the correct (non-colliding) corner next to the
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
-              <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-500 shadow-md">
-                <span className="font-label text-[9px] font-extrabold leading-none text-red-600">HOT</span>
-                <span
+              <span className="relative z-10 h-7 w-7 shrink-0">
+                <img src="/hot-badge.svg" alt="" className="h-full w-full drop-shadow" />
+                <img
+                  src="/flame.svg"
+                  alt=""
                   aria-hidden="true"
-                  className="flame-flicker absolute -top-2.5 left-1/2 -translate-x-1/2 text-base"
-                >
-                  🔥
-                </span>
+                  className="flame-flicker absolute -top-2.5 left-1/2 h-4 w-3.5 -translate-x-1/2"
+                />
               </span>
               <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-white shadow-md">
                 -{percentOff}%
