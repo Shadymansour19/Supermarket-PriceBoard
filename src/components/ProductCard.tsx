@@ -65,11 +65,12 @@ export function ProductCard({
       )}
       {(limitedTimeDiscount || cheapestTier) &&
         (isHotDeal ? (
-          // "Comet" badge — a HOT bubble with a single flickering flame
-          // trailing off it, overlapping into the percentage pill —
-          // replaces the plain badge for deals that clear the hot-deal
-          // threshold, instead of stacking a separate flame ring around
-          // the whole card.
+          // "Comet" badge — a HOT bubble with a flame trailing off it,
+          // overlapping into the percentage pill. hot-badge.png is the
+          // reference "HOT" ball+flame image supplied by the user, used
+          // untouched (no recoloring, no re-cutting its transparency) —
+          // the pill is a plain CSS element behind/under it since the
+          // source image has no pill of its own to reuse.
           <div className="absolute start-2 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
@@ -80,12 +81,8 @@ export function ProductCard({
              * lands on the correct (non-colliding) corner next to the
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
-              {/* One merged image — the ball, "HOT", and its flame are all
-               * baked into hot-badge.svg itself (rather than layering the
-               * flame separately on top), so there's exactly one asset
-               * whose internal layout can never drift apart. */}
-              <img src="/hot-badge.svg" alt="" className="relative z-10 h-11 w-[3.35rem] shrink-0 drop-shadow" />
-              <span className="font-label -ml-4 rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-5 pr-3 text-sm font-bold text-yellow-300 shadow-md">
+              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0" />
+              <span className="font-label -ml-11 rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-14 pr-3 text-sm font-bold text-yellow-300 shadow-md">
                 -{percentOff}%
               </span>
             </div>
