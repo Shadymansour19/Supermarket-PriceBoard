@@ -54,6 +54,15 @@ const resources = {
         whatsappIntro: "Hi, I'd like to order:",
         whatsappLine: "{{name}} x{{quantity}} — {{subtotal}}",
         whatsappTotal: "Total: {{total}}",
+        orderHistory: "Order history",
+      },
+      orderHistory: {
+        title: "Your orders",
+        empty: "No orders yet.",
+        total: "Total",
+        resendWhatsapp: "Resend via WhatsApp",
+        clearHistory: "Clear history",
+        confirmClearHistory: "Clear your order history?",
       },
       notifications: {
         navLabel: "Notifications",
@@ -260,6 +269,15 @@ const resources = {
         whatsappIntro: "مرحبًا، حابب اطلب الآتي:",
         whatsappLine: "{{name}} × {{quantity}} — {{subtotal}}",
         whatsappTotal: "الإجمالي: {{total}}",
+        orderHistory: "سجل الطلبات",
+      },
+      orderHistory: {
+        title: "طلباتك",
+        empty: "لسه معملتش أي طلب.",
+        total: "الإجمالي",
+        resendWhatsapp: "إعادة الإرسال عبر واتساب",
+        clearHistory: "مسح السجل",
+        confirmClearHistory: "هل تريد مسح سجل الطلبات؟",
       },
       notifications: {
         navLabel: "الإشعارات",

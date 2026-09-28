@@ -7,6 +7,7 @@ import { useCart } from "../../context/CartContext";
 import { CONTACT } from "../../config";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
 import { formatPrice, localizedField } from "../../lib/localize";
+import { recordOrder } from "../../lib/orderHistory";
 import { fetchProductsByIds } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
@@ -97,17 +98,38 @@ export function CartPage() {
       "\n",
     );
     window.open(`https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noreferrer");
+
+    // WhatsApp gives no way to confirm the message was actually sent (the
+    // wa.me link just opens the app with it pre-filled) — recording the
+    // order here, right when they tap this button, is the closest signal
+    // to "placed an order" this app can ever get.
+    recordOrder(
+      rows.map((row) => ({
+        productId: row.product.id,
+        name: localizedField(row.product, "name", i18n.language),
+        quantity: row.quantity,
+        unitPrice: row.unitPrice,
+        subtotal: row.subtotal,
+      })),
+      total,
+    );
+    clearCart();
   }
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("cart.title")}</h1>
-        {rows.length > 0 && (
-          <button type="button" onClick={handleClear} className="text-sm font-medium text-red-600 hover:underline">
-            {t("cart.clearCart")}
-          </button>
-        )}
+        <div className="flex items-center gap-3">
+          <Link to="/orders" className="text-sm font-medium text-emerald-700 hover:underline">
+            {t("cart.orderHistory")}
+          </Link>
+          {rows.length > 0 && (
+            <button type="button" onClick={handleClear} className="text-sm font-medium text-red-600 hover:underline">
+              {t("cart.clearCart")}
+            </button>
+          )}
+        </div>
       </div>
 
       {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
