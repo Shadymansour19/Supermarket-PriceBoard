@@ -64,7 +64,10 @@ const resources = {
         reorder: "Reorder",
         clearHistory: "Clear history",
         confirmClearHistory: "Clear your order history?",
-        confirmReorderDiscard: "This will replace what's currently in your cart. Continue?",
+        reorderPromptTitle: "Reorder",
+        reorderPromptBody: "Your cart already has items — how would you like to add this order?",
+        addToExisting: "Add to existing cart",
+        startNewCart: "Start a new cart",
       },
       notifications: {
         navLabel: "Notifications",
@@ -281,7 +284,10 @@ const resources = {
         reorder: "إعادة الطلب",
         clearHistory: "مسح السجل",
         confirmClearHistory: "هل تريد مسح سجل الطلبات؟",
-        confirmReorderDiscard: "ده هيستبدل اللي موجود في السلة دلوقتي. تكمل؟",
+        reorderPromptTitle: "إعادة الطلب",
+        reorderPromptBody: "السلة فيها منتجات بالفعل — عايز تضيف الطلب ده إزاي؟",
+        addToExisting: "أضف للسلة الحالية",
+        startNewCart: "ابدأ سلة جديدة",
       },
       notifications: {
         navLabel: "الإشعارات",

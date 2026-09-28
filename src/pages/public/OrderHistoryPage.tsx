@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { CloseIcon } from "../../components/ContactIcons";
 import { CartIcon } from "../../components/Icons";
 import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../lib/localize";
@@ -11,6 +12,11 @@ export function OrderHistoryPage() {
   const { items, addToCart, clearCart } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderHistoryEntry[]>([]);
+  // Only set (opening the choice dialog below) when reordering would
+  // actually collide with something already in the cart — an empty cart
+  // has nothing to ask about, so that case just adds and goes straight
+  // to /cart.
+  const [reorderPrompt, setReorderPrompt] = useState<OrderHistoryEntry | null>(null);
 
   useEffect(() => {
     setOrders(getOrderHistory());
@@ -22,16 +28,30 @@ export function OrderHistoryPage() {
     setOrders([]);
   }
 
-  /** Replaces whatever's currently in the cart with this past order's
-   * items and goes there — not a one-tap resend, since the customer might
-   * want to adjust quantities or add a few more things before actually
-   * sending it via WhatsApp again. Confirms first if that would actually
-   * discard something, since it's a destructive replace, not a merge. */
-  function handleReorder(order: OrderHistoryEntry) {
-    if (items.length > 0 && !confirm(t("orderHistory.confirmReorderDiscard"))) return;
-    clearCart();
+  function addOrderItems(order: OrderHistoryEntry) {
     for (const item of order.items) addToCart(item.productId, item.quantity);
     navigate("/cart");
+  }
+
+  function handleReorder(order: OrderHistoryEntry) {
+    if (items.length === 0) {
+      addOrderItems(order);
+      return;
+    }
+    setReorderPrompt(order);
+  }
+
+  function handleReplaceCart() {
+    if (!reorderPrompt) return;
+    clearCart();
+    addOrderItems(reorderPrompt);
+    setReorderPrompt(null);
+  }
+
+  function handleAddToExisting() {
+    if (!reorderPrompt) return;
+    addOrderItems(reorderPrompt);
+    setReorderPrompt(null);
   }
 
   return (
@@ -82,6 +102,47 @@ export function OrderHistoryPage() {
             </li>
           ))}
         </ul>
+      )}
+
+      {reorderPrompt && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label={t("orderHistory.reorderPromptTitle")}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          onClick={() => setReorderPrompt(null)}
+        >
+          <div className="w-full max-w-sm space-y-3 rounded-xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h2 className="font-heading text-base font-bold text-neutral-900">{t("orderHistory.reorderPromptTitle")}</h2>
+              <button
+                type="button"
+                onClick={() => setReorderPrompt(null)}
+                aria-label={t("common.close")}
+                className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+              >
+                <CloseIcon className="h-5 w-5" />
+              </button>
+            </div>
+            <p className="text-sm text-neutral-600">{t("orderHistory.reorderPromptBody")}</p>
+            <div className="space-y-2">
+              <button
+                type="button"
+                onClick={handleAddToExisting}
+                className="font-label w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
+              >
+                {t("orderHistory.addToExisting")}
+              </button>
+              <button
+                type="button"
+                onClick={handleReplaceCart}
+                className="font-label w-full rounded-lg border border-neutral-300 px-4 py-2 text-sm font-semibold text-neutral-700 hover:bg-neutral-100"
+              >
+                {t("orderHistory.startNewCart")}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
