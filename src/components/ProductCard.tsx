@@ -41,7 +41,9 @@ export function ProductCard({
   return (
     <Link
       to={`/product/${product.id}`}
-      className="group relative flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:shadow-md"
+      className={`group relative flex flex-col overflow-hidden rounded-xl border bg-white transition hover:shadow-md ${
+        isHotDeal ? "card-fire-glow border-orange-300" : "border-neutral-200"
+      }`}
     >
       {(limitedTimeDiscount || cheapestTier) && (
         <span

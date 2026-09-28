@@ -117,6 +117,23 @@ textarea {
   }
 }
 
+/* A warm glowing halo around a "hot deal" product card — a pulsing
+   box-shadow rather than an actual flame graphic, so it reads as an aura
+   around the whole card without needing extra assets. */
+@keyframes card-fire-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 2px rgba(249, 115, 22, 0.4),
+      0 0 14px 2px rgba(239, 68, 68, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 2px rgba(249, 115, 22, 0.7),
+      0 0 26px 6px rgba(239, 68, 68, 0.5);
+  }
+}
+
 .hero-fade-in {
   animation: hero-fade-in 0.7s ease-out both;
 }
@@ -141,13 +158,18 @@ textarea {
   animation: hero-badge-pulse 2.4s ease-in-out infinite;
 }
 
+.card-fire-glow {
+  animation: card-fire-glow 2s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-fade-in,
   .hero-float,
   .hero-float-rotate,
   .hero-gradient-shift,
   .hero-shimmer,
-  .hero-badge-pulse {
+  .hero-badge-pulse,
+  .card-fire-glow {
     animation: none;
   }
 }
