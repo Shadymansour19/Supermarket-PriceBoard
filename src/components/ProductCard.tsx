@@ -12,7 +12,7 @@ import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/da
  * pulse treatment — below it, the gradient badge alone is enough. Keeps
  * the animation meaningful (a genuinely standout deal) instead of every
  * discounted card in a full grid pulsing at once. */
-const HOT_DEAL_THRESHOLD = 30;
+const HOT_DEAL_THRESHOLD = 20;
 
 export function ProductCard({
   product,
