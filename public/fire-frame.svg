@@ -2,19 +2,15 @@
   <defs>
     <linearGradient id="flameOuter" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#dc2626" />
-      <stop offset="35%" stop-color="#ea580c" />
-      <stop offset="70%" stop-color="#f59e0b" />
+      <stop offset="30%" stop-color="#ea580c" />
+      <stop offset="65%" stop-color="#f59e0b" />
       <stop offset="100%" stop-color="#fde047" />
     </linearGradient>
     <linearGradient id="flameInner" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f97316" />
-      <stop offset="55%" stop-color="#fde047" />
+      <stop offset="50%" stop-color="#fde047" />
       <stop offset="100%" stop-color="#fffbeb" />
     </linearGradient>
-    <symbol id="f" viewBox="0 0 64 88">
-      <path d="M32 2 C26 10 30 18 24 24 C14 30 6 40 8 54 C10 70 20 82 32 86 C44 82 54 70 56 54 C58 40 50 30 40 24 C34 18 38 10 32 2 Z" fill="url(#flameOuter)" />
-      <path d="M32 40 C26 48 22 56 23 66 C24 76 28 82 32 84 C36 82 40 76 41 66 C42 56 38 48 32 40 Z" fill="url(#flameInner)" />
-    </symbol>
     <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
       <feGaussianBlur stdDeviation="5" result="blur" />
       <feMerge>
@@ -23,17 +19,20 @@
         <feMergeNode in="SourceGraphic" />
       </feMerge>
     </filter>
+    <filter id="flameBlur" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="1.4" />
+    </filter>
     <style>
       @keyframes flk {
-        0%, 100% { transform: scale(1) rotate(-3deg); opacity: 0.85; }
-        25% { transform: scale(1.15) rotate(3deg); opacity: 1; }
-        50% { transform: scale(0.92) rotate(-3deg); opacity: 0.8; }
-        75% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+        0%, 100% { transform: scaleY(1) translateY(0); opacity: 0.92; }
+        25% { transform: scaleY(1.035) translateY(-3px); opacity: 1; }
+        50% { transform: scaleY(0.975) translateY(1px); opacity: 0.88; }
+        75% { transform: scaleY(1.02) translateY(-2px); opacity: 1; }
       }
       .flk {
-        animation: flk 1.1s ease-in-out infinite;
+        animation: flk 1.6s ease-in-out infinite;
         transform-box: fill-box;
-        transform-origin: center;
+        transform-origin: 50% 100%;
       }
       @media (prefers-reduced-motion: reduce) {
         .flk { animation: none; }
@@ -41,9 +40,7 @@
     </style>
   </defs>
 
-  <!-- The glowing rounded-rect frame outline — a card's own border sits
-       right behind this in the app, so this line is drawn a hair outside
-       it purely for the ambient bloom, not to replace the card's border. -->
+  <!-- The glowing rounded-rect frame outline the fire is fused onto. -->
   <rect
     x="20"
     y="90"
@@ -57,99 +54,10 @@
     filter="url(#glow)"
   />
 
-  <g transform="translate(26 72) rotate(-18 0 17.9)">
-    <g class="flk" style="animation-delay:0.1s">
-      <use href="#f" x="-13" y="0" width="26" height="35.8" />
-    </g>
-  </g>
-  <g transform="translate(53 60) rotate(-9 0 22.0)">
-    <g class="flk" style="animation-delay:0.4s">
-      <use href="#f" x="-16" y="0" width="32" height="44" />
-    </g>
-  </g>
-  <g transform="translate(83 50) rotate(-3 0 24.8)">
-    <g class="flk" style="animation-delay:0s">
-      <use href="#f" x="-18" y="0" width="36" height="49.5" />
-    </g>
-  </g>
-  <g transform="translate(113 56) rotate(-6 0 22.0)">
-    <g class="flk" style="animation-delay:0.25s">
-      <use href="#f" x="-16" y="0" width="32" height="44" />
-    </g>
-  </g>
-  <g transform="translate(143 46) rotate(2 0 26.1)">
-    <g class="flk" style="animation-delay:0.15s">
-      <use href="#f" x="-19" y="0" width="38" height="52.3" />
-    </g>
-  </g>
-  <g transform="translate(170 42) rotate(0 0 27.5)">
-    <g class="flk" style="animation-delay:0.2s">
-      <use href="#f" x="-20" y="0" width="40" height="55" />
-    </g>
-  </g>
-  <g transform="translate(197 46) rotate(-2 0 26.1)">
-    <g class="flk" style="animation-delay:0.35s">
-      <use href="#f" x="-19" y="0" width="38" height="52.3" />
-    </g>
-  </g>
-  <g transform="translate(226.99999999999997 56) rotate(6 0 22.0)">
-    <g class="flk" style="animation-delay:0.05s">
-      <use href="#f" x="-16" y="0" width="32" height="44" />
-    </g>
-  </g>
-  <g transform="translate(257 50) rotate(3 0 24.8)">
-    <g class="flk" style="animation-delay:0.3s">
-      <use href="#f" x="-18" y="0" width="36" height="49.5" />
-    </g>
-  </g>
-  <g transform="translate(287 60) rotate(9 0 22.0)">
-    <g class="flk" style="animation-delay:0.45s">
-      <use href="#f" x="-16" y="0" width="32" height="44" />
-    </g>
-  </g>
-  <g transform="translate(314 72) rotate(18 0 17.9)">
-    <g class="flk" style="animation-delay:0.2s">
-      <use href="#f" x="-13" y="0" width="26" height="35.8" />
-    </g>
-  </g>
-  <g transform="translate(20 86) rotate(-24 0 15.2)">
-    <g class="flk" style="animation-delay:0.5s">
-      <use href="#f" x="-11" y="0" width="22" height="30.3" />
-    </g>
-  </g>
-  <g transform="translate(320 86) rotate(24 0 15.2)">
-    <g class="flk" style="animation-delay:0.1s">
-      <use href="#f" x="-11" y="0" width="22" height="30.3" />
-    </g>
-  </g>
-  <g transform="translate(20 110) rotate(-28 0 12.4)">
-    <g class="flk" style="animation-delay:0.55s">
-      <use href="#f" x="-9" y="0" width="18" height="24.8" />
-    </g>
-  </g>
-  <g transform="translate(320 110) rotate(28 0 12.4)">
-    <g class="flk" style="animation-delay:0.15s">
-      <use href="#f" x="-9" y="0" width="18" height="24.8" />
-    </g>
-  </g>
-  <g transform="translate(20 134) rotate(-32 0 10.3)">
-    <g class="flk" style="animation-delay:0.3s">
-      <use href="#f" x="-7.5" y="0" width="15" height="20.6" />
-    </g>
-  </g>
-  <g transform="translate(320 134) rotate(32 0 10.3)">
-    <g class="flk" style="animation-delay:0.4s">
-      <use href="#f" x="-7.5" y="0" width="15" height="20.6" />
-    </g>
-  </g>
-  <g transform="translate(20 158) rotate(-34 0 8.3)">
-    <g class="flk" style="animation-delay:0.1s">
-      <use href="#f" x="-6" y="0" width="12" height="16.5" />
-    </g>
-  </g>
-  <g transform="translate(320 158) rotate(34 0 8.3)">
-    <g class="flk" style="animation-delay:0.25s">
-      <use href="#f" x="-6" y="0" width="12" height="16.5" />
-    </g>
+  <!-- One continuous flame mass (outer silhouette fused to a brighter
+       inner core), not repeated separate flame icons. -->
+  <g class="flk" filter="url(#flameBlur)">
+    <path d="M 20.0 300.0 Q 20.0 300.0 19.0 289.5 Q 18.0 279.0 15.0 268.5 Q 12.0 258.0 14.0 247.5 Q 16.0 237.0 12.0 226.5 Q 8.0 216.0 11.0 205.5 Q 14.0 195.0 9.0 184.5 Q 4.0 174.0 7.0 163.5 Q 10.0 153.0 4.0 142.5 Q -2.0 132.0 5.0 121.5 Q 12.0 111.0 7.0 100.5 Q 2.0 90.0 18.5 78.5 Q 35.0 67.0 42.5 72.0 Q 50.0 77.0 57.5 67.5 Q 65.0 58.0 72.5 65.5 Q 80.0 73.0 87.5 62.5 Q 95.0 52.0 102.5 60.5 Q 110.0 69.0 117.5 58.5 Q 125.0 48.0 132.5 56.5 Q 140.0 65.0 147.5 53.5 Q 155.0 42.0 162.5 51.5 Q 170.0 61.0 177.5 52.5 Q 185.0 44.0 192.5 55.5 Q 200.0 67.0 207.5 58.5 Q 215.0 50.0 222.5 60.5 Q 230.0 71.0 237.5 62.5 Q 245.0 54.0 252.5 64.5 Q 260.0 75.0 267.5 68.0 Q 275.0 61.0 282.5 70.0 Q 290.0 79.0 297.5 75.0 Q 305.0 71.0 321.5 80.5 Q 338.0 90.0 333.0 100.5 Q 328.0 111.0 335.0 121.5 Q 342.0 132.0 336.0 142.5 Q 330.0 153.0 333.0 163.5 Q 336.0 174.0 331.0 184.5 Q 326.0 195.0 329.0 205.5 Q 332.0 216.0 328.0 226.5 Q 324.0 237.0 326.0 247.5 Q 328.0 258.0 325.0 268.5 Q 322.0 279.0 321.0 289.5 Q 320.0 300.0 320.0 300.0 L 320.0 300.0 L 320 90 L 20 90 Z" fill="url(#flameOuter)" />
+    <path d="M 20.0 300.0 Q 20.0 300.0 19.4 289.5 Q 18.8 279.0 16.9 268.5 Q 15.0 258.0 16.3 247.5 Q 17.5 237.0 15.0 226.5 Q 12.6 216.0 14.4 205.5 Q 16.3 195.0 13.2 184.5 Q 10.1 174.0 11.9 163.5 Q 13.8 153.0 10.1 142.5 Q 6.4 132.0 10.7 121.5 Q 15.0 111.0 11.9 100.5 Q 8.8 90.0 21.9 82.9 Q 35.0 75.7 42.5 78.8 Q 50.0 81.9 57.5 76.0 Q 65.0 70.2 72.5 74.8 Q 80.0 79.5 87.5 73.0 Q 95.0 66.4 102.5 71.7 Q 110.0 77.0 117.5 70.5 Q 125.0 64.0 132.5 69.2 Q 140.0 74.5 147.5 67.4 Q 155.0 60.2 162.5 66.1 Q 170.0 72.0 177.5 66.8 Q 185.0 61.5 192.5 68.6 Q 200.0 75.7 207.5 70.5 Q 215.0 65.2 222.5 71.7 Q 230.0 78.2 237.5 73.0 Q 245.0 67.7 252.5 74.2 Q 260.0 80.7 267.5 76.4 Q 275.0 72.0 282.5 77.6 Q 290.0 83.2 297.5 80.7 Q 305.0 78.2 318.1 84.1 Q 331.2 90.0 328.1 100.5 Q 325.0 111.0 329.3 121.5 Q 333.6 132.0 329.9 142.5 Q 326.2 153.0 328.1 163.5 Q 329.9 174.0 326.8 184.5 Q 323.7 195.0 325.6 205.5 Q 327.4 216.0 325.0 226.5 Q 322.5 237.0 323.7 247.5 Q 325.0 258.0 323.1 268.5 Q 321.2 279.0 320.6 289.5 Q 320.0 300.0 320.0 300.0 L 320.0 300.0 L 320 90 L 20 90 Z" fill="url(#flameInner)" />
   </g>
 </svg>
