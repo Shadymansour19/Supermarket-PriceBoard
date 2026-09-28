@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { WhatsAppIcon } from "../../components/ContactIcons";
-import { CONTACT } from "../../config";
+import { useNavigate } from "react-router-dom";
+import { CartIcon } from "../../components/Icons";
+import { useCart } from "../../context/CartContext";
 import { formatPrice } from "../../lib/localize";
 import { clearOrderHistory, getOrderHistory, type OrderHistoryEntry } from "../../lib/orderHistory";
 
 export function OrderHistoryPage() {
   const { t, i18n } = useTranslation();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderHistoryEntry[]>([]);
 
   useEffect(() => {
@@ -19,20 +22,12 @@ export function OrderHistoryPage() {
     setOrders([]);
   }
 
-  function handleResend(order: OrderHistoryEntry) {
-    const lines = order.items.map((item) =>
-      t("cart.whatsappLine", {
-        name: item.name,
-        quantity: item.quantity,
-        subtotal: formatPrice(item.subtotal, i18n.language),
-      }),
-    );
-    const message = [
-      t("cart.whatsappIntro"),
-      ...lines,
-      t("cart.whatsappTotal", { total: formatPrice(order.total, i18n.language) }),
-    ].join("\n");
-    window.open(`https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noreferrer");
+  /** Puts this past order's items back in the cart and goes there — not a
+   * one-tap resend, since the customer might want to adjust quantities or
+   * add a few more things before actually sending it via WhatsApp again. */
+  function handleReorder(order: OrderHistoryEntry) {
+    for (const item of order.items) addToCart(item.productId, item.quantity);
+    navigate("/cart");
   }
 
   return (
@@ -74,11 +69,11 @@ export function OrderHistoryPage() {
 
               <button
                 type="button"
-                onClick={() => handleResend(order)}
+                onClick={() => handleReorder(order)}
                 className="font-label flex w-full items-center justify-center gap-2 rounded-lg border border-emerald-600 px-4 py-2 text-sm font-semibold text-emerald-700 hover:bg-emerald-50"
               >
-                <WhatsAppIcon className="h-4 w-4" />
-                {t("orderHistory.resendWhatsapp")}
+                <CartIcon className="h-4 w-4" />
+                {t("orderHistory.reorder")}
               </button>
             </li>
           ))}

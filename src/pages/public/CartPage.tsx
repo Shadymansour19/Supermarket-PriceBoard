@@ -5,6 +5,7 @@ import { CloseIcon, WhatsAppIcon } from "../../components/ContactIcons";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { useCart } from "../../context/CartContext";
 import { CONTACT } from "../../config";
+import { confirmAfterReturn } from "../../lib/confirmAfterReturn";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
 import { formatPrice, localizedField } from "../../lib/localize";
 import { recordOrder } from "../../lib/orderHistory";
@@ -99,21 +100,25 @@ export function CartPage() {
     );
     window.open(`https://wa.me/${CONTACT.whatsappNumber}?text=${encodeURIComponent(message)}`, "_blank", "noreferrer");
 
-    // WhatsApp gives no way to confirm the message was actually sent (the
-    // wa.me link just opens the app with it pre-filled) — recording the
-    // order here, right when they tap this button, is the closest signal
-    // to "placed an order" this app can ever get.
-    recordOrder(
-      rows.map((row) => ({
-        productId: row.product.id,
-        name: localizedField(row.product, "name", i18n.language),
-        quantity: row.quantity,
-        unitPrice: row.unitPrice,
-        subtotal: row.subtotal,
-      })),
-      total,
-    );
-    clearCart();
+    // Snapshotted now, at the moment of the click — `rows`/`total` belong
+    // to this render and shouldn't be re-read later from possibly-stale
+    // component state once the user actually comes back.
+    const orderItems = rows.map((row) => ({
+      productId: row.product.id,
+      name: localizedField(row.product, "name", i18n.language),
+      quantity: row.quantity,
+      unitPrice: row.unitPrice,
+      subtotal: row.subtotal,
+    }));
+    // Only recorded (and the cart only cleared) once they actually leave
+    // this tab and come back — a `wa.me` link gives no real confirmation
+    // that the message was sent, so this is the closest available signal,
+    // and clearing the cart immediately on click would risk wiping it out
+    // for someone who back out of sending after all.
+    confirmAfterReturn(() => {
+      recordOrder(orderItems, total);
+      clearCart();
+    });
   }
 
   return (

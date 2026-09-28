@@ -90,7 +90,7 @@ export function BottomNavBar() {
         aria-label={t("cart.navLabel")}
         data-cart-target
         className={`absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[58%] items-center justify-center rounded-full shadow-xl transition ${
-          cartActive ? "bg-white text-emerald-700" : "bg-emerald-600 text-white hover:bg-emerald-700"
+          cartActive ? "bg-emerald-800 text-white" : "bg-emerald-600 text-white hover:bg-emerald-700"
         }`}
       >
         <CartIcon className="h-7 w-7" filled={cartActive} />
