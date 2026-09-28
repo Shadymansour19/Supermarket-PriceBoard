@@ -1,22 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 80">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 88">
   <defs>
     <linearGradient id="flameOuter" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#ea580c" />
-      <stop offset="45%" stop-color="#f59e0b" />
+      <stop offset="0%" stop-color="#dc2626" />
+      <stop offset="35%" stop-color="#ea580c" />
+      <stop offset="70%" stop-color="#f59e0b" />
       <stop offset="100%" stop-color="#fde047" />
     </linearGradient>
     <linearGradient id="flameInner" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0%" stop-color="#f97316" />
-      <stop offset="60%" stop-color="#fde047" />
-      <stop offset="100%" stop-color="#fff7c2" />
+      <stop offset="55%" stop-color="#fde047" />
+      <stop offset="100%" stop-color="#fffbeb" />
     </linearGradient>
   </defs>
+  <!-- Outer tongue — a slightly irregular teardrop (small waist near the
+       tip on both sides) rather than a perfectly smooth silhouette, so a
+       row of these reads as flickering fire instead of stamped icons. -->
   <path
-    d="M32 4 C14 22 6 36 8 52 C10 68 20 78 32 78 C44 78 54 68 56 52 C58 36 50 22 32 4 Z"
+    d="M32 2 C26 10 30 18 24 24 C14 30 6 40 8 54 C10 70 20 82 32 86 C44 82 54 70 56 54 C58 40 50 30 40 24 C34 18 38 10 32 2 Z"
     fill="url(#flameOuter)"
   />
+  <!-- Inner core — brighter, smaller, same silhouette, sitting in the
+       lower two-thirds like the hot core of a real flame. -->
   <path
-    d="M32 34 C22 44 18 54 19 64 C20 74 26 78 32 78 C38 78 44 74 45 64 C46 54 42 44 32 34 Z"
+    d="M32 40 C26 48 22 56 23 66 C24 76 28 82 32 84 C36 82 40 76 41 66 C42 56 38 48 32 40 Z"
     fill="url(#flameInner)"
   />
 </svg>

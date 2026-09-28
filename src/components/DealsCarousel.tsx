@@ -168,7 +168,12 @@ export function DealsCarousel<T>({
       </div>
       <div
         ref={scrollerRef}
-        className="scrollbar-hide flex items-center gap-4 overflow-x-auto py-2"
+        // `overflow-x-auto` forces `overflow-y` to clip too (a scrolling
+        // value on one axis makes the other axis auto, per the CSS
+        // overflow spec) — a hot-deal card's fire frame pokes well above
+        // the card itself, so without this extra top padding it got cut
+        // off right at the scroller's own edge, under the section title.
+        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-11"
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}

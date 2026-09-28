@@ -117,20 +117,22 @@ textarea {
   }
 }
 
-/* Soft ambient warmth cast by the flame emoji ring (below) around a "hot
-   deal" product card — kept gentle since the actual "fire" read now comes
-   from the flickering flames themselves, not this glow. */
+/* A crisp glowing amber outline around a "hot deal" card's own border —
+   the reference frame image's continuous glowing line, not just a soft
+   diffuse shadow — plus a little extra outer bloom for warmth. The actual
+   "fire" read comes from the flame images layered on top of this, not
+   this glow alone. */
 @keyframes card-fire-glow {
   0%,
   100% {
     box-shadow:
-      0 0 0 1px rgba(245, 158, 11, 0.45),
-      0 0 10px 1px rgba(251, 191, 36, 0.25);
+      0 0 4px 1px rgba(251, 191, 36, 0.8),
+      0 0 14px 2px rgba(245, 158, 11, 0.35);
   }
   50% {
     box-shadow:
-      0 0 0 1px rgba(245, 158, 11, 0.7),
-      0 0 16px 3px rgba(251, 191, 36, 0.4);
+      0 0 7px 2px rgba(251, 191, 36, 1),
+      0 0 20px 4px rgba(245, 158, 11, 0.5);
   }
 }
 

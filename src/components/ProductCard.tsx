@@ -22,23 +22,25 @@ const HOT_DEAL_THRESHOLD = 20;
  * negative = poking above it); `rotate` leans the side flames outward;
  * `delay` staggers each one's flicker so they don't pulse in sync. */
 const HOT_CARD_FLAMES = [
-  { left: 4, top: -16, size: 24, rotate: -16, delay: 0.1 },
-  { left: 14, top: -28, size: 30, rotate: -7, delay: 0.4 },
-  { left: 25, top: -38, size: 34, rotate: 4, delay: 0 },
-  { left: 36, top: -32, size: 30, rotate: -5, delay: 0.25 },
-  { left: 50, top: -42, size: 38, rotate: 0, delay: 0.15 },
-  { left: 64, top: -32, size: 30, rotate: 5, delay: 0.35 },
-  { left: 75, top: -38, size: 34, rotate: -4, delay: 0.05 },
-  { left: 86, top: -28, size: 30, rotate: 7, delay: 0.3 },
-  { left: 96, top: -16, size: 24, rotate: 16, delay: 0.2 },
-  { left: 0, top: -2, size: 20, rotate: -22, delay: 0.45 },
-  { left: 100, top: -2, size: 20, rotate: 22, delay: 0.5 },
-  { left: 0, top: 24, size: 17, rotate: -28, delay: 0.55 },
-  { left: 100, top: 24, size: 17, rotate: 28, delay: 0.15 },
-  { left: 0, top: 50, size: 14, rotate: -32, delay: 0.3 },
-  { left: 100, top: 50, size: 14, rotate: 32, delay: 0.45 },
-  { left: 0, top: 76, size: 11, rotate: -34, delay: 0.1 },
-  { left: 100, top: 76, size: 11, rotate: 34, delay: 0.25 },
+  { left: 2, top: -18, size: 26, rotate: -18, delay: 0.1 },
+  { left: 11, top: -30, size: 32, rotate: -9, delay: 0.4 },
+  { left: 21, top: -40, size: 36, rotate: -3, delay: 0 },
+  { left: 31, top: -34, size: 32, rotate: -6, delay: 0.25 },
+  { left: 41, top: -44, size: 38, rotate: 2, delay: 0.15 },
+  { left: 50, top: -48, size: 40, rotate: 0, delay: 0.2 },
+  { left: 59, top: -44, size: 38, rotate: -2, delay: 0.35 },
+  { left: 69, top: -34, size: 32, rotate: 6, delay: 0.05 },
+  { left: 79, top: -40, size: 36, rotate: 3, delay: 0.3 },
+  { left: 89, top: -30, size: 32, rotate: 9, delay: 0.45 },
+  { left: 98, top: -18, size: 26, rotate: 18, delay: 0.2 },
+  { left: 0, top: -4, size: 22, rotate: -24, delay: 0.5 },
+  { left: 100, top: -4, size: 22, rotate: 24, delay: 0.1 },
+  { left: 0, top: 20, size: 18, rotate: -28, delay: 0.55 },
+  { left: 100, top: 20, size: 18, rotate: 28, delay: 0.15 },
+  { left: 0, top: 44, size: 15, rotate: -32, delay: 0.3 },
+  { left: 100, top: 44, size: 15, rotate: 32, delay: 0.4 },
+  { left: 0, top: 68, size: 12, rotate: -34, delay: 0.1 },
+  { left: 100, top: 68, size: 12, rotate: 34, delay: 0.25 },
 ];
 
 export function ProductCard({
@@ -68,8 +70,8 @@ export function ProductCard({
   return (
     <Link
       to={`/product/${product.id}`}
-      className={`group relative flex flex-col rounded-xl border bg-white transition hover:shadow-md ${
-        isHotDeal ? "card-fire-glow border-amber-400" : "border-neutral-200"
+      className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
+        isHotDeal ? "card-fire-glow border-2 border-amber-400" : "border border-neutral-200"
       }`}
     >
       {isHotDeal && (
@@ -86,7 +88,7 @@ export function ProductCard({
                 left: `${f.left}%`,
                 top: `${f.top}px`,
                 width: f.size,
-                height: f.size * 1.3,
+                height: f.size * 1.375,
                 transform: `translateX(-50%) rotate(${f.rotate}deg)`,
               }}
             >
@@ -120,32 +122,32 @@ export function ProductCard({
               <span className="relative z-10 h-7 w-7 shrink-0">
                 <img src="/hot-badge.svg" alt="" className="h-full w-full drop-shadow" />
                 {/* A fanned trio (not one centered flame) — closer to the
-                 * reference badge, where several tongues erupt from the
-                 * ball's top-right corner and lean into the pill, instead
-                 * of one flame sitting centered above the ball. */}
+                 * reference badge, where several tall tongues erupt from
+                 * the ball's top-right corner and lean down into the pill,
+                 * instead of one flame sitting centered above the ball. */}
                 <img
                   src="/flame.svg"
                   alt=""
                   aria-hidden="true"
-                  className="flame-flicker absolute h-3 w-2.5"
-                  style={{ top: -3, left: 9, transform: "rotate(-18deg)", animationDelay: "0.1s" }}
+                  className="flame-flicker absolute h-3.5 w-3"
+                  style={{ top: -6, left: 8, transform: "rotate(-20deg)", animationDelay: "0.1s" }}
+                />
+                <img
+                  src="/flame.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="flame-flicker absolute h-5 w-4"
+                  style={{ top: -11, left: 14, transform: "rotate(4deg)", animationDelay: "0.3s" }}
                 />
                 <img
                   src="/flame.svg"
                   alt=""
                   aria-hidden="true"
                   className="flame-flicker absolute h-4 w-3.5"
-                  style={{ top: -7, left: 15, transform: "rotate(6deg)", animationDelay: "0.3s" }}
-                />
-                <img
-                  src="/flame.svg"
-                  alt=""
-                  aria-hidden="true"
-                  className="flame-flicker absolute h-3.5 w-3"
-                  style={{ top: -2, left: 22, transform: "rotate(26deg)", animationDelay: "0.2s" }}
+                  style={{ top: -6, left: 21, transform: "rotate(28deg)", animationDelay: "0.2s" }}
                 />
               </span>
-              <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-white shadow-md">
+              <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-yellow-300 shadow-md">
                 -{percentOff}%
               </span>
             </div>

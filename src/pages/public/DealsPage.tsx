@@ -28,7 +28,10 @@ export function DealsPage() {
       {!loading && !error && deals.length === 0 && <p className="text-neutral-500">{t("deals.noActiveDeals")}</p>}
 
       {!loading && !error && deals.length > 0 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        // Extra top margin (beyond the page's own space-y-4) — a hot-deal
+        // card's fire frame pokes well above the card itself, and without
+        // this clearance it painted over the page title right above it.
+        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {deals.map(({ product, discount }) => (
             <ProductCard key={product.id} product={product} limitedTimeDiscount={discount} />
           ))}
