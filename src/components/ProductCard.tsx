@@ -22,19 +22,23 @@ const HOT_DEAL_THRESHOLD = 20;
  * negative = poking above it); `rotate` leans the side flames outward;
  * `delay` staggers each one's flicker so they don't pulse in sync. */
 const HOT_CARD_FLAMES = [
-  { left: 6, top: -14, size: 22, rotate: -14, delay: 0.1 },
-  { left: 16, top: -24, size: 28, rotate: -6, delay: 0.4 },
-  { left: 27, top: -30, size: 30, rotate: 3, delay: 0 },
-  { left: 38, top: -26, size: 26, rotate: -4, delay: 0.25 },
-  { left: 50, top: -32, size: 34, rotate: 0, delay: 0.15 },
-  { left: 62, top: -26, size: 26, rotate: 4, delay: 0.35 },
-  { left: 73, top: -30, size: 30, rotate: -3, delay: 0.05 },
-  { left: 84, top: -24, size: 28, rotate: 6, delay: 0.3 },
-  { left: 94, top: -14, size: 22, rotate: 14, delay: 0.2 },
-  { left: 0, top: 6, size: 18, rotate: -24, delay: 0.45 },
-  { left: 100, top: 6, size: 18, rotate: 24, delay: 0.5 },
-  { left: 0, top: 34, size: 14, rotate: -30, delay: 0.55 },
-  { left: 100, top: 34, size: 14, rotate: 30, delay: 0.15 },
+  { left: 4, top: -16, size: 24, rotate: -16, delay: 0.1 },
+  { left: 14, top: -28, size: 30, rotate: -7, delay: 0.4 },
+  { left: 25, top: -38, size: 34, rotate: 4, delay: 0 },
+  { left: 36, top: -32, size: 30, rotate: -5, delay: 0.25 },
+  { left: 50, top: -42, size: 38, rotate: 0, delay: 0.15 },
+  { left: 64, top: -32, size: 30, rotate: 5, delay: 0.35 },
+  { left: 75, top: -38, size: 34, rotate: -4, delay: 0.05 },
+  { left: 86, top: -28, size: 30, rotate: 7, delay: 0.3 },
+  { left: 96, top: -16, size: 24, rotate: 16, delay: 0.2 },
+  { left: 0, top: -2, size: 20, rotate: -22, delay: 0.45 },
+  { left: 100, top: -2, size: 20, rotate: 22, delay: 0.5 },
+  { left: 0, top: 24, size: 17, rotate: -28, delay: 0.55 },
+  { left: 100, top: 24, size: 17, rotate: 28, delay: 0.15 },
+  { left: 0, top: 50, size: 14, rotate: -32, delay: 0.3 },
+  { left: 100, top: 50, size: 14, rotate: 32, delay: 0.45 },
+  { left: 0, top: 76, size: 11, rotate: -34, delay: 0.1 },
+  { left: 100, top: 76, size: 11, rotate: 34, delay: 0.25 },
 ];
 
 export function ProductCard({
@@ -65,11 +69,15 @@ export function ProductCard({
     <Link
       to={`/product/${product.id}`}
       className={`group relative flex flex-col rounded-xl border bg-white transition hover:shadow-md ${
-        isHotDeal ? "card-fire-glow border-orange-300" : "border-neutral-200"
+        isHotDeal ? "card-fire-glow border-amber-400" : "border-neutral-200"
       }`}
     >
       {isHotDeal && (
-        <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+        // z-20 (above every other card's own z-10 badge/favorite button) so
+        // a flame poking into a neighboring card's territory — above it in
+        // the grid, or to its side — always paints on top of that card's
+        // opaque white background instead of disappearing behind it.
+        <div className="pointer-events-none absolute inset-0 z-20" aria-hidden="true">
           {HOT_CARD_FLAMES.map((f, i) => (
             <span
               key={i}
@@ -99,7 +107,7 @@ export function ProductCard({
           // replaces the plain badge for deals that clear the hot-deal
           // threshold, instead of stacking a separate flame ring around
           // the whole card.
-          <div className="absolute start-2 top-2 z-10">
+          <div className="absolute start-2 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
              * internal layout must stay the same shape in both languages
@@ -111,11 +119,30 @@ export function ProductCard({
             <div dir="ltr" className="flex items-center">
               <span className="relative z-10 h-7 w-7 shrink-0">
                 <img src="/hot-badge.svg" alt="" className="h-full w-full drop-shadow" />
+                {/* A fanned trio (not one centered flame) — closer to the
+                 * reference badge, where several tongues erupt from the
+                 * ball's top-right corner and lean into the pill, instead
+                 * of one flame sitting centered above the ball. */}
                 <img
                   src="/flame.svg"
                   alt=""
                   aria-hidden="true"
-                  className="flame-flicker absolute -top-2.5 left-1/2 h-4 w-3.5 -translate-x-1/2"
+                  className="flame-flicker absolute h-3 w-2.5"
+                  style={{ top: -3, left: 9, transform: "rotate(-18deg)", animationDelay: "0.1s" }}
+                />
+                <img
+                  src="/flame.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="flame-flicker absolute h-4 w-3.5"
+                  style={{ top: -7, left: 15, transform: "rotate(6deg)", animationDelay: "0.3s" }}
+                />
+                <img
+                  src="/flame.svg"
+                  alt=""
+                  aria-hidden="true"
+                  className="flame-flicker absolute h-3.5 w-3"
+                  style={{ top: -2, left: 22, transform: "rotate(26deg)", animationDelay: "0.2s" }}
                 />
               </span>
               <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-white shadow-md">
@@ -124,14 +151,14 @@ export function ProductCard({
             </div>
           </div>
         ) : (
-          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
+          <span className="font-label absolute start-2 top-2 z-30 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
             -{percentOff}%
           </span>
         ))}
       <FavoriteButton
         productId={product.id}
         stopNavigation
-        className="absolute end-2 top-2 z-10 h-8 w-8 bg-white/90 shadow-sm hover:bg-white"
+        className="absolute end-2 top-2 z-30 h-8 w-8 bg-white/90 shadow-sm hover:bg-white"
       />
       <div className="aspect-square w-full overflow-hidden rounded-t-xl bg-neutral-100">
         {imageUrl ? (
