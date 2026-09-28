@@ -7,12 +7,13 @@ const RETURN_WINDOW_MS = 10 * 60 * 1000;
 /**
  * Calls `onConfirmed` once the user leaves this tab (backgrounding it —
  * switching to the WhatsApp app, or a WhatsApp Web tab taking focus) and
- * then comes back, within `RETURN_WINDOW_MS`. This is the best signal
- * available for "they probably sent the WhatsApp message" — a `wa.me`
- * link gives no actual send-confirmation at all, it just opens WhatsApp
- * with the text pre-filled, so this can only ever be a heuristic, not a
- * guarantee. Does nothing if they never come back (closed the tab,
- * switched away and stayed there, etc.) — silently expires instead.
+ * then comes back, within `RETURN_WINDOW_MS`. Returning is just the cue to
+ * ask — a `wa.me` link gives no actual send-confirmation at all, it just
+ * opens WhatsApp with the text pre-filled, so the caller still needs to
+ * explicitly ask the user (e.g. a yes/no prompt) whether they actually
+ * sent it before treating `onConfirmed` as true confirmation. Does
+ * nothing if they never come back (closed the tab, switched away and
+ * stayed there, etc.) — silently expires instead.
  */
 export function confirmAfterReturn(onConfirmed: () => void): void {
   let didHide = false;

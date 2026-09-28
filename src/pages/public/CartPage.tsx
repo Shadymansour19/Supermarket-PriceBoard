@@ -116,6 +116,7 @@ export function CartPage() {
     // and clearing the cart immediately on click would risk wiping it out
     // for someone who back out of sending after all.
     confirmAfterReturn(() => {
+      if (!confirm(t("cart.confirmOrderSent"))) return;
       recordOrder(orderItems, total);
       clearCart();
     });
