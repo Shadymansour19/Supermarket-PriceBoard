@@ -38,7 +38,7 @@ export function FavoritesPage() {
 
       {!loading && !error && products.length > 0 && (
         // Extra top margin — see the matching comment in DealsPage.
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-28 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
             <ProductCard key={product.id} product={product} limitedTimeDiscount={discountMap.get(product.id)} />
           ))}

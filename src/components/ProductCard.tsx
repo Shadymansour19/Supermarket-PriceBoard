@@ -77,7 +77,7 @@ export function ProductCard({
           // instead of the intended 114.667%, undoing the whole
           // width-relative sizing below and clipping off the side bulges.
           className="pointer-events-none absolute z-20 max-w-none"
-          style={{ left: "-11.333%", top: 0, width: "123.333%", height: "auto", marginTop: "-20.667%" }}
+          style={{ left: "-11.333%", top: 0, width: "123.333%", height: "auto", marginTop: "-26%" }}
         />
       )}
       {(limitedTimeDiscount || cheapestTier) &&

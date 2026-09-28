@@ -31,7 +31,7 @@ export function WholesaleDealsPage() {
 
       {!loading && !error && deals.length > 0 && (
         // Extra top margin — see the matching comment in DealsPage.
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mt-28 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {deals.map(({ product, discount }) => (
             <ProductCard key={product.id} product={product} quantityDiscount={discount} />
           ))}

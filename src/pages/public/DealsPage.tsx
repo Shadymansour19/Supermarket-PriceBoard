@@ -31,7 +31,11 @@ export function DealsPage() {
         // Extra top margin (beyond the page's own space-y-4) — a hot-deal
         // card's fire frame pokes well above the card itself, and without
         // this clearance it painted over the page title right above it.
-        <div className="mt-10 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        // Sized for the frame's tallest peak on a wide desktop card
+        // (poke scales with card width, so a wider grid column needs
+        // more headroom than this fixed value gives a narrow mobile one
+        // — generous enough to cover it up to a very wide card).
+        <div className="mt-28 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {deals.map(({ product, discount }) => (
             <ProductCard key={product.id} product={product} limitedTimeDiscount={discount} />
           ))}
