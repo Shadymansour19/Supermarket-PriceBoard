@@ -47,35 +47,12 @@ export function ProductCard({
       style={{ containerType: "inline-size" }}
     >
       {isHotDeal && (
-        // Static (no animation) — fire-frame.png is the user-supplied
-        // reference image used as-is, rendered via CSS `border-image`
-        // instead of a plain absolutely-positioned/stretched `<img>`.
-        // border-image is what actually solves "resize correctly on any
-        // card size": its 9-slice model keeps the flame's own corner and
-        // edge art at the right proportions no matter the box's
-        // width/height, instead of the whole image being stretched
-        // non-uniformly to fit (which is what distorted the shapes on
-        // every earlier hand-drawn attempt whenever a card ended up a
-        // different height than the one thing was tuned against).
-        // border-image-outset (not manual negative positioning) is what
-        // lets the flame visually poke above/beside the card's own edges
-        // — it's a real CSS feature for exactly this, sized as multiples
-        // of border-image-width so it scales right along with it. No
-        // bottom slice/width here since the source image has no flame
-        // along the bottom edge, matching the plain glowing border there.
-        <div
+        <img
+          src="/fire-frame.png"
+          alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 z-20"
-          style={{
-            borderStyle: "solid",
-            borderWidth: 1,
-            borderColor: "transparent",
-            borderImageSource: "url(/fire-frame.png)",
-            borderImageSlice: "300 200 0 210",
-            borderImageWidth: "21.77cqw 14.51cqw 0 15.24cqw",
-            borderImageOutset: "0.6 0.4 0 0.4",
-            borderImageRepeat: "stretch",
-          }}
+          className="pointer-events-none absolute -start-[11%] z-20 h-auto max-w-none w-[122%]"
+          style={{ top: "-21cqw" }}
         />
       )}
       {(limitedTimeDiscount || cheapestTier) &&
