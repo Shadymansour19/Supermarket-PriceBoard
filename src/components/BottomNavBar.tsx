@@ -89,9 +89,11 @@ export function BottomNavBar() {
         aria-current={cartActive}
         aria-label={t("cart.navLabel")}
         data-cart-target
-        className="absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[62%] items-center justify-center rounded-full bg-emerald-600 text-white shadow-xl transition hover:bg-emerald-700"
+        className={`absolute inset-x-0 top-0 z-10 mx-auto flex h-16 w-16 -translate-y-[58%] items-center justify-center rounded-full shadow-xl transition ${
+          cartActive ? "bg-white text-emerald-700" : "bg-emerald-600 text-white hover:bg-emerald-700"
+        }`}
       >
-        <CartIcon className="h-7 w-7" />
+        <CartIcon className="h-7 w-7" filled={cartActive} />
         {itemCount > 0 && (
           <span className="font-label absolute -end-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-600 px-1 text-[11px] font-semibold text-white">
             {itemCount}
