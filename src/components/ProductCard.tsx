@@ -42,42 +42,39 @@ export function ProductCard({
     <Link
       to={`/product/${product.id}`}
       className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
-        isHotDeal ? "card-fire-glow border-2 border-amber-400" : "border border-neutral-200"
+        isHotDeal ? "border-2 border-amber-400" : "border border-neutral-200"
       }`}
     >
       {isHotDeal && (
-        // One self-contained image (baked-in flame, with its own internal
-        // flicker animation) — sized off the card's WIDTH only (`height:
-        // auto` lets the SVG's own aspect ratio drive it), never its
-        // height. Cards vary a lot in height (a wrapped product name, an
-        // out-of-stock badge, a tier line) but the flame is meant to be a
-        // fixed-proportion "cap" near the top regardless, not something
-        // stretched to fit whatever height a given card happens to be —
-        // stretching it to match height was distorting the flame shapes
-        // on any card that wasn't exactly the one size this was tuned
-        // against. `margin-top` as a negative percentage relies on a real
-        // (if easily-forgotten) CSS rule: percentages on vertical margins
-        // resolve against the *width* of the containing block, not its
-        // height — which is exactly the width-relative offset this needs.
-        // The glowing border line itself is the card's own `border-2` +
-        // `card-fire-glow` below, which already adapts to any height on
-        // its own, so it's no longer duplicated inside this image. z-20
-        // is above every other card's own z-10 badge/favorite button, so
-        // a flame poking into a neighboring card's territory — above it
-        // in the grid, or to its side — always paints on top of that
-        // card's opaque white background instead of disappearing behind
-        // it.
-        <img
-          src="/fire-frame.svg"
-          alt=""
+        // Static (no animation) — fire-frame.png is the user-supplied
+        // reference image used as-is, rendered via CSS `border-image`
+        // instead of a plain absolutely-positioned/stretched `<img>`.
+        // border-image is what actually solves "resize correctly on any
+        // card size": its 9-slice model keeps the flame's own corner and
+        // edge art at the right proportions no matter the box's
+        // width/height, instead of the whole image being stretched
+        // non-uniformly to fit (which is what distorted the shapes on
+        // every earlier hand-drawn attempt whenever a card ended up a
+        // different height than the one thing was tuned against).
+        // border-image-outset (not manual negative positioning) is what
+        // lets the flame visually poke above/beside the card's own edges
+        // — it's a real CSS feature for exactly this, sized as multiples
+        // of border-image-width so it scales right along with it. No
+        // bottom slice/width here since the source image has no flame
+        // along the bottom edge, matching the plain glowing border there.
+        <div
           aria-hidden="true"
-          // Tailwind's preflight sets a blanket `img { max-width: 100% }`
-          // (to stop normal content images overflowing their container) —
-          // it was silently capping this at 100% of the card's width
-          // instead of the intended 114.667%, undoing the whole
-          // width-relative sizing below and clipping off the side bulges.
-          className="pointer-events-none absolute z-20 max-w-none"
-          style={{ left: "-11.333%", top: 0, width: "123.333%", height: "auto", marginTop: "-26%" }}
+          className="pointer-events-none absolute inset-0 z-20"
+          style={{
+            borderStyle: "solid",
+            borderWidth: 1,
+            borderColor: "transparent",
+            borderImageSource: "url(/fire-frame.png)",
+            borderImageSlice: "300 200 0 210",
+            borderImageWidth: "22% 15% 0 15%",
+            borderImageOutset: "0.6 0.4 0 0.4",
+            borderImageRepeat: "stretch",
+          }}
         />
       )}
       {(limitedTimeDiscount || cheapestTier) &&
