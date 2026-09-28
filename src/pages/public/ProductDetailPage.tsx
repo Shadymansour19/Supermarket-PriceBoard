@@ -9,7 +9,12 @@ import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
 import { SimilarProductsSection } from "../../components/SimilarProductsSection";
 import { useCart } from "../../context/CartContext";
 import { flyToCart, squareRectAt } from "../../lib/cartFlyAnimation";
-import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
+import {
+  daysRemaining,
+  fetchLimitedTimeDiscount,
+  fetchQuantityDiscount,
+  isLimitedTimeDiscountActive,
+} from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
 import { recordProductView } from "../../lib/recentlyViewed";
@@ -187,10 +192,4 @@ export function ProductDetailPage() {
       </div>
     </div>
   );
-}
-
-/** Whole days left until `endsAt`, floored at 0 (never shows negative). */
-function daysRemaining(endsAt: string): number {
-  const ms = new Date(endsAt).getTime() - Date.now();
-  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
 }

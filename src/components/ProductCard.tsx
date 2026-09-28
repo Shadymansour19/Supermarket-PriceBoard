@@ -3,10 +3,16 @@ import { Link } from "react-router-dom";
 import { AddToCartButton } from "./AddToCartButton";
 import { DiscountPrice } from "./DiscountPrice";
 import { FavoriteButton } from "./FavoriteButton";
-import { discountPercent } from "../lib/discounts";
+import { daysRemaining, discountPercent } from "../lib/discounts";
 import { productImageUrl } from "../lib/supabase";
 import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
+
+/** From this percent off up, a deal is "hot" enough to earn the flame +
+ * pulse treatment — below it, the gradient badge alone is enough. Keeps
+ * the animation meaningful (a genuinely standout deal) instead of every
+ * discounted card in a full grid pulsing at once. */
+const HOT_DEAL_THRESHOLD = 30;
 
 export function ProductCard({
   product,
@@ -25,22 +31,26 @@ export function ProductCard({
   const imageUrl = productImageUrl(product.image_path);
   const name = localizedField(product, "name", i18n.language);
   const cheapestTier = quantityDiscount?.tiers[0];
+  const percentOff = limitedTimeDiscount
+    ? discountPercent(product.price, limitedTimeDiscount.new_price)
+    : cheapestTier
+      ? discountPercent(product.price, cheapestTier.price)
+      : 0;
+  const isHotDeal = percentOff >= HOT_DEAL_THRESHOLD;
 
   return (
     <Link
       to={`/product/${product.id}`}
       className="group relative flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:shadow-md"
     >
-      {limitedTimeDiscount ? (
-        <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
-          -{discountPercent(product.price, limitedTimeDiscount.new_price)}%
+      {(limitedTimeDiscount || cheapestTier) && (
+        <span
+          className={`font-label absolute start-2 top-2 z-10 flex items-center gap-0.5 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white ${
+            isHotDeal ? "hero-badge-pulse" : ""
+          }`}
+        >
+          {isHotDeal && <span aria-hidden="true">🔥</span>}-{percentOff}%
         </span>
-      ) : (
-        cheapestTier && (
-          <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white">
-            -{discountPercent(product.price, cheapestTier.price)}%
-          </span>
-        )
       )}
       <FavoriteButton
         productId={product.id}
@@ -108,6 +118,14 @@ export function ProductCard({
            * when buying the minimum quantity. */}
           {cheapestTier && !limitedTimeDiscount && (
             <span className="text-xs text-neutral-500">{t("deals.tierLabel", { count: cheapestTier.min_quantity })}</span>
+          )}
+          {/* A bit of urgency for the "hot" deals specifically — small
+           * enough not to compete with the badge/price for attention on
+           * an ordinary discount. */}
+          {limitedTimeDiscount && isHotDeal && (
+            <span className="text-xs font-medium text-red-600">
+              {t("deals.endsIn", { count: daysRemaining(limitedTimeDiscount.ends_at) })}
+            </span>
           )}
         </div>
       </div>

@@ -17,6 +17,12 @@ export function isLimitedTimeDiscountActive(discount: LimitedTimeDiscount): bool
   return new Date(discount.ends_at).getTime() > Date.now();
 }
 
+/** Whole days left until `endsAt`, floored at 0 (never shows negative). */
+export function daysRemaining(endsAt: string): number {
+  const ms = new Date(endsAt).getTime() - Date.now();
+  return Math.max(0, Math.ceil(ms / (24 * 60 * 60 * 1000)));
+}
+
 // ---------------------------------------------------------------------------
 // Limited-time discounts
 // ---------------------------------------------------------------------------
