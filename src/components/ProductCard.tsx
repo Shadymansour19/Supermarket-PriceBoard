@@ -14,35 +14,6 @@ import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/da
  * every discounted card in a full grid getting the same treatment. */
 const HOT_DEAL_THRESHOLD = 20;
 
-/** Individual flame tongues making up the fire frame around a hot-deal
- * card — concentrated along the top edge (like a fireplace opening) and
- * tapering down the upper sides, left empty along the bottom to match the
- * reference look instead of a uniform ring. `left`/`top` position each
- * flame's own center (in %/px, `top` relative to the card's own top edge,
- * negative = poking above it); `rotate` leans the side flames outward;
- * `delay` staggers each one's flicker so they don't pulse in sync. */
-const HOT_CARD_FLAMES = [
-  { left: 2, top: -18, size: 26, rotate: -18, delay: 0.1 },
-  { left: 11, top: -30, size: 32, rotate: -9, delay: 0.4 },
-  { left: 21, top: -40, size: 36, rotate: -3, delay: 0 },
-  { left: 31, top: -34, size: 32, rotate: -6, delay: 0.25 },
-  { left: 41, top: -44, size: 38, rotate: 2, delay: 0.15 },
-  { left: 50, top: -48, size: 40, rotate: 0, delay: 0.2 },
-  { left: 59, top: -44, size: 38, rotate: -2, delay: 0.35 },
-  { left: 69, top: -34, size: 32, rotate: 6, delay: 0.05 },
-  { left: 79, top: -40, size: 36, rotate: 3, delay: 0.3 },
-  { left: 89, top: -30, size: 32, rotate: 9, delay: 0.45 },
-  { left: 98, top: -18, size: 26, rotate: 18, delay: 0.2 },
-  { left: 0, top: -4, size: 22, rotate: -24, delay: 0.5 },
-  { left: 100, top: -4, size: 22, rotate: 24, delay: 0.1 },
-  { left: 0, top: 20, size: 18, rotate: -28, delay: 0.55 },
-  { left: 100, top: 20, size: 18, rotate: 28, delay: 0.15 },
-  { left: 0, top: 44, size: 15, rotate: -32, delay: 0.3 },
-  { left: 100, top: 44, size: 15, rotate: 32, delay: 0.4 },
-  { left: 0, top: 68, size: 12, rotate: -34, delay: 0.1 },
-  { left: 100, top: 68, size: 12, rotate: 34, delay: 0.25 },
-];
-
 export function ProductCard({
   product,
   limitedTimeDiscount,
@@ -75,32 +46,22 @@ export function ProductCard({
       }`}
     >
       {isHotDeal && (
-        // z-20 (above every other card's own z-10 badge/favorite button) so
-        // a flame poking into a neighboring card's territory — above it in
+        // One self-contained image (baked-in flames + glowing outline,
+        // with its own internal flicker animation) instead of many
+        // separately-positioned flame icons — sized/positioned via
+        // percentages so its built-in "window" lines up with the card's
+        // own box exactly, whatever the card's actual pixel size. z-20 is
+        // above every other card's own z-10 badge/favorite button, so a
+        // flame poking into a neighboring card's territory — above it in
         // the grid, or to its side — always paints on top of that card's
         // opaque white background instead of disappearing behind it.
-        <div className="pointer-events-none absolute inset-0 z-20" aria-hidden="true">
-          {HOT_CARD_FLAMES.map((f, i) => (
-            <span
-              key={i}
-              className="absolute"
-              style={{
-                left: `${f.left}%`,
-                top: `${f.top}px`,
-                width: f.size,
-                height: f.size * 1.375,
-                transform: `translateX(-50%) rotate(${f.rotate}deg)`,
-              }}
-            >
-              <img
-                src="/flame.svg"
-                alt=""
-                className="flame-flicker block h-full w-full"
-                style={{ animationDelay: `${f.delay}s` }}
-              />
-            </span>
-          ))}
-        </div>
+        <img
+          src="/fire-frame.svg"
+          alt=""
+          aria-hidden="true"
+          className="pointer-events-none absolute z-20"
+          style={{ left: "-6.667%", top: "-25.714%", width: "113.333%", height: "131.429%" }}
+        />
       )}
       {(limitedTimeDiscount || cheapestTier) &&
         (isHotDeal ? (
