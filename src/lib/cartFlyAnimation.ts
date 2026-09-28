@@ -1,15 +1,28 @@
 const ANIMATION_MS = 650;
 
+/** A plain, minimal rect — deliberately not `DOMRect` itself, so a caller
+ * can hand over either a real element's `getBoundingClientRect()` or a
+ * small synthetic square (e.g. centered on a click point) without needing
+ * an element to measure. */
+export type FlyRect = { left: number; top: number; width: number; height: number };
+
+/** A small square centered on `(x, y)` — e.g. a click/tap point — sized to
+ * roughly match a button's scale rather than the huge product photo, so
+ * the flourish reads as a quick flick instead of shrinking a full image. */
+export function squareRectAt(x: number, y: number, size = 40): FlyRect {
+  return { left: x - size / 2, top: y - size / 2, width: size, height: size };
+}
+
 /**
  * A small purely-decorative flourish: clones the product image and
- * animates it flying from `sourceEl` to whichever cart icon is currently
- * visible (the notched bottom-bar button on mobile, the header icon on
- * desktop — both are marked with `data-cart-target`), then calls `onLand`.
- * Falls back to calling `onLand` immediately — never blocking the actual
- * add-to-cart — if the user prefers reduced motion or no cart icon is
- * currently in the DOM.
+ * animates it flying from `sourceRect` to whichever cart icon is
+ * currently visible (the notched bottom-bar button on mobile, the header
+ * icon on desktop — both are marked with `data-cart-target`), then calls
+ * `onLand`. Falls back to calling `onLand` immediately — never blocking
+ * the actual add-to-cart — if the user prefers reduced motion or no cart
+ * icon is currently in the DOM.
  */
-export function flyToCart(sourceEl: HTMLElement, imageUrl: string | null, onLand: () => void): void {
+export function flyToCart(sourceRect: FlyRect, imageUrl: string | null, onLand: () => void): void {
   const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const target = [...document.querySelectorAll<HTMLElement>("[data-cart-target]")].find(
     (el) => el.offsetParent !== null,
@@ -20,7 +33,6 @@ export function flyToCart(sourceEl: HTMLElement, imageUrl: string | null, onLand
     return;
   }
 
-  const sourceRect = sourceEl.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
 
   const flyer = document.createElement(imageUrl ? "img" : "div");

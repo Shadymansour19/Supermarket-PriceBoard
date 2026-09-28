@@ -8,7 +8,7 @@ import { QuantityStepper } from "../../components/QuantityStepper";
 import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
 import { SimilarProductsSection } from "../../components/SimilarProductsSection";
 import { useCart } from "../../context/CartContext";
-import { flyToCart } from "../../lib/cartFlyAnimation";
+import { flyToCart, squareRectAt } from "../../lib/cartFlyAnimation";
 import { fetchLimitedTimeDiscount, fetchQuantityDiscount, isLimitedTimeDiscountActive } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductById } from "../../lib/products";
@@ -65,12 +65,12 @@ export function ProductDetailPage() {
     const id = product!.id;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
-    // Flies from the button itself, not the (much larger) product image —
-    // starting close in size to the cart icon it's animating toward reads
-    // as a quicker, cleaner motion than shrinking a full product photo
-    // down, which is what AddToCartButton (the product-card quick-add)
-    // already does.
-    flyToCart(e.currentTarget, imageUrl, () => addToCart(id, quantity));
+    // A small square centered on the actual tap/click point, not the
+    // button's own (wide, short) rect — the button is a long pill, so
+    // using its full bounds would fly a stretched banner shape instead of
+    // a clean square, and starting exactly where the finger tapped reads
+    // as more responsive than always starting from the button's center.
+    flyToCart(squareRectAt(e.clientX, e.clientY), imageUrl, () => addToCart(id, quantity));
   }
 
   return (

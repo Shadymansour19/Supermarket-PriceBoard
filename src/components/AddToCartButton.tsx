@@ -32,7 +32,7 @@ export function AddToCartButton({
     }
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
-    flyToCart(e.currentTarget, imageUrl, () => addToCart(productId, 1));
+    flyToCart(e.currentTarget.getBoundingClientRect(), imageUrl, () => addToCart(productId, 1));
   }
 
   return (
