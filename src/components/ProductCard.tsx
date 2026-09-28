@@ -44,6 +44,7 @@ export function ProductCard({
       className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
         isHotDeal ? "border-2 border-amber-400" : "border border-neutral-200"
       }`}
+      style={{ containerType: "inline-size" }}
     >
       {isHotDeal && (
         // Static (no animation) — fire-frame.png is the user-supplied
@@ -71,7 +72,7 @@ export function ProductCard({
             borderColor: "transparent",
             borderImageSource: "url(/fire-frame.png)",
             borderImageSlice: "300 200 0 210",
-            borderImageWidth: "22% 15% 0 15%",
+            borderImageWidth: "21.77cqw 14.51cqw 0 15.24cqw",
             borderImageOutset: "0.6 0.4 0 0.4",
             borderImageRepeat: "stretch",
           }}
