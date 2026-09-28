@@ -14,6 +14,29 @@ import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/da
  * every discounted card in a full grid getting the same treatment. */
 const HOT_DEAL_THRESHOLD = 20;
 
+/** Individual flame tongues making up the fire frame around a hot-deal
+ * card — concentrated along the top edge (like a fireplace opening) and
+ * tapering down the upper sides, left empty along the bottom to match the
+ * reference look instead of a uniform ring. `left`/`top` position each
+ * flame's own center (in %/px, `top` relative to the card's own top edge,
+ * negative = poking above it); `rotate` leans the side flames outward;
+ * `delay` staggers each one's flicker so they don't pulse in sync. */
+const HOT_CARD_FLAMES = [
+  { left: 6, top: -14, size: 22, rotate: -14, delay: 0.1 },
+  { left: 16, top: -24, size: 28, rotate: -6, delay: 0.4 },
+  { left: 27, top: -30, size: 30, rotate: 3, delay: 0 },
+  { left: 38, top: -26, size: 26, rotate: -4, delay: 0.25 },
+  { left: 50, top: -32, size: 34, rotate: 0, delay: 0.15 },
+  { left: 62, top: -26, size: 26, rotate: 4, delay: 0.35 },
+  { left: 73, top: -30, size: 30, rotate: -3, delay: 0.05 },
+  { left: 84, top: -24, size: 28, rotate: 6, delay: 0.3 },
+  { left: 94, top: -14, size: 22, rotate: 14, delay: 0.2 },
+  { left: 0, top: 6, size: 18, rotate: -24, delay: 0.45 },
+  { left: 100, top: 6, size: 18, rotate: 24, delay: 0.5 },
+  { left: 0, top: 34, size: 14, rotate: -30, delay: 0.55 },
+  { left: 100, top: 34, size: 14, rotate: 30, delay: 0.15 },
+];
+
 export function ProductCard({
   product,
   limitedTimeDiscount,
@@ -45,6 +68,28 @@ export function ProductCard({
         isHotDeal ? "card-fire-glow border-orange-300" : "border-neutral-200"
       }`}
     >
+      {isHotDeal && (
+        <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
+          {HOT_CARD_FLAMES.map((f, i) => (
+            <span
+              key={i}
+              className="absolute"
+              style={{
+                left: `${f.left}%`,
+                top: `${f.top}px`,
+                width: f.size,
+                height: f.size * 1.3,
+                transform: `translateX(-50%) rotate(${f.rotate}deg)`,
+              }}
+            >
+              <span
+                className="card-flame-shape flame-flicker block h-full w-full"
+                style={{ animationDelay: `${f.delay}s` }}
+              />
+            </span>
+          ))}
+        </div>
+      )}
       {(limitedTimeDiscount || cheapestTier) &&
         (isHotDeal ? (
           // "Comet" badge — a HOT bubble with a single flickering flame
@@ -52,19 +97,29 @@ export function ProductCard({
           // replaces the plain badge for deals that clear the hot-deal
           // threshold, instead of stacking a separate flame ring around
           // the whole card.
-          <div className="absolute start-2 top-2 z-10 flex items-center">
-            <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-500 shadow-md">
-              <span className="font-label text-[9px] font-extrabold leading-none text-red-600">HOT</span>
-              <span
-                aria-hidden="true"
-                className="flame-flicker absolute -top-2.5 start-1/2 -translate-x-1/2 text-base"
-              >
-                🔥
+          <div className="absolute start-2 top-2 z-10">
+            {/* Forced `dir="ltr"` — this badge is a small fixed graphic
+             * (ball trailing into a pill), not reading text, so its
+             * internal layout must stay the same shape in both languages
+             * instead of mirroring like the rest of the RTL-aware page.
+             * Only this inner wrapper is forced; the outer div above keeps
+             * logical start/top positioning so the badge itself still
+             * lands on the correct (non-colliding) corner next to the
+             * favorite button in both languages. */}
+            <div dir="ltr" className="flex items-center">
+              <span className="relative z-10 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-yellow-300 via-yellow-400 to-orange-500 shadow-md">
+                <span className="font-label text-[9px] font-extrabold leading-none text-red-600">HOT</span>
+                <span
+                  aria-hidden="true"
+                  className="flame-flicker absolute -top-2.5 left-1/2 -translate-x-1/2 text-base"
+                >
+                  🔥
+                </span>
               </span>
-            </span>
-            <span className="font-label -ms-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 ps-4 pe-2.5 text-xs font-bold text-white shadow-md">
-              -{percentOff}%
-            </span>
+              <span className="font-label -ml-2.5 rounded-full bg-gradient-to-r from-red-600 to-red-500 py-1 pl-4 pr-2.5 text-xs font-bold text-white shadow-md">
+                -{percentOff}%
+              </span>
+            </div>
           </div>
         ) : (
           <span className="font-label absolute start-2 top-2 z-10 rounded-full bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
