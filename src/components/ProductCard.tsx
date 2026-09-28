@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { AddToCartButton } from "./AddToCartButton";
 import { DiscountPrice } from "./DiscountPrice";
 import { FavoriteButton } from "./FavoriteButton";
 import { discountPercent } from "../lib/discounts";
@@ -89,7 +90,14 @@ export function ProductCard({
                 )}
               </span>
             )}
-            {!product.in_stock && (
+            {product.in_stock ? (
+              <AddToCartButton
+                productId={product.id}
+                imageUrl={imageUrl}
+                stopNavigation
+                className="h-7 w-7 shrink-0"
+              />
+            ) : (
               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
                 {t("product.outOfStock")}
               </span>
