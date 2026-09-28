@@ -63,7 +63,7 @@ export function ProductCard({
           // untouched (no recoloring, no re-cutting its transparency) —
           // the pill is a plain CSS element behind/under it since the
           // source image has no pill of its own to reuse.
-          <div className="absolute start-2 top-2 z-30">
+          <div className="absolute start-5 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
              * internal layout must stay the same shape in both languages
@@ -80,7 +80,7 @@ export function ProductCard({
                * `items-center` alone aligns the pill to the image's
                * midpoint, not the ball, so it's nudged down to the ball's
                * actual center (measured at ~65% of the image's height). */}
-              <span className="font-label -ml-11 translate-y-[8px] rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-14 pr-3 text-sm font-bold text-yellow-300 shadow-md">
+              <span className="font-label -ml-11 translate-y-[8px] rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-10 pr-3 text-sm font-bold text-yellow-300 shadow-md">
                 -{percentOff}%
               </span>
             </div>
