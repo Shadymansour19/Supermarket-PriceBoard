@@ -77,7 +77,7 @@ export function ProductCard({
           // instead of the intended 114.667%, undoing the whole
           // width-relative sizing below and clipping off the side bulges.
           className="pointer-events-none absolute z-20 max-w-none"
-          style={{ left: "-7.333%", top: 0, width: "114.667%", height: "auto", marginTop: "-16%" }}
+          style={{ left: "-11.333%", top: 0, width: "123.333%", height: "auto", marginTop: "-20.667%" }}
         />
       )}
       {(limitedTimeDiscount || cheapestTier) &&
@@ -98,7 +98,7 @@ export function ProductCard({
              * lands on the correct (non-colliding) corner next to the
              * favorite button in both languages. */}
             <div dir="ltr" className="flex items-center">
-              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0 translate-x-[10px]" />
+              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0 translate-x-[15px]" />
               {/* The ball inside hot-badge.png sits well below the
                * image's own vertical center (the flame reaches much
                * higher above it than the ball extends below it) — flex
