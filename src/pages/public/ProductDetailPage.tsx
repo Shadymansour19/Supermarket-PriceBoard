@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { AskWhatsAppButton } from "../../components/AskWhatsAppButton";
@@ -25,7 +25,6 @@ export function ProductDetailPage() {
   const [quantityDiscount, setQuantityDiscount] = useState<QuantityDiscount | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
-  const imageContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!productId) return;
@@ -60,17 +59,18 @@ export function ProductDetailPage() {
   const name = localizedField(product, "name", i18n.language);
   const description = localizedField(product, "description", i18n.language);
 
-  function handleAddToCart() {
+  function handleAddToCart(e: React.MouseEvent<HTMLButtonElement>) {
     // Safe: this handler is only ever wired up to a button below, which
     // only renders once the early returns above have ruled out null/undefined.
     const id = product!.id;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
-    if (imageContainerRef.current) {
-      flyToCart(imageContainerRef.current, imageUrl, () => addToCart(id, quantity));
-    } else {
-      addToCart(id, quantity);
-    }
+    // Flies from the button itself, not the (much larger) product image —
+    // starting close in size to the cart icon it's animating toward reads
+    // as a quicker, cleaner motion than shrinking a full product photo
+    // down, which is what AddToCartButton (the product-card quick-add)
+    // already does.
+    flyToCart(e.currentTarget, imageUrl, () => addToCart(id, quantity));
   }
 
   return (
@@ -83,7 +83,7 @@ export function ProductDetailPage() {
          * add-to-cart row is sticky-clamped near the bottom independently
          * of this, so a taller image no longer risks landing it behind
          * the fixed bottom nav/cart button on shorter phones. */}
-        <div ref={imageContainerRef} className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
+        <div className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
           {imageUrl ? (
             <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
           ) : (
