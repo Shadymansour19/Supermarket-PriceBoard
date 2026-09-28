@@ -51,7 +51,7 @@ export function ProductCard({
           src="/fire-frame.png"
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute -start-[11%] z-20 h-auto max-w-none w-[122%]"
+          className="pointer-events-none absolute -start-[9.3%] z-20 h-auto max-w-none w-[119.5%]"
           style={{ top: "-21cqw" }}
         />
       )}
