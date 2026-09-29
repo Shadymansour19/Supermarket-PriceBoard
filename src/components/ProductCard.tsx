@@ -63,7 +63,7 @@ export function ProductCard({
           // untouched (no recoloring, no re-cutting its transparency) —
           // the pill is a plain CSS element behind/under it since the
           // source image has no pill of its own to reuse.
-          <div className="absolute start-5 top-2 z-30">
+          <div className="hot-badge absolute start-5 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
              * internal layout must stay the same shape in both languages
@@ -71,22 +71,59 @@ export function ProductCard({
              * Only this inner wrapper is forced; the outer div above keeps
              * logical start/top positioning so the badge itself still
              * lands on the correct (non-colliding) corner next to the
-             * favorite button in both languages. */}
-            <div dir="ltr" className="flex items-center">
-              <img src="/hot-badge.png" alt="" className="relative z-10 h-14 w-[5.5rem] shrink-0 translate-x-[15px]" />
-              {/* The ball inside hot-badge.png sits well below the
-               * image's own vertical center (the flame reaches much
-               * higher above it than the ball extends below it) — flex
-               * `items-center` alone aligns the pill to the image's
-               * midpoint, not the ball, so it's nudged down to the ball's
-               * actual center (measured at ~65% of the image's height). */}
-              <span className="font-label -ml-11 translate-y-[8px] rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 py-1 pl-10 pr-3 text-sm font-bold text-yellow-300 shadow-md">
+             * favorite button in both languages.
+             *
+             * Everything below scales off the single `--hb-scale`
+             * variable (1 normally, 0.68 on a narrower card per the
+             * `.hot-badge` container query in index.css) so the whole
+             * badge shrinks together on a smaller card instead of the
+             * image and pill drifting out of proportion with each other.
+             * The translateY here re-centers the whole assembly on the
+             * favorite button's own fixed center (top-2 + half of h-8 =
+             * 24px) — without it, this whole badge sits lower than the
+             * favorite button and the plain (non-hot) badge, since the
+             * ball inside hot-badge.png sits well below the image's own
+             * vertical center to begin with (the flame reaches much
+             * higher above the ball than the ball extends below it). */}
+            <div
+              dir="ltr"
+              className="flex items-center"
+              style={{ transform: "translateY(calc(16px - 32.6px * var(--hb-scale)))" }}
+            >
+              <img
+                src="/hot-badge.png"
+                alt=""
+                className="relative z-10 shrink-0"
+                style={{
+                  width: "calc(5.5rem * var(--hb-scale))",
+                  height: "auto",
+                  transform: "translateX(calc(15px * var(--hb-scale)))",
+                }}
+              />
+              {/* The pill's own extra offset (on top of the outer one
+               * above) aligns it with where the flame's tail meets the
+               * ball specifically, not the image's overall center. */}
+              <span
+                className="font-label rounded-full bg-red-600 bg-gradient-to-r from-red-600 to-red-500 font-bold text-yellow-300 shadow-md"
+                style={{
+                  marginLeft: "calc(-44px * var(--hb-scale))",
+                  transform: "translateY(calc(8px * var(--hb-scale)))",
+                  paddingBlock: "calc(4px * var(--hb-scale))",
+                  paddingInlineStart: "calc(40px * var(--hb-scale))",
+                  paddingInlineEnd: "calc(12px * var(--hb-scale))",
+                  fontSize: "calc(0.875rem * var(--hb-scale))",
+                }}
+              >
                 -{percentOff}%
               </span>
             </div>
           </div>
         ) : (
-          <span className="font-label absolute start-2 top-2 z-30 rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 py-0.5 text-xs font-bold text-white shadow-md ring-2 ring-white">
+          // Fixed `h-8` + flex centering (matching the favorite button's
+          // own box below) instead of relying on text metrics + padding
+          // to happen to land at the same height — guarantees the same
+          // vertical center regardless of font rendering.
+          <span className="font-label absolute start-2 top-2 z-30 flex h-8 items-center rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 text-xs font-bold text-white shadow-md ring-2 ring-white">
             -{percentOff}%
           </span>
         ))}

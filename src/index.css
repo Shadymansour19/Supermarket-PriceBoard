@@ -186,3 +186,22 @@ textarea {
 .pb-mobile-fab-safe {
   padding-bottom: var(--mobile-fab-safe);
 }
+
+/* Hot-deal badge scale — one variable everything else derives from via
+   calc(), so overriding it here for a narrower card (a container query
+   against the product card itself, which already sets container-type for
+   the fire frame) shrinks the whole badge consistently instead of having
+   to keep several separate breakpoint overrides in sync. Cards in the
+   "all products" grid end up narrower than in the dedicated deals
+   sections purely because that page also has a category sidebar eating
+   into the same row width — same grid-cols breakpoints, less room left
+   for each card. */
+.hot-badge {
+  --hb-scale: 1;
+}
+
+@container (max-width: 210px) {
+  .hot-badge {
+    --hb-scale: 0.68;
+  }
+}
