@@ -42,20 +42,30 @@ export function ProductCard({
     <Link
       to={`/product/${product.id}`}
       className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
-        isHotDeal ? "border-2 border-amber-400" : "border border-neutral-200"
+        isHotDeal ? "card-border-glow border-2 border-amber-400" : "border border-neutral-200"
       }`}
       style={{ containerType: "inline-size" }}
     >
-      {isHotDeal && (
-        <img
-          src="/fire-frame.png"
-          alt=""
-          aria-hidden="true"
-          className="pointer-events-none absolute -start-[9.3%] z-20 h-auto max-w-none w-[119.5%]"
-          style={{ top: "-21cqw" }}
-        />
-      )}
-      {(limitedTimeDiscount || cheapestTier) &&
+      {/* `.product-card` (the --hb-scale/--badge-level container-query
+       * scope) lives on this wrapper, not the Link above — a container
+       * query can't restyle the same element that establishes the
+       * container (that's a spec rule against self-referential
+       * containment, not a bug), so it has to sit on a descendant.
+       * `pointer-events-none` + individual `pointer-events-auto` back on
+       * the favorite button keeps this purely-decorative-except-for-that
+       * wrapper from intercepting clicks meant for the image/content
+       * below it. */}
+      <div className="product-card pointer-events-none absolute inset-0 z-20">
+        {isHotDeal && (
+          <img
+            src="/fire-frame.png"
+            alt=""
+            aria-hidden="true"
+            className="pointer-events-none absolute -start-[9.3%] h-auto max-w-none w-[119.5%]"
+            style={{ top: "-21cqw" }}
+          />
+        )}
+        {(limitedTimeDiscount || cheapestTier) &&
         (isHotDeal ? (
           // "Comet" badge — a HOT bubble with a flame trailing off it,
           // overlapping into the percentage pill. hot-badge.png is the
@@ -63,7 +73,7 @@ export function ProductCard({
           // untouched (no recoloring, no re-cutting its transparency) —
           // the pill is a plain CSS element behind/under it since the
           // source image has no pill of its own to reuse.
-          <div className="hot-badge absolute start-5 top-2 z-30">
+          <div className="absolute start-5 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
              * internal layout must stay the same shape in both languages
@@ -75,21 +85,15 @@ export function ProductCard({
              *
              * Everything below scales off the single `--hb-scale`
              * variable (1 normally, 0.68 on a narrower card per the
-             * `.hot-badge` container query in index.css) so the whole
+             * `.product-card` container query in index.css) so the whole
              * badge shrinks together on a smaller card instead of the
              * image and pill drifting out of proportion with each other.
-             * The translateY here re-centers the whole assembly on the
-             * favorite button's own fixed center (top-2 + half of h-8 =
-             * 24px) — without it, this whole badge sits lower than the
-             * favorite button and the plain (non-hot) badge, since the
-             * ball inside hot-badge.png sits well below the image's own
-             * vertical center to begin with (the flame reaches much
-             * higher above the ball than the ball extends below it). */}
-            <div
-              dir="ltr"
-              className="flex items-center"
-              style={{ transform: "translateY(calc(16px - 32.6px * var(--hb-scale)))" }}
-            >
+             * This div is left at its natural (unshifted) position — the
+             * favorite button and the plain badge are the ones that move
+             * to match *this* badge's level (via `--badge-level` in
+             * index.css, defined to equal exactly where the ball inside
+             * hot-badge.png naturally sits), not the other way around. */}
+            <div dir="ltr" className="flex items-center">
               <img
                 src="/hot-badge.png"
                 alt=""
@@ -119,19 +123,49 @@ export function ProductCard({
             </div>
           </div>
         ) : (
-          // Fixed `h-8` + flex centering (matching the favorite button's
-          // own box below) instead of relying on text metrics + padding
-          // to happen to land at the same height — guarantees the same
-          // vertical center regardless of font rendering.
-          <span className="font-label absolute start-2 top-2 z-30 flex h-8 items-center rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 text-xs font-bold text-white shadow-md ring-2 ring-white">
-            -{percentOff}%
+          // Fixed `h-8` + flex centering (rather than relying on text
+          // metrics + padding to happen to land at some height) so its
+          // center lands exactly at `top + 16px`, matching the `-16px`
+          // in its own `top` below. `dir="ltr"` on the *inner* span (not
+          // this outer one) keeps "-52%" reading the same way in Arabic
+          // as in English — plain text with a leading "-" and trailing
+          // "%" is exactly the kind of thing the bidi algorithm reorders
+          // around digits in an RTL context (it was rendering as
+          // "52%-") — while this outer span's own `start-2` stays
+          // logical/RTL-aware, so the badge still lands on the correct
+          // corner instead of colliding with the favorite button (that
+          // bug already happened once before, on the hot badge).
+          <span
+            className="font-label absolute start-2 z-30 flex h-8 items-center rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 text-xs font-bold text-white shadow-md ring-2 ring-white"
+            style={{ top: "calc(var(--badge-level) - 16px)" }}
+          >
+            <span dir="ltr">-{percentOff}%</span>
           </span>
         ))}
-      <FavoriteButton
-        productId={product.id}
-        stopNavigation
-        className="absolute end-2 top-2 z-30 h-8 w-8 bg-white/90 shadow-sm hover:bg-white"
-      />
+        <FavoriteButton
+          productId={product.id}
+          stopNavigation
+          // Scales with the same --hb-scale as the hot badge (so it
+          // shrinks to match on a narrower "all products" card), and its
+          // `top` is pinned to --badge-level — the hot badge's own
+          // natural resting position — rather than a fixed top-2, so it
+          // lines up with the hot badge instead of the hot badge being
+          // pulled up to it. `pointer-events-auto` opts back in since the
+          // wrapping div above turns pointer events off for everything
+          // else in it.
+          className="pointer-events-auto absolute end-2 z-30 bg-white/90 shadow-sm hover:bg-white"
+          style={{
+            top: "calc(var(--badge-level) - 1rem * var(--hb-scale))",
+            height: "calc(2rem * var(--hb-scale))",
+            width: "calc(2rem * var(--hb-scale))",
+          }}
+          iconClassName="shrink-0"
+          iconStyle={{
+            height: "calc(1.25rem * var(--hb-scale))",
+            width: "calc(1.25rem * var(--hb-scale))",
+          }}
+        />
+      </div>
       <div className="aspect-square w-full overflow-hidden rounded-t-xl bg-neutral-100">
         {imageUrl ? (
           <img
