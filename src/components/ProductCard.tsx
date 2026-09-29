@@ -185,38 +185,40 @@ export function ProductCard({
         {/* Always rendered (even without a size) so every card reserves the
          * same vertical space here instead of shrinking. */}
         <span className="font-label text-xs text-neutral-500">{product.size || " "}</span>
-        <div className="font-label mt-auto flex flex-col gap-0.5 pt-1">
-          <div className="flex items-center justify-between">
-            {limitedTimeDiscount ? (
-              <DiscountPrice
-                originalPrice={product.price}
-                newPrice={limitedTimeDiscount.new_price}
-                lang={i18n.language}
-                size="sm"
-              />
-            ) : cheapestTier ? (
-              <DiscountPrice
-                originalPrice={product.price}
-                newPrice={cheapestTier.price}
-                lang={i18n.language}
-                size="sm"
-              />
-            ) : (
-              <span className="font-semibold text-emerald-700">
-                {formatPrice(product.price, i18n.language)}
-                {shouldShowUnit(product.unit) && (
-                  <span className="text-xs font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
-                )}
-              </span>
-            )}
-            {product.in_stock ? (
-              <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="shrink-0" />
-            ) : (
-              <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
-                {t("product.outOfStock")}
-              </span>
-            )}
-          </div>
+        <div className="font-label mt-auto flex flex-col gap-1 pt-1">
+          {limitedTimeDiscount ? (
+            <DiscountPrice
+              originalPrice={product.price}
+              newPrice={limitedTimeDiscount.new_price}
+              lang={i18n.language}
+              size="sm"
+            />
+          ) : cheapestTier ? (
+            <DiscountPrice
+              originalPrice={product.price}
+              newPrice={cheapestTier.price}
+              lang={i18n.language}
+              size="sm"
+            />
+          ) : (
+            <span className="font-semibold text-emerald-700">
+              {formatPrice(product.price, i18n.language)}
+              {shouldShowUnit(product.unit) && (
+                <span className="text-xs font-normal text-neutral-500"> / {t(`unit.${product.unit}`)}</span>
+              )}
+            </span>
+          )}
+          {/* Its own line now (was sharing a row with the price) — the
+           * quantity stepper + cart button together are wider than the
+           * old single icon button, and squeezed next to the price it
+           * was crowding out longer prices/discounts on a narrow card. */}
+          {product.in_stock ? (
+            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="self-start" />
+          ) : (
+            <span className="w-fit rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
+              {t("product.outOfStock")}
+            </span>
+          )}
           {/* The badge/price alone would read as an unconditional price
            * drop — this is the only place left saying it only applies
            * when buying the minimum quantity. */}
