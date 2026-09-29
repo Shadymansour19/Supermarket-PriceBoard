@@ -195,13 +195,49 @@ textarea {
    "all products" grid end up narrower than in the dedicated deals
    sections purely because that page also has a category sidebar eating
    into the same row width — same grid-cols breakpoints, less room left
-   for each card. */
-.hot-badge {
+   for each card.
+
+   Scoped to the card itself (not just the hot badge) so the favorite
+   button and the plain (non-hot) badge can read the same --badge-level —
+   the hot badge's own natural resting position (the ball inside
+   hot-badge.png sits ~32.6px*scale below the badge's top-2 anchor,
+   however tall the badge currently renders) — and match themselves to
+   it, rather than the hot badge being pulled up to match them. */
+.product-card {
   --hb-scale: 1;
+  --badge-level: calc(8px + 32.6px * var(--hb-scale));
 }
 
 @container (max-width: 210px) {
-  .hot-badge {
+  .product-card {
     --hb-scale: 0.68;
+  }
+}
+
+/* A pulsing glow on a hot-deal card's own border line (the plain
+   `border-amber-400`, separate from the fire-frame image layered above
+   it) — the image supplies the flame texture, this is just the crisp
+   line underneath it getting some life of its own. */
+@keyframes card-border-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 4px 1px rgba(251, 191, 36, 0.8),
+      0 0 14px 2px rgba(245, 158, 11, 0.35);
+  }
+  50% {
+    box-shadow:
+      0 0 7px 2px rgba(251, 191, 36, 1),
+      0 0 20px 4px rgba(245, 158, 11, 0.5);
+  }
+}
+
+.card-border-glow {
+  animation: card-border-glow 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-border-glow {
+    animation: none;
   }
 }
