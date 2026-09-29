@@ -2,10 +2,13 @@
  *  notifications) — unlike ContactIcons.tsx, which groups icons that are
  *  only ever used together in the Contact Us dialog. */
 
-type IconProps = { className?: string };
+import type { CSSProperties } from "react";
+
+type IconProps = { className?: string; style?: CSSProperties };
 
 export function HeartIcon({
   className = "h-5 w-5",
+  style,
   filled = false,
 }: IconProps & { filled?: boolean }) {
   return (
@@ -17,6 +20,7 @@ export function HeartIcon({
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      style={style}
       aria-hidden="true"
     >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78Z" />
