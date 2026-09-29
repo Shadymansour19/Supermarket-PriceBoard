@@ -173,9 +173,12 @@ export function DealsCarousel<T>({
         // overflow spec) — a hot-deal card's fire frame pokes well above
         // the card itself, so without this extra top padding it got cut
         // off right at the scroller's own edge, under the section title.
-        // Generous enough to cover the frame's tallest peak even on a
-        // wide desktop card (the poke scales with card width).
-        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-28"
+        // The frame's poke is `21cqw` of the card's own width, and cards
+        // here cap at 300px (`max-w-[300px]` below) — 21% of that is
+        // ~63px, so 80px covers it with a little to spare without leaving
+        // a big dead gap under the title on a narrower card, which is all
+        // a much larger fixed value like the old pt-28 (112px) achieved.
+        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-20"
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}
