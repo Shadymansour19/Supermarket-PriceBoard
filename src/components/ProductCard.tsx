@@ -176,12 +176,7 @@ export function ProductCard({
               </span>
             )}
             {product.in_stock ? (
-              <AddToCartButton
-                productId={product.id}
-                imageUrl={imageUrl}
-                stopNavigation
-                className="h-7 w-7 shrink-0"
-              />
+              <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="shrink-0" />
             ) : (
               <span className="rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
                 {t("product.outOfStock")}
