@@ -38,7 +38,14 @@ export function AddToCartButton({
 
   return (
     <div
-      className={`font-label inline-flex h-7 items-stretch overflow-hidden rounded-md border border-neutral-300 bg-white ${className}`}
+      // `flex` (not `inline-flex`) + the cart button below being `flex-1`
+      // is what lets that button actually grow into whatever width this
+      // whole control is given — an inline-flex container only ever sizes
+      // to its children's own widths, so nothing would be left for a
+      // `flex-1` child to grow into. The `-`/qty/`+` segments keep their
+      // own fixed widths since fixed-size tap targets there is right;
+      // only the cart button should absorb the rest of the available row.
+      className={`font-label flex h-9 items-stretch overflow-hidden rounded-md border border-neutral-300 bg-white ${className}`}
       onClick={(e) => {
         if (stopNavigation) {
           e.preventDefault();
@@ -51,7 +58,7 @@ export function AddToCartButton({
         onClick={() => setQuantity((q) => Math.max(1, q - 1))}
         disabled={quantity <= 1}
         aria-label={t("cart.decreaseQuantity")}
-        className="flex w-5 items-center justify-center text-sm text-neutral-600 hover:bg-neutral-100 disabled:opacity-40"
+        className="flex w-7 shrink-0 items-center justify-center text-base text-neutral-600 hover:bg-neutral-100 disabled:opacity-40"
       >
         −
       </button>
@@ -64,13 +71,13 @@ export function AddToCartButton({
           const parsed = parseInt(e.target.value.replace(/[^0-9]/g, ""), 10);
           setQuantity(Number.isNaN(parsed) ? 1 : Math.max(1, parsed));
         }}
-        className="w-6 border-x border-neutral-300 bg-transparent text-center text-xs font-medium text-neutral-900 focus:outline-none"
+        className="w-7 shrink-0 border-x border-neutral-300 bg-transparent text-center text-sm font-medium text-neutral-900 focus:outline-none"
       />
       <button
         type="button"
         onClick={() => setQuantity((q) => q + 1)}
         aria-label={t("cart.increaseQuantity")}
-        className="flex w-5 items-center justify-center text-sm text-neutral-600 hover:bg-neutral-100"
+        className="flex w-7 shrink-0 items-center justify-center text-base text-neutral-600 hover:bg-neutral-100"
       >
         +
       </button>
@@ -78,11 +85,11 @@ export function AddToCartButton({
         type="button"
         onClick={handleAdd}
         aria-label={t("cart.addToCart")}
-        className={`flex w-7 items-center justify-center text-white transition ${
+        className={`flex flex-1 items-center justify-center text-white transition ${
           justAdded ? "bg-emerald-700" : "bg-emerald-600 hover:bg-emerald-700"
         }`}
       >
-        {justAdded ? <CheckIcon className="h-3.5 w-3.5" /> : <CartIcon className="h-3.5 w-3.5" />}
+        {justAdded ? <CheckIcon className="h-4 w-4" /> : <CartIcon className="h-4 w-4" />}
       </button>
     </div>
   );

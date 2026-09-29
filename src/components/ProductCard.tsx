@@ -213,7 +213,7 @@ export function ProductCard({
            * old single icon button, and squeezed next to the price it
            * was crowding out longer prices/discounts on a narrow card. */}
           {product.in_stock ? (
-            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="self-start" />
+            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="w-full" />
           ) : (
             <span className="w-fit rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
               {t("product.outOfStock")}
