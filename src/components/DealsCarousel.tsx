@@ -183,7 +183,7 @@ export function DealsCarousel<T>({
         // less dead space shows up under the title on a typical (narrower
         // than 300px) card, at the cost of very little room for error at
         // the exact 300px width.
-        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-16"
+        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-12"
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}
