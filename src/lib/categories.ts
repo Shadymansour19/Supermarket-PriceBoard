@@ -75,6 +75,7 @@ export async function createCategory(input: {
   name_ar: string;
   parent_id: string | null;
   sort_order?: number;
+  image_path?: string | null;
 }): Promise<Category> {
   const { data, error } = await supabase
     .from("categories")
@@ -87,7 +88,7 @@ export async function createCategory(input: {
 
 export async function updateCategory(
   id: string,
-  input: Partial<Pick<Category, "name_en" | "name_ar" | "parent_id" | "sort_order">>,
+  input: Partial<Pick<Category, "name_en" | "name_ar" | "parent_id" | "sort_order" | "image_path">>,
 ): Promise<Category> {
   const { data, error } = await supabase
     .from("categories")

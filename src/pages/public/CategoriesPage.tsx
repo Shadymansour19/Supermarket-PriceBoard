@@ -1,14 +1,14 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import { CategoryAvatar } from "../../components/CategoryAvatar";
 import { Chevron } from "../../components/Chevron";
 import { fetchCategoryTree } from "../../lib/categories";
 import { localizedField } from "../../lib/localize";
 import type { CategoryWithChildren } from "../../types/database";
 
 /** Cycled by row index so the list reads as a set of distinct sections at
- * a glance, rather than a flat wall of identical rows — categories have no
- * icon/image of their own to do that job. */
+ * a glance even for a category with no image of its own. */
 const AVATAR_COLORS = [
   "bg-emerald-100 text-emerald-700",
   "bg-amber-100 text-amber-700",
@@ -65,14 +65,12 @@ export function CategoriesPage() {
             return (
               <li key={category.id}>
                 <div className="flex items-center gap-3 px-3 py-2.5">
-                  <span
-                    className={`font-heading flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                      AVATAR_COLORS[index % AVATAR_COLORS.length]
-                    }`}
-                    aria-hidden="true"
-                  >
-                    {name.charAt(0)}
-                  </span>
+                  <CategoryAvatar
+                    imagePath={category.image_path}
+                    name={name}
+                    colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                    className="h-10 w-10 text-sm"
+                  />
                   <Link to={`/category/${category.id}`} className="font-label flex-1 py-1 text-neutral-900">
                     {name}
                   </Link>
@@ -96,12 +94,18 @@ export function CategoriesPage() {
 
                 {hasChildren && isOpen && (
                   <ul className="ms-14 space-y-0.5 border-s border-neutral-200 ps-3 pb-2">
-                    {category.children.map((child) => (
+                    {category.children.map((child, childIndex) => (
                       <li key={child.id}>
                         <Link
                           to={`/category/${child.id}`}
-                          className="font-label block rounded-md px-2 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
+                          className="font-label flex items-center gap-2 rounded-md px-2 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
                         >
+                          <CategoryAvatar
+                            imagePath={child.image_path}
+                            name={localizedField(child, "name", i18n.language)}
+                            colorClass={AVATAR_COLORS[childIndex % AVATAR_COLORS.length]}
+                            className="h-6 w-6 text-xs"
+                          />
                           {localizedField(child, "name", i18n.language)}
                         </Link>
                       </li>

@@ -12,6 +12,7 @@ import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { localizedField } from "../../lib/localize";
 import { fetchProducts } from "../../lib/products";
+import { categoryImageUrl } from "../../lib/supabase";
 import type { CategoryWithChildren, LimitedTimeDiscount, Product } from "../../types/database";
 
 export function CatalogPage() {
@@ -67,15 +68,19 @@ export function CatalogPage() {
 
           {currentTopCategory && currentTopCategory.children.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
-              {currentTopCategory.children.map((child) => (
-                <Link
-                  key={child.id}
-                  to={`/category/${child.id}`}
-                  className="font-label shrink-0 rounded-full border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100"
-                >
-                  {localizedField(child, "name", i18n.language)}
-                </Link>
-              ))}
+              {currentTopCategory.children.map((child) => {
+                const imageUrl = categoryImageUrl(child.image_path);
+                return (
+                  <Link
+                    key={child.id}
+                    to={`/category/${child.id}`}
+                    className="font-label flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100"
+                  >
+                    {imageUrl && <img src={imageUrl} alt="" className="h-4 w-4 shrink-0 rounded-full object-cover" />}
+                    {localizedField(child, "name", i18n.language)}
+                  </Link>
+                );
+              })}
             </div>
           )}
 

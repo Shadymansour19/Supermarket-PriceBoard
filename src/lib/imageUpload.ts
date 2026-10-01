@@ -34,3 +34,24 @@ export async function deleteProductImage(path: string): Promise<void> {
   const { error } = await supabase.storage.from(IMAGE_BUCKET).remove([path]);
   if (error) throw error;
 }
+
+/** Uploads a category image and returns its storage path — same bucket as
+ * products (its policies apply to any path, not just product ids), just
+ * under a "categories/" prefix so the two don't collide. */
+export async function uploadCategoryImage(file: File, categoryId: string): Promise<string> {
+  const prepared = await prepareImage(file);
+  const path = `categories/${categoryId}/${Date.now()}.webp`;
+
+  const { error } = await supabase.storage.from(IMAGE_BUCKET).upload(path, prepared, {
+    contentType: "image/webp",
+    upsert: true,
+  });
+  if (error) throw error;
+
+  return path;
+}
+
+export async function deleteCategoryImage(path: string): Promise<void> {
+  const { error } = await supabase.storage.from(IMAGE_BUCKET).remove([path]);
+  if (error) throw error;
+}

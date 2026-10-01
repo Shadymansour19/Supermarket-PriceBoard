@@ -1,9 +1,24 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useParams } from "react-router-dom";
+import { CategoryAvatar } from "./CategoryAvatar";
 import { Chevron } from "./Chevron";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
+
+/** Only shown as a fallback when a category has no image of its own — see
+ * CategoryAvatar. Index-cycled like the other category listings, for the
+ * same "distinct section at a glance" reason. */
+const AVATAR_COLORS = [
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700",
+  "bg-sky-100 text-sky-700",
+  "bg-rose-100 text-rose-700",
+  "bg-violet-100 text-violet-700",
+  "bg-teal-100 text-teal-700",
+  "bg-orange-100 text-orange-700",
+  "bg-indigo-100 text-indigo-700",
+];
 
 export function CategoryNav({ categories }: { categories: CategoryWithChildren[] }) {
   const { t, i18n } = useTranslation();
@@ -44,9 +59,10 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
       </NavLink>
 
       <ul className="space-y-1">
-        {categories.map((category) => {
+        {categories.map((category, index) => {
           const isOpen = expanded.has(category.id);
           const hasChildren = category.children.length > 0;
+          const name = localizedField(category, "name", i18n.language);
 
           return (
             <li key={category.id}>
@@ -65,12 +81,18 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
                 <NavLink
                   to={`/category/${category.id}`}
                   className={({ isActive }) =>
-                    `font-label block flex-1 rounded-md px-2 py-1.5 text-sm font-semibold ${
+                    `font-label flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold ${
                       hasChildren ? "" : "ms-6"
                     } ${isActive ? "bg-emerald-600 text-white" : "text-neutral-900 hover:bg-neutral-100"}`
                   }
                 >
-                  {localizedField(category, "name", i18n.language)}
+                  <CategoryAvatar
+                    imagePath={category.image_path}
+                    name={name}
+                    colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                    className="h-5 w-5 text-[10px]"
+                  />
+                  {name}
                 </NavLink>
               </div>
               {hasChildren && isOpen && (

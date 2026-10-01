@@ -24,6 +24,7 @@ export type Category = {
   name_ar: string;
   sort_order: number;
   created_at: string;
+  image_path: string | null;
 };
 
 export type Product = {

@@ -1,9 +1,11 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryForm, type CategoryFormValues } from "../../components/admin/CategoryForm";
+import { CategoryAvatar } from "../../components/CategoryAvatar";
 import { Chevron } from "../../components/Chevron";
 import { SearchBar } from "../../components/SearchBar";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
+import { deleteCategoryImage, uploadCategoryImage } from "../../lib/imageUpload";
 import type { Category, CategoryWithChildren } from "../../types/database";
 
 function matchesSearch(category: Category, query: string) {
@@ -73,14 +75,28 @@ export function AdminCategoriesPage() {
     reload();
   }, [reload]);
 
-  async function handleSubmit(values: CategoryFormValues) {
+  async function handleSubmit(values: CategoryFormValues, imageFile: File | null, removeImage: boolean) {
     setActionError(null);
+    const previousImagePath = formMode?.kind === "edit" ? formMode.category.image_path : null;
     try {
+      let category: Category;
       if (formMode?.kind === "edit") {
-        await updateCategory(formMode.category.id, values);
+        category = await updateCategory(formMode.category.id, values);
       } else {
-        await createCategory(values);
+        category = await createCategory(values);
       }
+
+      if (imageFile) {
+        const path = await uploadCategoryImage(imageFile, category.id);
+        await updateCategory(category.id, { image_path: path });
+        // Best-effort cleanup of the photo it replaced — not critical if
+        // this fails, so it shouldn't block the save that already succeeded.
+        if (previousImagePath) await deleteCategoryImage(previousImagePath).catch(() => {});
+      } else if (removeImage && previousImagePath) {
+        await updateCategory(category.id, { image_path: null });
+        await deleteCategoryImage(previousImagePath).catch(() => {});
+      }
+
       // Make sure the category just added/edited is actually visible.
       if (values.parent_id) {
         setExpanded((prev) => new Set(prev).add(values.parent_id!));
@@ -97,6 +113,7 @@ export function AdminCategoriesPage() {
     setActionError(null);
     try {
       await deleteCategory(category.id);
+      if (category.image_path) await deleteCategoryImage(category.image_path).catch(() => {});
       await reload();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
@@ -189,14 +206,11 @@ export function AdminCategoriesPage() {
                     <span className="w-5 shrink-0 text-center text-neutral-400" aria-hidden="true">
                       {hasChildren && <Chevron open={isOpen} />}
                     </span>
-                    <span
-                      className={`font-heading flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold ${
-                        AVATAR_COLORS[index % AVATAR_COLORS.length]
-                      }`}
-                      aria-hidden="true"
-                    >
-                      {category.name_en.charAt(0)}
-                    </span>
+                    <CategoryAvatar
+                      imagePath={category.image_path}
+                      name={category.name_en}
+                      colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                    />
                     <span className="min-w-0 truncate font-medium text-neutral-900">
                       {category.name_en} / {category.name_ar}
                     </span>
@@ -224,14 +238,22 @@ export function AdminCategoriesPage() {
                 </div>
                 {hasChildren && isOpen && (
                   <ul className="ms-6 space-y-0.5 border-s border-neutral-200 ps-3 pb-2">
-                    {category.children.map((child) => (
+                    {category.children.map((child, childIndex) => (
                       <li
                         key={child.id}
                         className="flex flex-col gap-1.5 py-1.5 pe-2 sm:flex-row sm:items-center sm:justify-between"
                       >
-                        <span className="text-sm text-neutral-700">
-                          {child.name_en} / {child.name_ar}
-                        </span>
+                        <div className="flex min-w-0 items-center gap-2">
+                          <CategoryAvatar
+                            imagePath={child.image_path}
+                            name={child.name_en}
+                            colorClass={AVATAR_COLORS[childIndex % AVATAR_COLORS.length]}
+                            className="h-6 w-6 text-xs"
+                          />
+                          <span className="truncate text-sm text-neutral-700">
+                            {child.name_en} / {child.name_ar}
+                          </span>
+                        </div>
                         <CategoryActions
                           onEdit={() => setFormMode({ kind: "edit", category: child })}
                           onDelete={() => handleDelete(child)}

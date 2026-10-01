@@ -20,4 +20,13 @@ export function productImageUrl(path: string | null): string | null {
     .publicUrl;
 }
 
+/** Same bucket as products (see uploadCategoryImage) — just a differently
+ * named accessor so call sites read clearly even though the underlying
+ * storage is shared. */
+export function categoryImageUrl(path: string | null): string | null {
+  if (!path) return null;
+  return supabase.storage.from(IMAGE_BUCKET).getPublicUrl(path).data
+    .publicUrl;
+}
+
 export { IMAGE_BUCKET };
