@@ -4,6 +4,10 @@ import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "./CategoryAvatar";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
 
+/** How many categories the home page teaser shows before "Show more" takes
+ * over — the full list lives on the dedicated /categories page. */
+const PREVIEW_LIMIT = 8;
+
 /**
  * Horizontally-scrollable row of top-level categories, shown on the
  * customer-facing home page as a quick-access shortcut — the sidebar
@@ -13,12 +17,20 @@ import type { CategoryWithChildren } from "../types/database";
 export function TopCategoriesRow({ categories }: { categories: CategoryWithChildren[] }) {
   const { t, i18n } = useTranslation();
   if (categories.length === 0) return null;
+  const preview = categories.slice(0, PREVIEW_LIMIT);
 
   return (
     <div className="md:hidden">
-      <h2 className="font-heading mb-2 text-lg font-semibold text-neutral-900">{t("nav.topCategories")}</h2>
+      <div className="mb-2 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-semibold text-neutral-900">{t("nav.topCategories")}</h2>
+        {categories.length > PREVIEW_LIMIT && (
+          <Link to="/categories" className="font-label text-sm font-medium text-emerald-700 hover:underline">
+            {t("deals.showMore")}
+          </Link>
+        )}
+      </div>
       <div className="scrollbar-hide -mx-4 flex gap-4 overflow-x-auto px-4 pb-1">
-        {categories.map((category, index) => (
+        {preview.map((category, index) => (
           <Link
             key={category.id}
             to={`/category/${category.id}`}
