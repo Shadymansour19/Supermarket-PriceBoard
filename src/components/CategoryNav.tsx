@@ -1,24 +1,10 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useParams } from "react-router-dom";
-import { CategoryAvatar } from "./CategoryAvatar";
+import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "./CategoryAvatar";
 import { Chevron } from "./Chevron";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
-
-/** Only shown as a fallback when a category has no image of its own — see
- * CategoryAvatar. Index-cycled like the other category listings, for the
- * same "distinct section at a glance" reason. */
-const AVATAR_COLORS = [
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-sky-100 text-sky-700",
-  "bg-rose-100 text-rose-700",
-  "bg-violet-100 text-violet-700",
-  "bg-teal-100 text-teal-700",
-  "bg-orange-100 text-orange-700",
-  "bg-indigo-100 text-indigo-700",
-];
 
 export function CategoryNav({ categories }: { categories: CategoryWithChildren[] }) {
   const { t, i18n } = useTranslation();
@@ -89,7 +75,7 @@ export function CategoryNav({ categories }: { categories: CategoryWithChildren[]
                   <CategoryAvatar
                     imagePath={category.image_path}
                     name={name}
-                    colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                    colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
                     className="h-5 w-5 text-[10px]"
                   />
                   {name}

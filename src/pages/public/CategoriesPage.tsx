@@ -1,24 +1,11 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { CategoryAvatar } from "../../components/CategoryAvatar";
+import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "../../components/CategoryAvatar";
 import { Chevron } from "../../components/Chevron";
 import { fetchCategoryTree } from "../../lib/categories";
 import { localizedField } from "../../lib/localize";
 import type { CategoryWithChildren } from "../../types/database";
-
-/** Cycled by row index so the list reads as a set of distinct sections at
- * a glance even for a category with no image of its own. */
-const AVATAR_COLORS = [
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-sky-100 text-sky-700",
-  "bg-rose-100 text-rose-700",
-  "bg-violet-100 text-violet-700",
-  "bg-teal-100 text-teal-700",
-  "bg-orange-100 text-orange-700",
-  "bg-indigo-100 text-indigo-700",
-];
 
 /**
  * Dedicated "browse by category" page, reached from the mobile bottom nav
@@ -68,7 +55,7 @@ export function CategoriesPage() {
                   <CategoryAvatar
                     imagePath={category.image_path}
                     name={name}
-                    colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                    colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
                     className="h-10 w-10 text-sm"
                   />
                   <Link to={`/category/${category.id}`} className="font-label flex-1 py-1 text-neutral-900">
@@ -103,7 +90,7 @@ export function CategoriesPage() {
                           <CategoryAvatar
                             imagePath={child.image_path}
                             name={localizedField(child, "name", i18n.language)}
-                            colorClass={AVATAR_COLORS[childIndex % AVATAR_COLORS.length]}
+                            colorClass={CATEGORY_AVATAR_COLORS[childIndex % CATEGORY_AVATAR_COLORS.length]}
                             className="h-6 w-6 text-xs"
                           />
                           {localizedField(child, "name", i18n.language)}

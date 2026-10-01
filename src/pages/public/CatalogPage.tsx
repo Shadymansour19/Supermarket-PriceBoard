@@ -8,6 +8,7 @@ import { ProductCard } from "../../components/ProductCard";
 import { QuantityDealsSection } from "../../components/QuantityDealsSection";
 import { RecentlyViewedSection } from "../../components/RecentlyViewedSection";
 import { SearchBar } from "../../components/SearchBar";
+import { TopCategoriesRow } from "../../components/TopCategoriesRow";
 import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { localizedField } from "../../lib/localize";
@@ -65,6 +66,8 @@ export function CatalogPage() {
         </aside>
         <section className="space-y-4">
           <SearchBar value={search} onChange={(q) => setSearchParams(q ? { q } : {})} />
+
+          {isHome && <TopCategoriesRow categories={categories} />}
 
           {currentTopCategory && currentTopCategory.children.length > 0 && (
             <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">

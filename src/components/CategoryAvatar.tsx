@@ -1,5 +1,20 @@
 import { categoryImageUrl } from "../lib/supabase";
 
+/** Cycled by index wherever a list of categories needs a fallback color per
+ * row/item — shared so every category listing (sidebar, categories page,
+ * admin list, this row) reads as the same consistent set of colors instead
+ * of each screen inventing its own. */
+export const CATEGORY_AVATAR_COLORS = [
+  "bg-emerald-100 text-emerald-700",
+  "bg-amber-100 text-amber-700",
+  "bg-sky-100 text-sky-700",
+  "bg-rose-100 text-rose-700",
+  "bg-violet-100 text-violet-700",
+  "bg-teal-100 text-teal-700",
+  "bg-orange-100 text-orange-700",
+  "bg-indigo-100 text-indigo-700",
+];
+
 /**
  * A category's own image if it has one, otherwise the same colored-letter
  * fallback used everywhere a category needs a small visual anchor (admin

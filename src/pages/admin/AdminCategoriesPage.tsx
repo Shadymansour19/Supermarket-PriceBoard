@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryForm, type CategoryFormValues } from "../../components/admin/CategoryForm";
-import { CategoryAvatar } from "../../components/CategoryAvatar";
+import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "../../components/CategoryAvatar";
 import { Chevron } from "../../components/Chevron";
 import { SearchBar } from "../../components/SearchBar";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
@@ -15,20 +15,6 @@ function matchesSearch(category: Category, query: string) {
 type FormMode =
   | { kind: "create"; parentId?: string }
   | { kind: "edit"; category: Category };
-
-/** Same palette as the public CategoriesPage, cycled by row index, so a
- * category reads as a distinct section at a glance here too instead of a
- * flat wall of text — categories have no icon/image of their own. */
-const AVATAR_COLORS = [
-  "bg-emerald-100 text-emerald-700",
-  "bg-amber-100 text-amber-700",
-  "bg-sky-100 text-sky-700",
-  "bg-rose-100 text-rose-700",
-  "bg-violet-100 text-violet-700",
-  "bg-teal-100 text-teal-700",
-  "bg-orange-100 text-orange-700",
-  "bg-indigo-100 text-indigo-700",
-];
 
 export function AdminCategoriesPage() {
   const { t } = useTranslation();
@@ -209,7 +195,7 @@ export function AdminCategoriesPage() {
                     <CategoryAvatar
                       imagePath={category.image_path}
                       name={category.name_en}
-                      colorClass={AVATAR_COLORS[index % AVATAR_COLORS.length]}
+                      colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
                     />
                     <span className="min-w-0 truncate font-medium text-neutral-900">
                       {category.name_en} / {category.name_ar}
@@ -247,7 +233,7 @@ export function AdminCategoriesPage() {
                           <CategoryAvatar
                             imagePath={child.image_path}
                             name={child.name_en}
-                            colorClass={AVATAR_COLORS[childIndex % AVATAR_COLORS.length]}
+                            colorClass={CATEGORY_AVATAR_COLORS[childIndex % CATEGORY_AVATAR_COLORS.length]}
                             className="h-6 w-6 text-xs"
                           />
                           <span className="truncate text-sm text-neutral-700">
