@@ -14,7 +14,7 @@ const resources = {
         subtitle: "Everything your home needs, all in one place, at prices you'll love.",
         cta: "Let's check out today's deals!",
       },
-      nav: { home: "Home", allCategories: "All categories", categories: "Categories" },
+      nav: { home: "Home", allCategories: "All categories", categories: "Categories", topCategories: "Top categories" },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
       product: {
         price: "Price",
@@ -234,7 +234,7 @@ const resources = {
         subtitle: "كل اللي بيتك محتاجه، في مكان واحد وبأحلى الأسعار!",
         cta: "شوف العروض دلوقتي",
       },
-      nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام" },
+      nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام", topCategories: "أهم الأقسام" },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
       product: {
         price: "السعر",
