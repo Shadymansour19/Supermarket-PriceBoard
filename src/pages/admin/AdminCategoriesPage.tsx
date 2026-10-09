@@ -4,6 +4,7 @@ import { CategoryForm, type CategoryFormValues } from "../../components/admin/Ca
 import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "../../components/CategoryAvatar";
 import { Chevron } from "../../components/Chevron";
 import { SearchBar } from "../../components/SearchBar";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
 import { deleteCategoryImage, uploadCategoryImage } from "../../lib/imageUpload";
 import type { Category, CategoryWithChildren } from "../../types/database";
@@ -18,6 +19,7 @@ type FormMode =
 
 export function AdminCategoriesPage() {
   const { t } = useTranslation();
+  const confirmDialog = useConfirmDialog();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<FormMode | null>(null);
@@ -95,7 +97,7 @@ export function AdminCategoriesPage() {
   }
 
   async function handleDelete(category: Category) {
-    if (!confirm(t("common.confirmDelete"))) return;
+    if (!(await confirmDialog({ message: t("common.confirmDelete"), destructive: true }))) return;
     setActionError(null);
     try {
       await deleteCategory(category.id);

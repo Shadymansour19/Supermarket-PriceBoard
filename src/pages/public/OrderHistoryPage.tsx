@@ -4,11 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { CloseIcon } from "../../components/ContactIcons";
 import { CartIcon } from "../../components/Icons";
 import { useCart } from "../../context/CartContext";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { formatPrice } from "../../lib/localize";
 import { clearOrderHistory, getOrderHistory, type OrderHistoryEntry } from "../../lib/orderHistory";
 
 export function OrderHistoryPage() {
   const { t, i18n } = useTranslation();
+  const confirmDialog = useConfirmDialog();
   const { items, addToCart, clearCart } = useCart();
   const navigate = useNavigate();
   const [orders, setOrders] = useState<OrderHistoryEntry[]>([]);
@@ -22,8 +24,8 @@ export function OrderHistoryPage() {
     setOrders(getOrderHistory());
   }, []);
 
-  function handleClear() {
-    if (!confirm(t("orderHistory.confirmClearHistory"))) return;
+  async function handleClear() {
+    if (!(await confirmDialog({ message: t("orderHistory.confirmClearHistory"), destructive: true }))) return;
     clearOrderHistory();
     setOrders([]);
   }

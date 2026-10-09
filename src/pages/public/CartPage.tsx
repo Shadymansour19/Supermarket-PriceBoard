@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { CloseIcon, WhatsAppIcon } from "../../components/ContactIcons";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { useCart } from "../../context/CartContext";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { CONTACT } from "../../config";
 import { recordOrderLineItems } from "../../lib/bestSellers";
 import { confirmAfterReturn } from "../../lib/confirmAfterReturn";
@@ -39,6 +40,7 @@ function unitPriceFor(
 
 export function CartPage() {
   const { t, i18n } = useTranslation();
+  const confirmDialog = useConfirmDialog();
   const { items, setItemQuantity, removeFromCart, clearCart } = useCart();
   const [products, setProducts] = useState<Product[]>([]);
   const [limitedTimeMap, setLimitedTimeMap] = useState<Map<string, LimitedTimeDiscount>>(new Map());
@@ -78,13 +80,13 @@ export function CartPage() {
 
   const total = rows.reduce((sum, row) => sum + row.subtotal, 0);
 
-  function handleClear() {
-    if (!confirm(t("cart.confirmClearCart"))) return;
+  async function handleClear() {
+    if (!(await confirmDialog({ message: t("cart.confirmClearCart"), destructive: true }))) return;
     clearCart();
   }
 
-  function handleRemove(productId: string) {
-    if (!confirm(t("cart.confirmRemoveItem"))) return;
+  async function handleRemove(productId: string) {
+    if (!(await confirmDialog({ message: t("cart.confirmRemoveItem"), destructive: true }))) return;
     removeFromCart(productId);
   }
 
@@ -117,12 +119,14 @@ export function CartPage() {
     // and clearing the cart immediately on click would risk wiping it out
     // for someone who back out of sending after all.
     confirmAfterReturn(() => {
-      if (!confirm(t("cart.confirmOrderSent"))) return;
-      recordOrder(orderItems, total);
-      recordOrderLineItems(orderItems.map((item) => ({ productId: item.productId, quantity: item.quantity }))).catch(
-        () => {},
-      );
-      clearCart();
+      confirmDialog(t("cart.confirmOrderSent")).then((confirmed) => {
+        if (!confirmed) return;
+        recordOrder(orderItems, total);
+        recordOrderLineItems(orderItems.map((item) => ({ productId: item.productId, quantity: item.quantity }))).catch(
+          () => {},
+        );
+        clearCart();
+      });
     });
   }
 

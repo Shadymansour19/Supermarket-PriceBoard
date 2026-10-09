@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { ProductDiscountsModal } from "../../components/admin/ProductDiscountsModal";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
 import { SearchBar } from "../../components/SearchBar";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { fetchCategoryTree } from "../../lib/categories";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
@@ -66,6 +67,7 @@ function ProductActions({
 
 export function AdminProductsPage() {
   const { t, i18n } = useTranslation();
+  const confirmDialog = useConfirmDialog();
   const [products, setProducts] = useState<Product[]>([]);
   const [categoryTree, setCategoryTree] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
@@ -139,7 +141,7 @@ export function AdminProductsPage() {
   }
 
   async function handleDelete(product: Product) {
-    if (!confirm(t("common.confirmDelete"))) return;
+    if (!(await confirmDialog({ message: t("common.confirmDelete"), destructive: true }))) return;
     setActionError(null);
     try {
       await deleteProduct(product.id);

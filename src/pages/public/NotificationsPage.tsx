@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { CloseIcon } from "../../components/ContactIcons";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { clearNotificationLog, getNotificationLog, type NotificationLogEntry } from "../../lib/notificationLog";
 
@@ -13,6 +14,7 @@ function isIOS() {
 
 export function NotificationsPage() {
   const { t, i18n } = useTranslation();
+  const confirmDialog = useConfirmDialog();
   const { supported, subscribed, loading, blocked, error, subscribe, unsubscribe } = usePushNotifications();
   const [showBlockedHint, setShowBlockedHint] = useState(false);
   const [showErrorHint, setShowErrorHint] = useState(false);
@@ -62,7 +64,7 @@ export function NotificationsPage() {
   }
 
   async function handleClearHistory() {
-    if (!confirm(t("notifications.confirmClearHistory"))) return;
+    if (!(await confirmDialog({ message: t("notifications.confirmClearHistory"), destructive: true }))) return;
     await clearNotificationLog();
     setLog([]);
   }

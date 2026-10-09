@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./components/admin/ProtectedRoute";
 import { PublicLayout } from "./components/PublicLayout";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
+import { ConfirmDialogProvider } from "./context/ConfirmDialogContext";
 import { FavoritesProvider } from "./context/FavoritesContext";
 import { useAdminManifest } from "./hooks/useAdminManifest";
 import { useDocumentDirection } from "./hooks/useDocumentDirection";
@@ -25,41 +26,43 @@ export default function App() {
   useAdminManifest();
 
   return (
-    <AuthProvider>
-      <FavoritesProvider>
-        <CartProvider>
-          <Routes>
-            <Route element={<PublicLayout />}>
-              <Route index element={<CatalogPage />} />
-              <Route path="category/:categoryId" element={<CatalogPage />} />
-              <Route path="categories" element={<CategoriesPage />} />
-              <Route path="deals" element={<DealsPage />} />
-              <Route path="wholesale-deals" element={<WholesaleDealsPage />} />
-              <Route path="favorites" element={<FavoritesPage />} />
-              <Route path="notifications" element={<NotificationsPage />} />
-              <Route path="cart" element={<CartPage />} />
-              <Route path="orders" element={<OrderHistoryPage />} />
-              <Route path="product/:productId" element={<ProductDetailPage />} />
-            </Route>
+    <ConfirmDialogProvider>
+      <AuthProvider>
+        <FavoritesProvider>
+          <CartProvider>
+            <Routes>
+              <Route element={<PublicLayout />}>
+                <Route index element={<CatalogPage />} />
+                <Route path="category/:categoryId" element={<CatalogPage />} />
+                <Route path="categories" element={<CategoriesPage />} />
+                <Route path="deals" element={<DealsPage />} />
+                <Route path="wholesale-deals" element={<WholesaleDealsPage />} />
+                <Route path="favorites" element={<FavoritesPage />} />
+                <Route path="notifications" element={<NotificationsPage />} />
+                <Route path="cart" element={<CartPage />} />
+                <Route path="orders" element={<OrderHistoryPage />} />
+                <Route path="product/:productId" element={<ProductDetailPage />} />
+              </Route>
 
-            <Route path="admin/login" element={<LoginPage />} />
-            <Route
-              path="admin"
-              element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="products" replace />} />
-              <Route path="products" element={<AdminProductsPage />} />
-              <Route path="categories" element={<AdminCategoriesPage />} />
-            </Route>
+              <Route path="admin/login" element={<LoginPage />} />
+              <Route
+                path="admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<Navigate to="products" replace />} />
+                <Route path="products" element={<AdminProductsPage />} />
+                <Route path="categories" element={<AdminCategoriesPage />} />
+              </Route>
 
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </CartProvider>
-      </FavoritesProvider>
-    </AuthProvider>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </CartProvider>
+        </FavoritesProvider>
+      </AuthProvider>
+    </ConfirmDialogProvider>
   );
 }
