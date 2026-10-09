@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
+import { BestSellersSection } from "../../components/BestSellersSection";
 import { CategoryNav } from "../../components/CategoryNav";
 import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
@@ -89,6 +90,7 @@ export function CatalogPage() {
 
           {isHome && <LimitedTimeDealsSection />}
           {isHome && <QuantityDealsSection />}
+          {isHome && <BestSellersSection />}
           {isHome && <RecentlyViewedSection />}
 
           {loading && <p className="text-neutral-500">{t("common.loading")}</p>}

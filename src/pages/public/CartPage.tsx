@@ -5,6 +5,7 @@ import { CloseIcon, WhatsAppIcon } from "../../components/ContactIcons";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { useCart } from "../../context/CartContext";
 import { CONTACT } from "../../config";
+import { recordOrderLineItems } from "../../lib/bestSellers";
 import { confirmAfterReturn } from "../../lib/confirmAfterReturn";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
 import { formatPrice, localizedField } from "../../lib/localize";
@@ -118,6 +119,9 @@ export function CartPage() {
     confirmAfterReturn(() => {
       if (!confirm(t("cart.confirmOrderSent"))) return;
       recordOrder(orderItems, total);
+      recordOrderLineItems(orderItems.map((item) => ({ productId: item.productId, quantity: item.quantity }))).catch(
+        () => {},
+      );
       clearCart();
     });
   }

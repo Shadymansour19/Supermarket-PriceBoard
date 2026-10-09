@@ -197,6 +197,10 @@ const resources = {
         sectionTitle: "Recently viewed",
         goToSlide: "Go to product {{count}}",
       },
+      bestSellers: {
+        sectionTitle: "Best sellers",
+        goToSlide: "Go to product {{count}}",
+      },
       similarProducts: {
         sectionTitle: "Similar products",
         goToSlide: "Go to product {{count}}",
@@ -424,6 +428,10 @@ const resources = {
       },
       recentlyViewed: {
         sectionTitle: "شوفته قبل كده",
+        goToSlide: "الانتقال إلى المنتج {{count}}",
+      },
+      bestSellers: {
+        sectionTitle: "المنتجات الأكثر مبيعًا",
         goToSlide: "الانتقال إلى المنتج {{count}}",
       },
       similarProducts: {
