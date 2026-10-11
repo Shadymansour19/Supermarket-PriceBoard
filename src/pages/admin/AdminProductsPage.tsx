@@ -192,6 +192,7 @@ export function AdminProductsPage() {
             initial={formMode.kind === "edit" ? formMode.product : undefined}
             onSubmit={handleSubmit}
             onCancel={() => setFormMode(null)}
+            onCreateAd={formMode.kind === "edit" ? () => setNewProductAd(formMode.product) : undefined}
           />
         </div>
       )}

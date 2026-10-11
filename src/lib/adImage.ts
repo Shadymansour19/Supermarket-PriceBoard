@@ -34,6 +34,10 @@ const body = (size: number, weight = 700) => `${weight} ${size}px ${BODY}`;
 // poster name, Lalezar = bold price numerals.
 const brush = (size: number) => `400 ${size}px Rakkas, Lalezar, ${BODY}`;
 const block = (size: number) => `900 ${size}px ${BODY}`;
+// Badge faces, picked from the reference lettering: a rounded, friendly
+// face for the label and a wide bubbly one for the price.
+const badgeLabel = (size: number) => `800 ${size}px "Playpen Sans Arabic", ${BODY}`;
+const badgePrice = (size: number) => `700 ${size}px Lemonada, ${BODY}`;
 const numeral = (size: number) => `400 ${size}px Lalezar, ${BODY}`;
 
 const arabicNumber = new Intl.NumberFormat("ar-EG", { maximumFractionDigits: 2 });
@@ -187,16 +191,25 @@ function dropShadow(ctx: Ctx, blur = 30, dy = 14, alpha = 0.4) {
 // ---------------------------------------------------------------------------
 
 type Theme = {
+  /** Solid colour panel behind the headline (and the buttons/circles). */
+  dark: string;
+  /** Light field the photo sits on. */
+  field: string;
+  /** Text/lines on the light field. */
+  ink: string;
+  /** Highlight on the dark panel: script lines, underline, glyphs. */
   accent: string;
-  accentDark: string;
-  onAccent: string;
-  script: string;
+  /** Fill for the badges that sit on the light field — chosen per palette
+   * so it harmonises with the field instead of clashing with it. */
+  tag: string;
 };
 
+// Two-tone palettes in the style of the cold-coffee reference: one flat
+// dark colour, one light field, one warm highlight.
 const THEMES: Record<AdSpec["kind"], Theme> = {
-  new: { accent: "#ffb300", accentDark: "#d98e00", onAccent: "#111111", script: "#ffdf70" },
-  limited: { accent: "#e5322d", accentDark: "#b3231f", onAccent: "#ffffff", script: "#ffd23f" },
-  quantity: { accent: "#14b87f", accentDark: "#0d8a60", onAccent: "#05140d", script: "#7ef0c0" },
+  new: { dark: "#0f4a3a", field: "#a6dcbf", ink: "#0b3a2d", accent: "#f6b100", tag: "#ffeea8" },
+  limited: { dark: "#7b1325", field: "#f4a3a0", ink: "#5e0e1c", accent: "#ffb703", tag: "#fff3ea" },
+  quantity: { dark: "#11315f", field: "#a7c4ee", ink: "#0c2548", accent: "#ff9f1c", tag: "#fff6e3" },
 };
 
 function lcg(seed: number) {
@@ -225,122 +238,47 @@ function bezier(t: number, p: number[][]): [number, number] {
   return [x, y];
 }
 
-/** The border between the black field and the colour field: a strip down
- * the left edge that sweeps, in one smooth curve, into the poster's bottom. */
+/** The border between the dark panel and the light field: one smooth
+ * S-curve — down the left side, then sweeping out to the right edge. */
 function borderPoints(): [number, number][] {
   const pts: [number, number][] = [];
-  for (let y = 0; y <= 470; y += 10) pts.push([250 - y * 0.07 + Math.sin(y / 47) * 7 + Math.sin(y / 17) * 3, y]);
-  const curve = [
-    [pts[pts.length - 1][0], 470],
-    [190, 640],
-    [700, 690],
-    [AD_WIDTH + 40, 830],
+  const upper = [
+    [390, 0],
+    [390, 170],
+    [200, 270],
+    [235, 450],
   ];
-  for (let t = 0.02; t <= 1.0001; t += 0.02) pts.push(bezier(t, curve));
+  const lower = [
+    [235, 450],
+    [275, 640],
+    [640, 802],
+    [AD_WIDTH + 60, 1018],
+  ];
+  for (let t = 0; t <= 1.0001; t += 0.02) pts.push(bezier(t, upper));
+  for (let t = 0.02; t <= 1.0001; t += 0.02) pts.push(bezier(t, lower));
   return pts;
 }
 
-/** A tapered brush flick: fat in the middle, pointed at both ends. */
-function flick(ctx: Ctx, x0: number, y0: number, x1: number, y1: number, bow: number, width: number, color: string) {
-  const mx = (x0 + x1) / 2 + bow;
-  const my = (y0 + y1) / 2 - bow * 0.6;
-  const dx = y1 - y0;
-  const dy = x0 - x1;
-  const len = Math.hypot(dx, dy) || 1;
-  const nx = (dx / len) * width;
-  const ny = (dy / len) * width;
-  ctx.fillStyle = color;
-  ctx.beginPath();
-  ctx.moveTo(x0, y0);
-  ctx.quadraticCurveTo(mx + nx, my + ny, x1, y1);
-  ctx.quadraticCurveTo(mx - nx * 0.4, my - ny * 0.4, x0, y0);
-  ctx.fill();
+/** Adds the light field's outline to the current path (no begin/fill). */
+function lightFieldPath(ctx: Ctx) {
+  const border = borderPoints();
+  ctx.moveTo(0, 0);
+  ctx.lineTo(border[0][0], 0);
+  for (const [x, y] of border) ctx.lineTo(x, y);
+  ctx.lineTo(AD_WIDTH, AD_HEIGHT);
+  ctx.lineTo(0, AD_HEIGHT);
+  ctx.closePath();
 }
 
 function drawBackground(ctx: Ctx, theme: Theme) {
-  ctx.fillStyle = "#0c0c0c";
+  ctx.fillStyle = theme.dark;
   ctx.fillRect(0, 0, AD_WIDTH, AD_HEIGHT);
-  const rnd = lcg(7);
-  for (let i = 0; i < 900; i++) {
-    ctx.fillStyle = `rgba(255,255,255,${0.02 + rnd() * 0.04})`;
-    ctx.fillRect(rnd() * AD_WIDTH, rnd() * AD_HEIGHT, 1 + rnd() * 2, 1 + rnd() * 2);
-  }
-  const glow = ctx.createRadialGradient(580, 790, 40, 580, 790, 520);
-  glow.addColorStop(0, "rgba(255,255,255,0.12)");
-  glow.addColorStop(1, "rgba(255,255,255,0)");
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, AD_WIDTH, AD_HEIGHT);
-
-  const border = borderPoints();
-  const fillField = (dx: number, dy: number, color: string) => {
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(border[0][0] + dx, 0);
-    for (const [x, y] of border) ctx.lineTo(x + dx, y + dy);
-    ctx.lineTo(AD_WIDTH, AD_HEIGHT);
-    ctx.lineTo(0, AD_HEIGHT);
-    ctx.closePath();
-    ctx.fillStyle = color;
-    ctx.fill();
-  };
-  // Darker offset copy underneath = the brush's thick wet edge.
-  fillField(-16, -16, theme.accentDark);
-  fillField(0, 0, theme.accent);
-
-  // Dry-brush bristles along the border: thin streaks that spill a little
-  // past the edge in the colour, and thin dark ones that cut back into it.
-  const rnd2 = lcg(33);
-  ctx.lineCap = "round";
-  for (let i = 1; i < border.length - 1; i++) {
-    const [x, y] = border[i];
-    const [px, py] = border[i - 1];
-    const [nx2, ny2] = border[i + 1];
-    const tx = nx2 - px;
-    const ty = ny2 - py;
-    const tl = Math.hypot(tx, ty) || 1;
-    // Outward normal (towards the black side): up/right of the stroke.
-    const ox = ty / tl;
-    const oy = -tx / tl;
-    for (let k = 0; k < 3; k++) {
-      if (rnd2() < 0.75) continue;
-      const off = (rnd2() - 0.5) * 20;
-      const sx = x + (tx / tl) * off;
-      const sy = y + (ty / tl) * off;
-      const len = 4 + rnd2() * 20;
-      ctx.lineWidth = 1.5 + rnd2() * 3;
-      ctx.strokeStyle = theme.accent;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.lineTo(sx + ox * len, sy + oy * len);
-      ctx.stroke();
-      if (rnd2() < 0.6) {
-        ctx.strokeStyle = "rgba(12,12,12,0.45)";
-        ctx.lineWidth = 1.5 + rnd2() * 2;
-        ctx.beginPath();
-        ctx.moveTo(sx, sy);
-        ctx.lineTo(sx - ox * (4 + rnd2() * 18), sy - oy * (4 + rnd2() * 18));
-        ctx.stroke();
-      }
-    }
-  }
-  // Black brush flicks crossing the colour field, and a colour flick
-  // crossing into the black — like the reference's loose strokes.
-  flick(ctx, -20, 905, 330, 845, 18, 12, "#0c0c0c");
-  flick(ctx, -20, 945, 250, 915, 10, 7, "#0c0c0c");
-  flick(ctx, 760, 925, AD_WIDTH + 20, 835, -14, 12, "#0c0c0c");
-
-  // Dry-brush streaks across the colour field.
-  ctx.strokeStyle = "rgba(0,0,0,0.10)";
-  ctx.lineWidth = 3;
-  for (let i = 0; i < 40; i++) {
-    const y = 980 + rnd2() * 370;
-    ctx.beginPath();
-    ctx.moveTo(rnd2() * 600, y);
-    ctx.lineTo(500 + rnd2() * 580, y + (rnd2() - 0.5) * 30);
-    ctx.stroke();
-  }
-  // Dot grid, top-left, like the reference.
-  ctx.fillStyle = "rgba(0,0,0,0.55)";
+  ctx.beginPath();
+  lightFieldPath(ctx);
+  ctx.fillStyle = theme.field;
+  ctx.fill();
+  // Dot grid, top-left.
+  ctx.fillStyle = `${theme.dark}66`;
   for (let r = 0; r < 4; r++) {
     for (let c = 0; c < 5; c++) {
       ctx.beginPath();
@@ -348,6 +286,16 @@ function drawBackground(ctx: Ctx, theme: Theme) {
       ctx.fill();
     }
   }
+}
+
+function starburst(ctx: Ctx, cx: number, cy: number, outer: number, inner: number, points: number) {
+  ctx.beginPath();
+  for (let i = 0; i < points * 2; i++) {
+    const r = i % 2 === 0 ? outer : inner;
+    const a = (Math.PI * i) / points - Math.PI / 2;
+    ctx.lineTo(cx + Math.cos(a) * r, cy + Math.sin(a) * r);
+  }
+  ctx.closePath();
 }
 
 /** Little spark ticks radiating from a point. */
@@ -398,7 +346,7 @@ function curlyArrow(ctx: Ctx, x: number, y: number, flip = 1, color = "#ffffff")
 type IconKind = "star" | "clock" | "pin" | "tag" | "number";
 
 function drawIcon(ctx: Ctx, kind: IconKind, cx: number, cy: number, theme: Theme, label?: string) {
-  ctx.fillStyle = "#0c0c0c";
+  ctx.fillStyle = theme.dark;
   ctx.beginPath();
   ctx.arc(cx, cy, 40, 0, Math.PI * 2);
   ctx.fill();
@@ -430,7 +378,7 @@ function drawIcon(ctx: Ctx, kind: IconKind, cx: number, cy: number, theme: Theme
     ctx.lineTo(cx, cy + 24);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = "#0c0c0c";
+    ctx.fillStyle = theme.dark;
     ctx.beginPath();
     ctx.arc(cx, cy - 6, 6, 0, Math.PI * 2);
     ctx.fill();
@@ -443,7 +391,7 @@ function drawIcon(ctx: Ctx, kind: IconKind, cx: number, cy: number, theme: Theme
     ctx.lineTo(cx + 4, cy + 20);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = "#0c0c0c";
+    ctx.fillStyle = theme.dark;
     ctx.beginPath();
     ctx.arc(cx + 9, cy - 9, 4, 0, Math.PI * 2);
     ctx.fill();
@@ -461,9 +409,9 @@ function features(product: Product, spec: AdSpec): Feature[] {
   switch (spec.kind) {
     case "new":
       return [
-        { icon: "star", line1: "جديد", line2: "لسه واصل" },
+        { icon: "star", line1: "تشكيلة", line2: "متجددة" },
         { icon: "pin", line1: "الدير - أجا", line2: "الدقهلية" },
-        { icon: "tag", line1: "على الأصل", line2: "دور" },
+        { icon: "tag", line1: "أسعار", line2: "تعجبك" },
       ];
     case "limited": {
       const days = daysRemaining(spec.discount.ends_at);
@@ -489,6 +437,109 @@ function features(product: Product, spec: AdSpec): Feature[] {
   }
 }
 
+/** Darkens a #rrggbb colour by `factor` (0..1). */
+function shade(hex: string, factor: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  const c = (v: number) => Math.round(v * factor);
+  return `rgb(${c((n >> 16) & 255)},${c((n >> 8) & 255)},${c(n & 255)})`;
+}
+
+/** An award-seal: ribbon tails, a finely scalloped rosette, a double ring
+ * around a dark disc, and a ribbon banner across the middle carrying the
+ * label over a big display-face line. */
+function drawSeal(ctx: Ctx, theme: Theme, x: number, y: number, label: string, big: string) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(-0.1);
+  ctx.shadowColor = "rgba(0,0,0,0.35)";
+  ctx.shadowBlur = 18;
+  ctx.shadowOffsetY = 8;
+
+  // Ribbon tails, swallow-tailed, peeking out from under the rosette.
+  const tail = theme.dark;
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.rotate(side * 0.28);
+    ctx.fillStyle = tail;
+    ctx.beginPath();
+    ctx.moveTo(-26, 60);
+    ctx.lineTo(26, 60);
+    ctx.lineTo(26, 150);
+    ctx.lineTo(0, 130);
+    ctx.lineTo(-26, 150);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+  ctx.shadowColor = "transparent";
+
+  // Rosette + rings + disc.
+  starburst(ctx, 0, 0, 118, 106, 34);
+  ctx.fillStyle = theme.tag;
+  ctx.fill();
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(0, 0, 98, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = theme.tag;
+  ctx.beginPath();
+  ctx.arc(0, 0, 93, 0, Math.PI * 2);
+  ctx.fill();
+  const disc = ctx.createRadialGradient(0, -20, 10, 0, 0, 86);
+  disc.addColorStop(0, shade(theme.dark, 1.5));
+  disc.addColorStop(1, theme.dark);
+  ctx.fillStyle = disc;
+  ctx.beginPath();
+  ctx.arc(0, 0, 86, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Small star above the banner.
+  ctx.fillStyle = theme.accent;
+  ctx.beginPath();
+  for (let i = 0; i < 10; i++) {
+    const r = i % 2 === 0 ? 10 : 4;
+    const a = (Math.PI * i) / 5 - Math.PI / 2;
+    ctx.lineTo(Math.cos(a) * r, -64 + Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fill();
+
+  // Banner across the middle: folded ends behind, swallow-tailed ribbon on top.
+  const bw = 232;
+  const bh = 48;
+  const by = -40;
+  ctx.fillStyle = tail;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(side * (bw / 2 - 12), by + bh);
+    ctx.lineTo(side * (bw / 2 + 6), by + bh + 14);
+    ctx.lineTo(side * (bw / 2 - 28), by + bh);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.fillStyle = theme.accent;
+  ctx.beginPath();
+  ctx.moveTo(-bw / 2, by);
+  ctx.lineTo(bw / 2, by);
+  ctx.lineTo(bw / 2 - 16, by + bh / 2);
+  ctx.lineTo(bw / 2, by + bh);
+  ctx.lineTo(-bw / 2, by + bh);
+  ctx.lineTo(-bw / 2 + 16, by + bh / 2);
+  ctx.closePath();
+  ctx.fill();
+  const fit = fitText(ctx, label, badgeLabel, bw - 56, 1, 34, 18);
+  ctx.fillStyle = theme.dark;
+  ctx.font = badgeLabel(fit.size);
+  ctx.fillText(label, 0, by + bh / 2 + 3);
+
+  // Big line under the banner.
+  ctx.fillStyle = theme.accent;
+  const bigFit = fitText(ctx, big, badgePrice, 130, 1, 40, 22);
+  ctx.font = badgePrice(bigFit.size);
+  ctx.fillText(big, 0, 40);
+  ctx.restore();
+}
+
 function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, adjust: PhotoAdjust): PhotoAdjust {
   const theme = THEMES[spec.kind];
   drawBackground(ctx, theme);
@@ -508,12 +559,12 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
 
   // Script line, giant product name, brush underline, sub-line.
   const scriptLine = {
-    new: "جديد عندنا يا باشا!",
+    new: "لسه واصل عشانك!",
     limited: "عرض لفترة محدودة!",
     quantity: "اشتري أكتر.. وفّر أكتر!",
   }[spec.kind];
   ctx.font = brush(68);
-  ctx.fillStyle = theme.script;
+  ctx.fillStyle = theme.accent;
   ctx.fillText(scriptLine, R, 140);
   ticks(ctx, R - ctx.measureText(scriptLine).width - 30, 112, 2.6, "#ffffff", 0.8);
 
@@ -527,61 +578,65 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   const lh = nameFit.size * 1.08;
   const nameTop = 215 + (nameFit.lines.length === 1 ? lh / 2 : 0);
   ctx.save();
-  dropShadow(ctx, 14, 6, 0.6);
+  // Extruded shadow: stacked offset copies of the same words in black, so
+  // the shadow follows each letter's shape.
+  ctx.lineJoin = "round";
+  ctx.lineWidth = 6;
+  ctx.fillStyle = "#000000";
+  ctx.strokeStyle = "#000000";
+  const depth = 9;
+  for (let d = depth; d >= 1; d--) {
+    nameFit.lines.forEach((l, i) => {
+      const y = nameTop + i * lh + lh / 2 + d;
+      ctx.strokeText(l, R + d * 0.7, y);
+      ctx.fillText(l, R + d * 0.7, y);
+    });
+  }
+  // Soft dark drop under the whole stack.
+  dropShadow(ctx, 20, depth + 8, 0.6);
   ctx.fillStyle = "#ffffff";
   nameFit.lines.forEach((l, i) => ctx.fillText(l, R, nameTop + i * lh + lh / 2));
   ctx.restore();
 
   const underY = nameTop + nameFit.lines.length * lh + 18;
-  ctx.fillStyle = theme.script;
-  raggedRect(ctx, R - 560, underY, 560, 9, 5, 3);
-  ctx.fill();
   const sub = {
-    new: "لسه واصل.. الحق اطلبه دلوقتي",
+    new: "تعالى شوفه بنفسك",
     limited: "الحق قبل ما يخلص!",
     quantity: "كل ما تزود الكمية، السعر بينزل",
   }[spec.kind];
+  // The underline is as long as the wider of the title (its longest line,
+  // at the size it was fitted to) and the sentence below it (in its own font).
+  ctx.font = block(nameFit.size);
+  const titleWidth = Math.max(...nameFit.lines.map((l) => ctx.measureText(l).width));
   ctx.font = brush(46);
+  const subWidth = ctx.measureText(sub).width;
+  const underWidth = Math.min(740, Math.max(titleWidth, subWidth));
+  ctx.fillStyle = theme.accent;
+  raggedRect(ctx, R - underWidth, underY, underWidth, 9, 5, 3);
+  ctx.fill();
   ctx.fillStyle = "#ffffff";
   ctx.fillText(sub, R, underY + 52);
 
-  // Round badge top-left (dashed ring, like the "quality" stamp).
+  // Award-seal badge top-left.
   ctx.textAlign = "center";
-  const bx = 150;
-  const by = 330;
-  ctx.fillStyle = "#0c0c0c";
-  ctx.beginPath();
-  ctx.arc(bx, by, 100, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.setLineDash([12, 9]);
-  ctx.lineWidth = 4;
-  ctx.strokeStyle = theme.accent;
-  ctx.beginPath();
-  ctx.arc(bx, by, 86, 0, Math.PI * 2);
-  ctx.stroke();
-  ctx.setLineDash([]);
   const badge =
     spec.kind === "new"
-      ? ["جديد", "لسه واصل"]
+      ? ["وصل", "حالا"]
       : spec.kind === "limited"
-        ? ["عرض", "محدود"]
-        : ["السعر العادي", adPrice(product.price)];
-  ctx.fillStyle = "#ffffff";
-  ctx.font = block(spec.kind === "quantity" ? 28 : 46);
-  ctx.fillText(badge[0], bx, by - 26);
-  ctx.fillStyle = theme.accent;
-  ctx.font = block(spec.kind === "quantity" ? 34 : 32);
-  ctx.fillText(badge[1], bx, by + 28);
-  ticks(ctx, bx + 120, by - 100, -0.9, "#ffffff", 0.8);
+        ? ["سعر", "خاص"]
+        : ["السعر الأصلي", adPrice(product.price)];
+  drawSeal(ctx, theme, 150, 330, badge[0], badge[1]);
+  ticks(ctx, 275, 225, -0.9, "#ffffff", 0.8);
 
   // Photo.
   const pcx = 580;
   const pcy = 770;
   const pr = 222;
   ctx.save();
-  ctx.shadowColor = theme.accent;
-  ctx.shadowBlur = 60;
-  ctx.fillStyle = "#0c0c0c";
+  ctx.shadowColor = "rgba(0,0,0,0.35)";
+  ctx.shadowBlur = 40;
+  ctx.shadowOffsetY = 14;
+  ctx.fillStyle = theme.dark;
   ctx.beginPath();
   ctx.arc(pcx, pcy, pr + 16, 0, Math.PI * 2);
   ctx.fill();
@@ -603,17 +658,31 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.stroke();
   ctx.restore();
   const note = {
-    new: ["جديد", "لذيذ", "جربه!"],
-    limited: ["الحق", "العرض", "ده!"],
-    quantity: ["اشتري", "أكتر", "وفّر!"],
+    new: ["هتحبه", "من أول", "مرة!"],
+    limited: ["متفوتش", "الفرصة", "دي!"],
+    quantity: ["اشتري", "بسعر", "الجملة!"],
   }[spec.kind];
   // Hand-written note on the right, with a curly arrow ending at the photo.
   ctx.textAlign = "right";
   ctx.font = brush(44);
   ctx.fillStyle = "#ffffff";
-  note.forEach((w, i) => ctx.fillText(w, R - 5, 660 + i * 52));
+  note.forEach((w, i) => ctx.fillText(w, R - 5, 688 + i * 52));
+  // Two-tone arrow: white where it crosses the dark panel, dark where it
+  // crosses the light field.
+  ctx.save();
+  ctx.beginPath();
+  lightFieldPath(ctx);
+  ctx.clip();
+  curlyArrow(ctx, 925, 835, 1, theme.dark);
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, AD_WIDTH, AD_HEIGHT);
+  lightFieldPath(ctx);
+  ctx.clip("evenodd");
   curlyArrow(ctx, 925, 835, 1, "#ffffff");
-  ticks(ctx, 960, 625, -2.4, theme.script, 0.9);
+  ctx.restore();
+  ticks(ctx, 960, 653, -2.4, theme.accent, 0.9);
   ctx.textAlign = "center";
 
   // Brush-stroke badge (the "best burger in town" style): a ragged blob in
@@ -629,14 +698,14 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.save();
   ctx.translate(175, 790);
   ctx.rotate(-0.07);
-  ctx.fillStyle = "#0c0c0c";
+  ctx.fillStyle = theme.dark;
   raggedRect(ctx, -125 + 7, -105 + 9, 250, 215, 16, 41);
   ctx.fill();
-  ctx.fillStyle = theme.script;
+  ctx.fillStyle = theme.tag;
   raggedRect(ctx, -125, -105, 250, 215, 16, 41);
   ctx.fill();
   // Dry-brush tails off both ends.
-  ctx.strokeStyle = theme.script;
+  ctx.strokeStyle = theme.tag;
   ctx.lineCap = "round";
   for (const [dy, len, side] of [
     [-60, 18, -1],
@@ -651,7 +720,7 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
     ctx.lineTo(side * (122 + len), dy + side * 4);
     ctx.stroke();
   }
-  ctx.fillStyle = "#0c0c0c";
+  ctx.fillStyle = theme.ink;
   ctx.font = block(32);
   ctx.fillText(percent > 0 ? "وفّر لحد" : "السعر", 0, -62);
   ctx.font = percent > 0 ? block(96) : numeral(104);
@@ -659,7 +728,7 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.font = block(percent > 0 ? 38 : 28);
   ctx.fillText(percent > 0 ? "خصم" : unit ? `جنيه / ${unit}` : "جنيه", 0, 74);
   // Crown above, outlined.
-  ctx.strokeStyle = theme.script;
+  ctx.strokeStyle = theme.ink;
   ctx.lineWidth = 5;
   ctx.lineJoin = "round";
   ctx.beginPath();
@@ -673,7 +742,7 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.closePath();
   ctx.stroke();
   ctx.restore();
-  ticks(ctx, 330, 655, -0.8, theme.onAccent, 0.9);
+  ticks(ctx, 330, 655, -0.8, theme.ink, 0.9);
 
   // Icon row on the colour field.
   const items = features(product, spec);
@@ -685,14 +754,14 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
     const right = startRight - i * itemW;
     drawIcon(ctx, f.icon, right - 50, rowY, theme, f.iconLabel);
     ctx.textAlign = "right";
-    ctx.fillStyle = theme.onAccent;
+    ctx.fillStyle = theme.ink;
     ctx.font = body(spec.kind === "quantity" ? 25 : 28, 800);
     ctx.fillText(f.line1, right - 100, rowY - 16);
     ctx.font = body(spec.kind === "quantity" ? 32 : 28, 900);
     ctx.fillText(f.line2, right - 100, rowY + 20);
     if (f.strike) {
       const w = ctx.measureText(f.line2).width;
-      ctx.fillStyle = theme.onAccent;
+      ctx.fillStyle = theme.ink;
       ctx.fillRect(right - 100 - w, rowY + 19, w, 4);
     }
     if (i < items.length - 1) {
@@ -712,14 +781,14 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.textAlign = "center";
   ctx.save();
   dropShadow(ctx, 14, 6, 0.35);
-  ctx.fillStyle = "#0c0c0c";
+  ctx.fillStyle = theme.dark;
   raggedRect(ctx, AD_WIDTH / 2 - 250, 1160, 500, 84, 10, 17);
   ctx.fill();
   ctx.restore();
   ctx.fillStyle = "#ffffff";
   ctx.font = block(48);
   ctx.fillText("اطلب دلوقتي", AD_WIDTH / 2, 1204);
-  ctx.strokeStyle = "#0c0c0c";
+  ctx.strokeStyle = theme.dark;
   ctx.lineWidth = 5;
   ctx.lineCap = "round";
   for (const side of [-1, 1]) {
@@ -734,7 +803,7 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
       ctx.stroke();
     }
   }
-  ctx.fillStyle = theme.onAccent;
+  ctx.fillStyle = theme.ink;
   ctx.font = body(34, 900);
   ctx.fillText(phones().join("   -   "), AD_WIDTH / 2, 1288);
   ctx.font = body(26, 700);
@@ -747,9 +816,11 @@ export async function renderProductAd(
   spec: AdSpec,
   adjust: PhotoAdjust = DEFAULT_PHOTO_ADJUST,
 ): Promise<{ blob: Blob; adjust: PhotoAdjust }> {
-  const sample = `${product.name_ar} جديد عندنا يا باشا عرض لفترة محدودة اشتري أكتر وفّر اطلب دلوقتي سوبر ماركت حماده ٠١٢٣٤٥٦٧٨٩٪`;
+  const sample = `${product.name_ar} لسه واصل عشانك وصل حالا عرض لفترة محدودة اشتري أكتر وفّر اطلب دلوقتي سوبر ماركت حماده ٠١٢٣٤٥٦٧٨٩٪`;
   await Promise.all(
-    [brush(60), block(60), numeral(60), body(40, 800), body(40, 700)].map((f) => document.fonts.load(f, sample)),
+    [brush(60), block(60), numeral(60), badgeLabel(60), badgePrice(60), body(40, 800), body(40, 700)].map((f) =>
+      document.fonts.load(f, sample),
+    ),
   );
 
   const imageUrl = productImageUrl(product.image_path);
@@ -775,6 +846,11 @@ export async function renderProductAd(
       "image/png",
     ),
   );
+}
+
+/** Public page of the product — included in captions and Facebook shares. */
+export function adProductUrl(product: Product): string {
+  return `${window.location.origin}/product/${product.id}`;
 }
 
 /** Ready-to-paste Egyptian-Arabic post text to go with the image. */
@@ -811,7 +887,7 @@ export function buildAdCaption(product: Product, spec: AdSpec): string {
   return [
     ...lines,
     "",
-    `🔗 شوف المنتج واطلبه أونلاين: ${window.location.origin}/product/${product.id}`,
+    `🔗 شوف المنتج واطلبه أونلاين: ${adProductUrl(product)}`,
     "",
     "على الأصل دور 🌟",
     `📍 ${CONTACT.address}`,
