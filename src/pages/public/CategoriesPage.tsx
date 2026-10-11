@@ -1,39 +1,31 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Link } from "react-router-dom";
-import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "../../components/CategoryAvatar";
-import { Chevron } from "../../components/Chevron";
-import { fetchCategoryTree } from "../../lib/categories";
-import { localizedField } from "../../lib/localize";
+import { CATEGORY_AVATAR_COLORS } from "../../components/CategoryAvatar";
+import { CategoryCard } from "../../components/CategoryCard";
+import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
+import { fetchActiveProductCategoryIds } from "../../lib/products";
 import type { CategoryWithChildren } from "../../types/database";
 
 /**
  * Dedicated "browse by category" page, reached from the mobile bottom nav
- * bar (replacing the old inline dropdown toggle). Tapping a category's
- * name goes straight to `/category/:id` (all of its products, including
- * subcategories'); tapping the chevron instead expands its subcategories
- * inline, so picking a specific one doesn't need a page round-trip.
+ * bar. Top-level categories only, as cards — picking a specific
+ * subcategory isn't this page's job any more (see the in-category picker
+ * on CatalogPage instead), so there's nothing here to expand.
  */
 export function CategoriesPage() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [categories, setCategories] = useState<CategoryWithChildren[] | null>(null);
+  const [productCategoryIds, setProductCategoryIds] = useState<string[]>([]);
   const [error, setError] = useState(false);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    fetchCategoryTree()
-      .then(setCategories)
+    Promise.all([fetchCategoryTree(), fetchActiveProductCategoryIds()])
+      .then(([tree, ids]) => {
+        setCategories(tree);
+        setProductCategoryIds(ids);
+      })
       .catch(() => setError(true));
   }, []);
-
-  function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
 
   return (
     <div className="space-y-4">
@@ -43,66 +35,23 @@ export function CategoriesPage() {
       {error && <p className="text-red-600">{t("common.error")}</p>}
 
       {categories && categories.length > 0 && (
-        <ul className="divide-y divide-neutral-200 overflow-hidden rounded-xl border border-neutral-200 bg-white">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
           {categories.map((category, index) => {
-            const hasChildren = category.children.length > 0;
-            const isOpen = expanded.has(category.id);
-            const name = localizedField(category, "name", i18n.language);
-
+            // A top-level category's own product count includes its
+            // subcategories' products too, matching what tapping into it
+            // actually shows (see getCategoryFilterIds).
+            const matchingIds = new Set(getCategoryFilterIds(categories, category.id));
+            const productCount = productCategoryIds.filter((id) => matchingIds.has(id)).length;
             return (
-              <li key={category.id}>
-                <div className="flex items-center gap-3 px-3 py-2.5">
-                  <CategoryAvatar
-                    imagePath={category.image_path}
-                    name={name}
-                    colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
-                    className="h-10 w-10 text-sm"
-                  />
-                  <Link to={`/category/${category.id}`} className="font-label flex-1 py-1 text-neutral-900">
-                    {name}
-                  </Link>
-                  {hasChildren ? (
-                    <button
-                      type="button"
-                      onClick={() => toggle(category.id)}
-                      aria-expanded={isOpen}
-                      aria-label={isOpen ? t("common.hide") : t("common.show")}
-                      className="font-label flex shrink-0 items-center gap-1 rounded-full px-2 py-1 text-sm text-neutral-500 hover:bg-neutral-100"
-                    >
-                      {category.children.length}
-                      <Chevron open={isOpen} />
-                    </button>
-                  ) : (
-                    <span className="shrink-0 text-neutral-300" aria-hidden="true">
-                      <Chevron open={false} />
-                    </span>
-                  )}
-                </div>
-
-                {hasChildren && isOpen && (
-                  <ul className="ms-14 space-y-0.5 border-s border-neutral-200 ps-3 pb-2">
-                    {category.children.map((child, childIndex) => (
-                      <li key={child.id}>
-                        <Link
-                          to={`/category/${child.id}`}
-                          className="font-label flex items-center gap-2 rounded-md px-2 py-2 text-sm text-neutral-600 hover:bg-neutral-50 hover:text-neutral-900"
-                        >
-                          <CategoryAvatar
-                            imagePath={child.image_path}
-                            name={localizedField(child, "name", i18n.language)}
-                            colorClass={CATEGORY_AVATAR_COLORS[childIndex % CATEGORY_AVATAR_COLORS.length]}
-                            className="h-6 w-6 text-xs"
-                          />
-                          {localizedField(child, "name", i18n.language)}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+              <CategoryCard
+                key={category.id}
+                category={category}
+                productCount={productCount}
+                colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
+              />
             );
           })}
-        </ul>
+        </div>
       )}
     </div>
   );

@@ -2,7 +2,9 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BestSellersSection } from "../../components/BestSellersSection";
+import { CATEGORY_AVATAR_COLORS } from "../../components/CategoryAvatar";
 import { CategoryNav } from "../../components/CategoryNav";
+import { CategoryPickerModal } from "../../components/CategoryPickerModal";
 import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
@@ -11,11 +13,10 @@ import { RecentlyArrivedSection } from "../../components/RecentlyArrivedSection"
 import { RecentlyViewedSection } from "../../components/RecentlyViewedSection";
 import { SearchBar } from "../../components/SearchBar";
 import { TopCategoriesRow } from "../../components/TopCategoriesRow";
-import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
+import { fetchCategoryTree, findCategoryWithParent, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { localizedField } from "../../lib/localize";
 import { fetchProducts } from "../../lib/products";
-import { categoryImageUrl } from "../../lib/supabase";
 import type { CategoryWithChildren, LimitedTimeDiscount, Product } from "../../types/database";
 
 export function CatalogPage() {
@@ -29,11 +30,17 @@ export function CatalogPage() {
   const [discountMap, setDiscountMap] = useState<Map<string, LimitedTimeDiscount>>(new Map());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
   const isHome = !categoryId && !search;
-  // Only set when `categoryId` is a top-level category (not a
-  // subcategory, which has no children of its own to drill into) — drives
-  // the mobile subcategory chip row below.
-  const currentTopCategory = categoryId ? categories.find((c) => c.id === categoryId) : undefined;
+  // Undefined until the category tree loads, or if `categoryId` doesn't
+  // match anything in it (e.g. still mid-fetch).
+  const current = categoryId ? findCategoryWithParent(categories, categoryId) : undefined;
+  // The picker is scoped to whichever top-level category is currently
+  // relevant — itself if it's a top-level category, or its parent if it's
+  // a subcategory — not the full category list.
+  const activeTopCategoryId = current ? (current.parent ? current.parent.id : current.category.id) : undefined;
+  const activeTopCategoryIndex = categories.findIndex((c) => c.id === activeTopCategoryId);
+  const activeTopCategory = activeTopCategoryIndex !== -1 ? categories[activeTopCategoryIndex] : undefined;
 
   useEffect(() => {
     fetchCategoryTree()
@@ -71,22 +78,41 @@ export function CatalogPage() {
 
           {isHome && <TopCategoriesRow categories={categories} />}
 
-          {currentTopCategory && currentTopCategory.children.length > 0 && (
-            <div className="flex gap-2 overflow-x-auto pb-1 md:hidden">
-              {currentTopCategory.children.map((child) => {
-                const imageUrl = categoryImageUrl(child.image_path);
-                return (
-                  <Link
-                    key={child.id}
-                    to={`/category/${child.id}`}
-                    className="font-label flex shrink-0 items-center gap-1.5 rounded-full border border-neutral-300 px-3 py-1.5 text-sm text-neutral-700 hover:bg-neutral-100"
-                  >
-                    {imageUrl && <img src={imageUrl} alt="" className="h-4 w-4 shrink-0 rounded-full object-cover" />}
-                    {localizedField(child, "name", i18n.language)}
-                  </Link>
-                );
-              })}
+          {/* One combined row for picking a different category from
+           * within a category page: a "back to {parent}" link when
+           * viewing a subcategory (there's nothing to go "back" to from a
+           * top-level category itself), and a button that opens the
+           * picker popout — on both mobile and desktop, since the sidebar
+           * no longer offers subcategory drill-down inline. */}
+          {current && (
+            <div className="flex items-center justify-between gap-2">
+              {current.parent ? (
+                <Link
+                  to={`/category/${current.parent.id}`}
+                  className="font-label flex items-center gap-1 text-sm font-medium text-emerald-700 hover:underline"
+                >
+                  ← {t("categories.backTo", { name: localizedField(current.parent, "name", i18n.language) })}
+                </Link>
+              ) : (
+                <span />
+              )}
+              <button
+                type="button"
+                onClick={() => setPickerOpen(true)}
+                className="font-label flex items-center gap-1 rounded-full border border-neutral-300 px-3 py-1.5 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                {localizedField(current.category, "name", i18n.language)}
+                <span aria-hidden="true">▾</span>
+              </button>
             </div>
+          )}
+
+          {pickerOpen && activeTopCategory && (
+            <CategoryPickerModal
+              topCategory={activeTopCategory}
+              colorClass={CATEGORY_AVATAR_COLORS[activeTopCategoryIndex % CATEGORY_AVATAR_COLORS.length]}
+              onClose={() => setPickerOpen(false)}
+            />
           )}
 
           {isHome && <LimitedTimeDealsSection />}

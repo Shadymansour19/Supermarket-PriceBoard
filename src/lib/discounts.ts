@@ -12,6 +12,33 @@ export function discountPercent(originalPrice: number, discountedPrice: number):
   return Math.round(((originalPrice - discountedPrice) / originalPrice) * 100);
 }
 
+/** From this percent off up, a deal is "hot" enough to earn the
+ * flame-frame treatment — below it, the plain badge alone is enough.
+ * Keeps it meaningful (a genuinely standout deal) instead of every
+ * discounted card in a full grid getting the same treatment. Shared (not
+ * just a ProductCard-local constant) so a carousel section can also tell
+ * whether it needs to reserve headroom for a hot card's frame before it
+ * even renders one. */
+export const HOT_DEAL_THRESHOLD = 20;
+
+/** Same "is this card hot" rule ProductCard itself uses — only the
+ * cheapest quantity-discount tier counts, and a limited-time discount
+ * takes priority over a quantity one when a product has both (a card only
+ * ever headlines one deal type). */
+export function isProductHot(
+  product: Pick<Product, "price">,
+  limitedTimeDiscount?: LimitedTimeDiscount,
+  quantityDiscount?: QuantityDiscount,
+): boolean {
+  const cheapestTier = quantityDiscount?.tiers[0];
+  const percentOff = limitedTimeDiscount
+    ? discountPercent(product.price, limitedTimeDiscount.new_price)
+    : cheapestTier
+      ? discountPercent(product.price, cheapestTier.price)
+      : 0;
+  return percentOff >= HOT_DEAL_THRESHOLD;
+}
+
 /** True while a limited-time discount hasn't reached its `ends_at` yet. */
 export function isLimitedTimeDiscountActive(discount: LimitedTimeDiscount): boolean {
   return new Date(discount.ends_at).getTime() > Date.now();

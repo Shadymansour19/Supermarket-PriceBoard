@@ -52,6 +52,25 @@ export function getCategoryFilterIds(
 }
 
 /**
+ * Finds a category anywhere in the tree (top-level or subcategory) along
+ * with its parent, when it has one — used to know whether the current
+ * category page is viewing a subcategory (and if so, which top-level
+ * category to offer a "back to" link for) without walking the tree by hand
+ * at each call site.
+ */
+export function findCategoryWithParent(
+  tree: CategoryWithChildren[],
+  categoryId: string,
+): { category: Category; parent?: CategoryWithChildren } | undefined {
+  for (const root of tree) {
+    if (root.id === categoryId) return { category: root };
+    const child = root.children.find((c) => c.id === categoryId);
+    if (child) return { category: child, parent: root };
+  }
+  return undefined;
+}
+
+/**
  * Flattens a category tree into a depth-annotated list, for <select> options.
  * Only handles the two levels the schema/UI actually support (category,
  * subcategory) — see CategoryWithChildren.

@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { DealsCarousel } from "./DealsCarousel";
 import { ProductCard } from "./ProductCard";
 import { fetchBestSellingProducts } from "../lib/bestSellers";
-import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../lib/discounts";
+import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals, isProductHot } from "../lib/discounts";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
 
 /** How many days of order history to rank best sellers over. */
@@ -49,6 +49,9 @@ export function BestSellersSection() {
           limitedTimeDiscount={limitedTimeMap.get(product.id)}
           quantityDiscount={quantityMap.get(product.id)}
         />
+      )}
+      hasHotItem={products.some((product) =>
+        isProductHot(product, limitedTimeMap.get(product.id), quantityMap.get(product.id)),
       )}
     />
   );

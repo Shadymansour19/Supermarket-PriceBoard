@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DealsCarousel } from "./DealsCarousel";
 import { ProductCard } from "./ProductCard";
-import { discountPercent, fetchActiveQuantityDeals } from "../lib/discounts";
+import { discountPercent, fetchActiveQuantityDeals, isProductHot } from "../lib/discounts";
 import type { Product, QuantityDiscount } from "../types/database";
 
 /** How many deals the home page teaser shows before "Show more" takes over. */
@@ -42,6 +42,7 @@ export function QuantityDealsSection() {
       getKey={(deal) => deal.product.id}
       slideLabel={(index) => t("deals.goToSlide", { count: index + 1 })}
       renderCard={({ product, discount }) => <ProductCard product={product} quantityDiscount={discount} />}
+      hasHotItem={deals.some(({ product, discount }) => isProductHot(product, undefined, discount))}
     />
   );
 }

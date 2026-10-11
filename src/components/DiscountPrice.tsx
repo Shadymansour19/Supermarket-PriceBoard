@@ -11,11 +11,15 @@ export function DiscountPrice({
   newPrice,
   lang,
   size = "md",
+  showPercent = true,
 }: {
   originalPrice: number;
   newPrice: number;
   lang: string;
   size?: "sm" | "md" | "lg";
+  /** False on the product card, where the percentage is already shown on
+   * the card's own badge — repeating it here would be redundant. */
+  showPercent?: boolean;
 }) {
   const percent = discountPercent(originalPrice, newPrice);
   const newPriceClass = size === "lg" ? "text-2xl font-semibold" : size === "sm" ? "text-sm font-semibold" : "font-semibold";
@@ -25,7 +29,7 @@ export function DiscountPrice({
     <span className="font-label inline-flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
       <span className={`text-red-500 line-through ${originalPriceClass}`}>{formatPrice(originalPrice, lang)}</span>
       <span className={`text-emerald-700 ${newPriceClass}`}>{formatPrice(newPrice, lang)}</span>
-      {percent > 0 && (
+      {showPercent && percent > 0 && (
         <span className="rounded-full bg-red-50 px-1.5 py-0.5 text-xs font-medium text-red-600">-{percent}%</span>
       )}
     </span>

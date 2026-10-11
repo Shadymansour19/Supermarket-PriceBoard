@@ -1,106 +1,54 @@
-import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { NavLink, useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "./CategoryAvatar";
-import { Chevron } from "./Chevron";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
 
+/**
+ * Top-level categories only, flat — no inline expand/collapse for
+ * subcategories any more. Picking a specific subcategory is the
+ * in-category picker's job now (CatalogPage), not this persistent sidebar's.
+ * Still highlights the right top-level entry when the active page is one of
+ * its subcategories, so navigating there doesn't leave the sidebar looking
+ * like nothing is selected.
+ */
 export function CategoryNav({ categories }: { categories: CategoryWithChildren[] }) {
   const { t, i18n } = useTranslation();
   const { categoryId: activeCategoryId } = useParams();
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  // Auto-expand the branch containing the currently selected (sub)category,
-  // so navigating here from a link never hides the active selection.
-  useEffect(() => {
-    if (!activeCategoryId) return;
-    const parent = categories.find(
-      (c) => c.id === activeCategoryId || c.children.some((child) => child.id === activeCategoryId),
-    );
-    if (parent) setExpanded((prev) => new Set(prev).add(parent.id));
-  }, [activeCategoryId, categories]);
-
-  function toggle(id: string) {
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else next.add(id);
-      return next;
-    });
-  }
 
   return (
     <nav className="space-y-4">
-      <NavLink
+      <Link
         to="/"
-        end
-        className={({ isActive }) =>
-          `font-label block rounded-md px-3 py-1.5 text-sm font-medium ${
-            isActive ? "bg-emerald-600 text-white" : "text-neutral-700 hover:bg-neutral-100"
-          }`
-        }
+        className={`font-label block rounded-md px-3 py-1.5 text-sm font-medium ${
+          !activeCategoryId ? "bg-emerald-600 text-white" : "text-neutral-700 hover:bg-neutral-100"
+        }`}
       >
         {t("nav.allCategories")}
-      </NavLink>
+      </Link>
 
       <ul className="space-y-1">
         {categories.map((category, index) => {
-          const isOpen = expanded.has(category.id);
-          const hasChildren = category.children.length > 0;
           const name = localizedField(category, "name", i18n.language);
+          const isActive =
+            category.id === activeCategoryId || category.children.some((child) => child.id === activeCategoryId);
 
           return (
             <li key={category.id}>
-              <div className="flex items-center">
-                {hasChildren && (
-                  <button
-                    type="button"
-                    onClick={() => toggle(category.id)}
-                    aria-expanded={isOpen}
-                    aria-label={isOpen ? "Collapse" : "Expand"}
-                    className="w-6 shrink-0 text-center text-neutral-400 hover:text-neutral-700"
-                  >
-                    <Chevron open={isOpen} />
-                  </button>
-                )}
-                <NavLink
-                  to={`/category/${category.id}`}
-                  className={({ isActive }) =>
-                    `font-label flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold ${
-                      hasChildren ? "" : "ms-6"
-                    } ${isActive ? "bg-emerald-600 text-white" : "text-neutral-900 hover:bg-neutral-100"}`
-                  }
-                >
-                  <CategoryAvatar
-                    imagePath={category.image_path}
-                    name={name}
-                    colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
-                    className="h-5 w-5 text-[10px]"
-                  />
-                  {name}
-                </NavLink>
-              </div>
-              {hasChildren && isOpen && (
-                <ul className="ms-3 mt-1 space-y-1 border-s border-neutral-200 ps-3">
-                  {category.children.map((child) => (
-                    <li key={child.id}>
-                      <NavLink
-                        to={`/category/${child.id}`}
-                        className={({ isActive }) =>
-                          `font-label block rounded-md px-2 py-1 text-sm ${
-                            isActive
-                              ? "bg-emerald-600 text-white"
-                              : "text-neutral-600 hover:bg-neutral-100"
-                          }`
-                        }
-                      >
-                        {localizedField(child, "name", i18n.language)}
-                      </NavLink>
-                    </li>
-                  ))}
-                </ul>
-              )}
+              <Link
+                to={`/category/${category.id}`}
+                className={`font-label flex items-center gap-2 rounded-md px-2 py-1.5 text-sm font-semibold ${
+                  isActive ? "bg-emerald-600 text-white" : "text-neutral-900 hover:bg-neutral-100"
+                }`}
+              >
+                <CategoryAvatar
+                  imagePath={category.image_path}
+                  name={name}
+                  colorClass={CATEGORY_AVATAR_COLORS[index % CATEGORY_AVATAR_COLORS.length]}
+                  className="h-5 w-5 text-[10px]"
+                />
+                {name}
+              </Link>
             </li>
           );
         })}

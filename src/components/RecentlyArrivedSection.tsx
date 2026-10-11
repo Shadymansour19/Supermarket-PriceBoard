@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { DealsCarousel } from "./DealsCarousel";
 import { ProductCard } from "./ProductCard";
-import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../lib/discounts";
+import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals, isProductHot } from "../lib/discounts";
 import { fetchRecentlyArrivedProducts } from "../lib/products";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
 
@@ -50,6 +50,9 @@ export function RecentlyArrivedSection() {
           limitedTimeDiscount={limitedTimeMap.get(product.id)}
           quantityDiscount={quantityMap.get(product.id)}
         />
+      )}
+      hasHotItem={products.some((product) =>
+        isProductHot(product, limitedTimeMap.get(product.id), quantityMap.get(product.id)),
       )}
     />
   );

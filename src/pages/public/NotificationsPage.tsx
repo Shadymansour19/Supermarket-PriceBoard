@@ -71,15 +71,13 @@ export function NotificationsPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("notifications.navLabel")}</h1>
-
       <div className="rounded-xl border border-neutral-200 bg-white p-4">
         {!supported ? (
           <p className="text-sm text-neutral-500">{t("notifications.notSupported")}</p>
         ) : (
           <>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-sm font-medium text-neutral-900">{t("notifications.navLabel")}</p>
+              <p className="font-heading text-lg font-semibold text-neutral-900">{t("notifications.navLabel")}</p>
               <button
                 type="button"
                 disabled={loading}

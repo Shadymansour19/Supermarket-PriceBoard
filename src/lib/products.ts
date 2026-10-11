@@ -10,6 +10,15 @@ export type ProductFilter = {
   includeInactive?: boolean;
 };
 
+/** How many active products exist in each category — used for the
+ * category cards' "N products" count, not for filtering, so it only ever
+ * needs the category id and nothing else per row. */
+export async function fetchActiveProductCategoryIds(): Promise<string[]> {
+  const { data, error } = await supabase.from("products").select("category_id").eq("is_active", true);
+  if (error) throw error;
+  return (data ?? []).map((row) => row.category_id);
+}
+
 export async function fetchProducts(filter: ProductFilter = {}): Promise<Product[]> {
   let query = supabase.from("products").select("*").order("created_at", { ascending: false });
 

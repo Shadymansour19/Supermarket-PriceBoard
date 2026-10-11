@@ -34,6 +34,7 @@ export function DealsCarousel<T>({
   getKey,
   renderCard,
   slideLabel,
+  hasHotItem = false,
 }: {
   title: string;
   /** Omit both together for a strip with no dedicated "see all" page (e.g.
@@ -44,6 +45,11 @@ export function DealsCarousel<T>({
   getKey: (item: T) => string;
   renderCard: (item: T) => ReactNode;
   slideLabel: (index: number) => string;
+  /** Whether any item in this strip renders a hot-deal card — only then
+   * does the scroller need the extra top padding its fire frame pokes
+   * into; a section with no hot items at all shouldn't carry that dead
+   * space under its title for no reason. */
+  hasHotItem?: boolean;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const scrollerRef = useRef<HTMLDivElement>(null);
@@ -173,17 +179,16 @@ export function DealsCarousel<T>({
         // overflow spec) — a hot-deal card's fire frame pokes well above
         // the card itself, so without this extra top padding it got cut
         // off right at the scroller's own edge, under the section title.
-        // Measured directly (not derived from the `-21cqw` on the image,
-        // since that doesn't account for the frame image's own empty
-        // margin) — the poke tops out at ~60px at the widest card here
-        // (300px, the `max-w-[300px]` cap below). This is deliberately
-        // tight (only a few px of margin at that widest card) rather than
-        // generous, since the poke shrinks on any narrower card but this
-        // padding can't shrink with it — the tighter this number, the
-        // less dead space shows up under the title on a typical (narrower
-        // than 300px) card, at the cost of very little room for error at
-        // the exact 300px width.
-        className="scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 pt-22"
+        // Measured directly (not derived from the `-14%`/`136%` on the
+        // image, since that doesn't account for the frame image's own
+        // empty margin) — the poke tops out at ~85px at the widest card
+        // here (300px, the `max-w-[300px]` cap below). This is
+        // deliberately tight rather than generous, since the poke shrinks
+        // on any narrower card but this padding can't shrink with it. Only
+        // applied when there's actually a hot card in this strip — a
+        // section with none shouldn't carry the dead space under its
+        // title for a poke that'll never happen.
+        className={`scrollbar-hide flex items-center gap-4 overflow-x-auto pb-2 ${hasHotItem ? "pt-22" : ""}`}
         onPointerDown={pauseAutoAdvance}
         onWheel={pauseAutoAdvance}
         onTouchStart={pauseAutoAdvance}

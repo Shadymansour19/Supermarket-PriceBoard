@@ -3,16 +3,10 @@ import { Link } from "react-router-dom";
 import { AddToCartButton } from "./AddToCartButton";
 import { DiscountPrice } from "./DiscountPrice";
 import { FavoriteButton } from "./FavoriteButton";
-import { daysRemaining, discountPercent } from "../lib/discounts";
+import { HOT_DEAL_THRESHOLD, daysRemaining, discountPercent } from "../lib/discounts";
 import { productImageUrl } from "../lib/supabase";
 import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
-
-/** From this percent off up, a deal is "hot" enough to earn the
- * flame-badge + glow treatment — below it, the plain gradient badge alone
- * is enough. Keeps it meaningful (a genuinely standout deal) instead of
- * every discounted card in a full grid getting the same treatment. */
-const HOT_DEAL_THRESHOLD = 20;
 
 export function ProductCard({
   product,
@@ -42,7 +36,7 @@ export function ProductCard({
     <Link
       to={`/product/${product.id}`}
       className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
-        isHotDeal ? "card-border-glow border-2 border-amber-400" : "border border-neutral-200"
+        isHotDeal ? "hot-border-travel" : "border border-neutral-200"
       }`}
       style={{ containerType: "inline-size" }}
     >
@@ -65,14 +59,14 @@ export function ProductCard({
             style={{ top: "-36cqw" }}
           />
         )}
-        {(limitedTimeDiscount || cheapestTier) &&
-        (isHotDeal ? (
-          // "Comet" badge — a HOT bubble with a flame trailing off it,
-          // overlapping into the percentage pill. hot-badge.png is the
-          // reference "HOT" ball+flame image supplied by the user, used
-          // untouched (no recoloring, no re-cutting its transparency) —
-          // the pill is a plain CSS element behind/under it since the
-          // source image has no pill of its own to reuse.
+        {(limitedTimeDiscount || cheapestTier) && (
+          // One shared "comet" structure for both — this is the original
+          // hot badge layout, unchanged, with the ball simply invisible
+          // (but still occupying its layout space) when not a hot deal.
+          // That's what keeps the pill's own position pixel-identical
+          // between the two instead of needing separately-derived offsets
+          // for each — a plain `opacity-0` on an `invisible` ball doesn't
+          // shift anything the pill's own margin/flex math depends on.
           <div className="absolute start-5 top-2 z-30">
             {/* Forced `dir="ltr"` — this badge is a small fixed graphic
              * (ball trailing into a pill), not reading text, so its
@@ -87,21 +81,17 @@ export function ProductCard({
              * variable (1 normally, 0.68 on a narrower card per the
              * `.product-card` container query in index.css) so the whole
              * badge shrinks together on a smaller card instead of the
-             * image and pill drifting out of proportion with each other.
-             * This div is left at its natural (unshifted) position — the
-             * favorite button and the plain badge are the ones that move
-             * to match *this* badge's level (via `--badge-level` in
-             * index.css, defined to equal exactly where the ball inside
-             * hot-badge.png naturally sits), not the other way around. */}
+             * image and pill drifting out of proportion with each other. */}
             <div dir="ltr" className="flex items-center">
               <img
                 src="/hot-badge.png"
                 alt=""
-                className="relative z-10 shrink-0"
+                aria-hidden="true"
+                className={`relative z-10 shrink-0 ${isHotDeal ? "" : "opacity-0"}`}
                 style={{
                   width: "calc(5.5rem * var(--hb-scale))",
                   height: "auto",
-                  transform: "translateX(calc(15px * var(--hb-scale)))",
+                  transform: "translateX(calc(16px * var(--hb-scale)))",
                 }}
               />
               {/* The pill's own extra offset (on top of the outer one
@@ -113,35 +103,21 @@ export function ProductCard({
                   marginLeft: "calc(-44px * var(--hb-scale))",
                   transform: "translateY(calc(8px * var(--hb-scale)))",
                   paddingBlock: "calc(4px * var(--hb-scale))",
-                  paddingInlineStart: "calc(40px * var(--hb-scale))",
+                  // Hot needs the big asymmetric start padding to leave
+                  // room for the ball's tail underneath it — without a
+                  // visible ball there, that same padding just reads as
+                  // the text sitting off-center in its own pill, so
+                  // non-hot gets equal padding on both sides instead.
+                  paddingInlineStart: `calc(${isHotDeal ? 32 : 12}px * var(--hb-scale))`,
                   paddingInlineEnd: "calc(12px * var(--hb-scale))",
                   fontSize: "calc(0.875rem * var(--hb-scale))",
                 }}
               >
-                -{percentOff}%
+                <span dir="ltr">-{percentOff}%</span>
               </span>
             </div>
           </div>
-        ) : (
-          // Fixed `h-8` + flex centering (rather than relying on text
-          // metrics + padding to happen to land at some height) so its
-          // center lands exactly at `top + 16px`, matching the `-16px`
-          // in its own `top` below. `dir="ltr"` on the *inner* span (not
-          // this outer one) keeps "-52%" reading the same way in Arabic
-          // as in English — plain text with a leading "-" and trailing
-          // "%" is exactly the kind of thing the bidi algorithm reorders
-          // around digits in an RTL context (it was rendering as
-          // "52%-") — while this outer span's own `start-2` stays
-          // logical/RTL-aware, so the badge still lands on the correct
-          // corner instead of colliding with the favorite button (that
-          // bug already happened once before, on the hot badge).
-          <span
-            className="font-label absolute start-2 z-30 flex h-8 items-center rounded-full bg-red-600 bg-gradient-to-br from-red-600 to-orange-500 px-2 text-xs font-bold text-white shadow-md ring-2 ring-white"
-            style={{ top: "calc(var(--badge-level) - 16px)" }}
-          >
-            <span dir="ltr">-{percentOff}%</span>
-          </span>
-        ))}
+        )}
         <FavoriteButton
           productId={product.id}
           stopNavigation
@@ -166,21 +142,46 @@ export function ProductCard({
           }}
         />
       </div>
-      <div className="aspect-square w-full overflow-hidden rounded-t-xl bg-neutral-100">
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt={name}
-            className="h-full w-full object-cover transition group-hover:scale-105"
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-neutral-300">
-            <span className="text-4xl">🛒</span>
+      {/* Outer wrapper has no overflow clipping of its own — it exists so
+       * the floating add-to-cart button below can be a sibling of the
+       * (clipped) photo box instead of a child of it. As a child, the
+       * button's bottom half (meant to overlap the card content below the
+       * photo) was being clipped off by the photo box's own
+       * `overflow-hidden`, which it still needs to contain the oversized
+       * fire frame. */}
+      <div className="relative aspect-square w-full">
+        <div className="h-full w-full overflow-hidden rounded-t-xl bg-neutral-100">
+          {imageUrl ? (
+            <img
+              src={imageUrl}
+              alt={name}
+              className="h-full w-full object-cover transition group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-neutral-300">
+              <span className="text-4xl">🛒</span>
+            </div>
+          )}
+        </div>
+        {product.in_stock && (
+          // `left-1/2` (physical), not `start-1/2` (logical) — centering
+          // is direction-independent, but `start-1/2` resolves to `right:
+          // 50%` in RTL, and `-translate-x-1/2` is always a physical
+          // leftward shift regardless of direction. Pairing a logical
+          // anchor with a physical transform only cancels out correctly
+          // in LTR; in RTL it shifted the button a full half-width left
+          // of true center.
+          <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2">
+            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="h-10 w-10" />
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3">
+      {/* `pt-6` (more than the `p-3` default) reserves enough clearance
+       * for the floating add-to-cart button above, which overlaps this
+       * area by half its own height (20px) — without it, the button sat
+       * on top of the product name instead of just above it. */}
+      <div className="flex flex-1 flex-col gap-1 px-3 pb-3 pt-6">
         <h3 className="font-label line-clamp-2 min-h-[2.5rem] text-sm font-medium text-neutral-900">{name}</h3>
         {/* Always rendered (even without a size) so every card reserves the
          * same vertical space here instead of shrinking. */}
@@ -192,6 +193,7 @@ export function ProductCard({
               newPrice={limitedTimeDiscount.new_price}
               lang={i18n.language}
               size="sm"
+              showPercent={false}
             />
           ) : cheapestTier ? (
             <DiscountPrice
@@ -199,6 +201,7 @@ export function ProductCard({
               newPrice={cheapestTier.price}
               lang={i18n.language}
               size="sm"
+              showPercent={false}
             />
           ) : (
             <span className="font-semibold text-emerald-700">
@@ -208,13 +211,10 @@ export function ProductCard({
               )}
             </span>
           )}
-          {/* Its own line now (was sharing a row with the price) — the
-           * quantity stepper + cart button together are wider than the
-           * old single icon button, and squeezed next to the price it
-           * was crowding out longer prices/discounts on a narrow card. */}
-          {product.in_stock ? (
-            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="w-full" />
-          ) : (
+          {/* The add-to-cart button itself now floats on the photo above
+           * (bottom-center) — this only still needs to say something when
+           * there's no button to show instead. */}
+          {!product.in_stock && (
             <span className="w-fit rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
               {t("product.outOfStock")}
             </span>
