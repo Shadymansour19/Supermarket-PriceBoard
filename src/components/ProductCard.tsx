@@ -61,8 +61,8 @@ export function ProductCard({
             src="/fire-frame.png"
             alt=""
             aria-hidden="true"
-            className="pointer-events-none absolute -start-[11%] h-auto max-w-none w-[122%]"
-            style={{ top: "-21cqw" }}
+            className="pointer-events-none absolute -start-[14%] h-auto max-w-none w-[136%]"
+            style={{ top: "-36cqw" }}
           />
         )}
         {(limitedTimeDiscount || cheapestTier) &&
