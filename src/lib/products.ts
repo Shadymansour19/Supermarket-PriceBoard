@@ -49,6 +49,25 @@ export async function fetchSimilarProducts(product: Product, limit = 8): Promise
     .slice(0, limit);
 }
 
+/** Active products created within the last `daysBack` days, newest first —
+ * keyed off `created_at`, which is set once at insert and never touched
+ * again (only `updated_at` has a trigger bumping it). That's what makes
+ * this safe from the thing it needs to avoid: a product that already
+ * existed, went inactive/out of stock, and later came back doesn't get a
+ * new `created_at`, so it never re-appears here as if it were new. */
+export async function fetchRecentlyArrivedProducts(daysBack = 14, limit = 8): Promise<Product[]> {
+  const since = new Date(Date.now() - daysBack * 24 * 60 * 60 * 1000).toISOString();
+  const { data, error } = await supabase
+    .from("products")
+    .select("*")
+    .eq("is_active", true)
+    .gte("created_at", since)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return (data ?? []) as Product[];
+}
+
 export async function fetchProductById(id: string): Promise<Product | null> {
   const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
   if (error) throw error;

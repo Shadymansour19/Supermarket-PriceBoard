@@ -7,6 +7,7 @@ import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
 import { QuantityDealsSection } from "../../components/QuantityDealsSection";
+import { RecentlyArrivedSection } from "../../components/RecentlyArrivedSection";
 import { RecentlyViewedSection } from "../../components/RecentlyViewedSection";
 import { SearchBar } from "../../components/SearchBar";
 import { TopCategoriesRow } from "../../components/TopCategoriesRow";
@@ -91,6 +92,7 @@ export function CatalogPage() {
           {isHome && <LimitedTimeDealsSection />}
           {isHome && <QuantityDealsSection />}
           {isHome && <BestSellersSection />}
+          {isHome && <RecentlyArrivedSection />}
           {isHome && <RecentlyViewedSection />}
 
           {loading && <p className="text-neutral-500">{t("common.loading")}</p>}

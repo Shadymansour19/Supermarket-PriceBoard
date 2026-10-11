@@ -201,6 +201,10 @@ const resources = {
         sectionTitle: "Best sellers",
         goToSlide: "Go to product {{count}}",
       },
+      recentlyArrived: {
+        sectionTitle: "New arrivals",
+        goToSlide: "Go to product {{count}}",
+      },
       similarProducts: {
         sectionTitle: "Similar products",
         goToSlide: "Go to product {{count}}",
@@ -432,6 +436,10 @@ const resources = {
       },
       bestSellers: {
         sectionTitle: "المنتجات الأكثر مبيعًا",
+        goToSlide: "الانتقال إلى المنتج {{count}}",
+      },
+      recentlyArrived: {
+        sectionTitle: "وصل حديثًا",
         goToSlide: "الانتقال إلى المنتج {{count}}",
       },
       similarProducts: {
