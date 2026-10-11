@@ -1,15 +1,19 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { ProductAdModal } from "../../components/admin/ProductAdModal";
 import { ProductDiscountsModal } from "../../components/admin/ProductDiscountsModal";
 import { ProductForm, type ProductFormValues } from "../../components/admin/ProductForm";
 import { SearchBar } from "../../components/SearchBar";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
+import type { AdSpec } from "../../lib/adImage";
 import { fetchCategoryTree } from "../../lib/categories";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
 import type { CategoryWithChildren, Product } from "../../types/database";
+
+const NEW_PRODUCT_AD: AdSpec = { kind: "new" };
 
 type FormMode = { kind: "create" } | { kind: "edit"; product: Product };
 
@@ -73,6 +77,7 @@ export function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<FormMode | null>(null);
   const [discountsProduct, setDiscountsProduct] = useState<Product | null>(null);
+  const [newProductAd, setNewProductAd] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
@@ -124,17 +129,21 @@ export function AdminProductsPage() {
 
       if (imageFile) {
         const path = await uploadProductImage(imageFile, product.id);
-        await updateProduct(product.id, { image_path: path });
+        product = await updateProduct(product.id, { image_path: path });
         // Best-effort cleanup of the photo it replaced — not critical if
         // this fails, so it shouldn't block the save that already succeeded.
         if (previousImagePath) await deleteProductImage(previousImagePath).catch(() => {});
       } else if (removeImage && previousImagePath) {
-        await updateProduct(product.id, { image_path: null });
+        product = await updateProduct(product.id, { image_path: null });
         await deleteProductImage(previousImagePath).catch(() => {});
       }
 
+      const isNew = formMode?.kind !== "edit";
       setFormMode(null);
       await reload();
+      if (isNew && product.is_active && (await confirmDialog({ message: t("admin.adPromptNew") }))) {
+        setNewProductAd(product);
+      }
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
     }
@@ -278,7 +287,7 @@ export function AdminProductsPage() {
                         <ProductActions
                           onEdit={() => setFormMode({ kind: "edit", product })}
                           onDiscounts={() => setDiscountsProduct(product)}
-                          onDelete={() => handleDelete(product)}
+                              onDelete={() => handleDelete(product)}
                         />
                       </td>
                     </tr>
@@ -288,6 +297,10 @@ export function AdminProductsPage() {
             </table>
           </div>
         </>
+      )}
+
+      {newProductAd && (
+        <ProductAdModal product={newProductAd} spec={NEW_PRODUCT_AD} onClose={() => setNewProductAd(null)} />
       )}
 
       {discountsProduct && (
