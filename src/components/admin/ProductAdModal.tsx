@@ -234,6 +234,15 @@ export function ProductAdModal({ product, spec, onClose }: { product: Product; s
               <ShareIcon className="h-4 w-4" />
               {t("admin.adShare")}
             </button>
+            <button
+              type="button"
+              disabled={!blob}
+              onClick={download}
+              className={`flex items-center gap-2 ${buttonClass}`}
+            >
+              <DownloadIcon className="h-4 w-4" />
+              {t("admin.adDownload")}
+            </button>
             <button type="button" onClick={copyCaption} className={buttonClass}>
               {copied ? t("admin.adCopied") : t("admin.adCopyCaption")}
             </button>
@@ -286,14 +295,6 @@ export function ProductAdModal({ product, spec, onClose }: { product: Product; s
                   />
                 </>
               )}
-              <MenuItem
-                icon={<DownloadIcon className="h-5 w-5 text-neutral-600" />}
-                label={t("admin.adDownload")}
-                onClick={() => {
-                  setMenuOpen(false);
-                  download();
-                }}
-              />
             </div>
             <button
               type="button"

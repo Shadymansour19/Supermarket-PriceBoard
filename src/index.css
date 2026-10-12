@@ -137,11 +137,26 @@ textarea {
   animation: hero-shimmer 5s ease-in-out infinite;
 }
 
+@keyframes hero-nudge {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  50% {
+    transform: translateX(6px);
+  }
+}
+
+.hero-nudge {
+  animation: hero-nudge 1.6s ease-in-out infinite;
+}
+
 .hero-badge-pulse {
   animation: hero-badge-pulse 2.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .hero-nudge,
   .hero-fade-in,
   .hero-float,
   .hero-float-rotate,

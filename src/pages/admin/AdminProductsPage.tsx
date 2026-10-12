@@ -35,10 +35,12 @@ function StatusBadge({ ok, yesLabel, noLabel }: { ok: boolean; yesLabel: string;
 function ProductActions({
   onEdit,
   onDiscounts,
+  onArrivalAd,
   onDelete,
 }: {
   onEdit: () => void;
   onDiscounts: () => void;
+  onArrivalAd: () => void;
   onDelete: () => void;
 }) {
   const { t } = useTranslation();
@@ -57,6 +59,13 @@ function ProductActions({
         className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
       >
         {t("admin.discounts")}
+      </button>
+      <button
+        type="button"
+        onClick={onArrivalAd}
+        className="rounded-md px-2 py-1 text-xs font-medium text-emerald-700 hover:bg-emerald-50"
+      >
+        {t("admin.createArrivalAd")}
       </button>
       <button
         type="button"
@@ -84,9 +93,7 @@ export function AdminProductsPage() {
   const visibleProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return products;
-    return products.filter(
-      (p) => p.name_en.toLowerCase().includes(q) || p.name_ar.includes(search.trim()),
-    );
+    return products.filter((p) => p.name_en.toLowerCase().includes(q) || p.name_ar.includes(search.trim()));
   }, [products, search]);
 
   const reload = useCallback(() => {
@@ -192,7 +199,6 @@ export function AdminProductsPage() {
             initial={formMode.kind === "edit" ? formMode.product : undefined}
             onSubmit={handleSubmit}
             onCancel={() => setFormMode(null)}
-            onCreateAd={formMode.kind === "edit" ? () => setNewProductAd(formMode.product) : undefined}
           />
         </div>
       )}
@@ -232,12 +238,17 @@ export function AdminProductsPage() {
                       )}
                     </p>
                     <div className="flex flex-wrap gap-1.5">
-                      <StatusBadge ok={product.in_stock} yesLabel={t("admin.inStock")} noLabel={t("product.outOfStock")} />
+                      <StatusBadge
+                        ok={product.in_stock}
+                        yesLabel={t("admin.inStock")}
+                        noLabel={t("product.outOfStock")}
+                      />
                       <StatusBadge ok={product.is_active} yesLabel={t("admin.active")} noLabel={t("admin.hidden")} />
                     </div>
                     <ProductActions
                       onEdit={() => setFormMode({ kind: "edit", product })}
                       onDiscounts={() => setDiscountsProduct(product)}
+                      onArrivalAd={() => setNewProductAd(product)}
                       onDelete={() => handleDelete(product)}
                     />
                   </div>
@@ -279,7 +290,11 @@ export function AdminProductsPage() {
                         )}
                       </td>
                       <td className="px-4 py-2">
-                        <StatusBadge ok={product.in_stock} yesLabel={t("admin.inStock")} noLabel={t("product.outOfStock")} />
+                        <StatusBadge
+                          ok={product.in_stock}
+                          yesLabel={t("admin.inStock")}
+                          noLabel={t("product.outOfStock")}
+                        />
                       </td>
                       <td className="px-4 py-2">
                         <StatusBadge ok={product.is_active} yesLabel={t("admin.active")} noLabel={t("admin.hidden")} />
@@ -288,7 +303,8 @@ export function AdminProductsPage() {
                         <ProductActions
                           onEdit={() => setFormMode({ kind: "edit", product })}
                           onDiscounts={() => setDiscountsProduct(product)}
-                              onDelete={() => handleDelete(product)}
+                          onArrivalAd={() => setNewProductAd(product)}
+                          onDelete={() => handleDelete(product)}
                         />
                       </td>
                     </tr>

@@ -33,14 +33,11 @@ export function ProductForm({
   initial,
   onSubmit,
   onCancel,
-  onCreateAd,
 }: {
   categoryTree: CategoryWithChildren[];
   initial?: Product;
   onSubmit: (values: ProductFormValues, imageFile: File | null, removeImage: boolean) => Promise<void>;
   onCancel: () => void;
-  /** Edit mode only: re-opens the "new arrival" ad for this product. */
-  onCreateAd?: () => void;
 }) {
   const { t } = useTranslation();
 
@@ -72,9 +69,7 @@ export function ProductForm({
   // A file picked from disk but not yet cropped/confirmed — held here just
   // long enough to show the crop modal, then discarded either way.
   const [cropSource, setCropSource] = useState<{ src: string; fileName: string } | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(
-    () => productImageUrl(initial?.image_path ?? null),
-  );
+  const [previewUrl, setPreviewUrl] = useState<string | null>(() => productImageUrl(initial?.image_path ?? null));
   const [submitting, setSubmitting] = useState(false);
   const [showCamera, setShowCamera] = useState(false);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
@@ -377,15 +372,6 @@ export function ProductForm({
         >
           {t("common.cancel")}
         </button>
-        {onCreateAd && (
-          <button
-            type="button"
-            onClick={onCreateAd}
-            className="rounded-lg border border-emerald-600 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-50"
-          >
-            {t("admin.createArrivalAd")}
-          </button>
-        )}
       </div>
     </form>
   );
