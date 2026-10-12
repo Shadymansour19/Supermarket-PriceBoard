@@ -135,7 +135,7 @@ export function HeroBanner() {
 
   return (
     <section
-      className="hero-fade-in relative isolate overflow-hidden rounded-2xl px-5 py-7 text-white sm:px-10 sm:py-12"
+      className="hero-fade-in relative isolate overflow-hidden rounded-2xl px-4 py-5 text-white sm:px-10 sm:py-12"
       style={{ backgroundColor: "#0f4a3a" }}
     >
       {/* Mint curve on the trailing side, like the ads' two-tone field. */}
@@ -150,7 +150,10 @@ export function HeroBanner() {
       <div className="hero-shimmer pointer-events-none absolute inset-y-0 -start-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
       {/* Dot grid, top corner, like the ads. */}
-      <svg className="pointer-events-none absolute start-3 top-3 h-14 w-20 text-white/25" aria-hidden="true">
+      <svg
+        className="pointer-events-none absolute end-3 top-3 h-10 w-14 text-white/25 sm:h-14 sm:w-20"
+        aria-hidden="true"
+      >
         <defs>
           <pattern id="hero-dots" width="14" height="14" patternUnits="userSpaceOnUse">
             <circle cx="3" cy="3" r="2.2" fill="currentColor" />
@@ -160,7 +163,7 @@ export function HeroBanner() {
       </svg>
       {/* Dashed orbit rings, like the one around the ad photo. */}
       <svg
-        className="pointer-events-none absolute -end-10 -bottom-10 h-44 w-44 text-[#f6b100]/50 sm:h-64 sm:w-64"
+        className="pointer-events-none absolute -end-12 -bottom-12 h-32 w-32 text-[#f6b100]/40 sm:-end-10 sm:-bottom-10 sm:h-64 sm:w-64 sm:text-[#f6b100]/50"
         viewBox="0 0 100 100"
         fill="none"
         aria-hidden="true"
@@ -184,7 +187,7 @@ export function HeroBanner() {
           <img
             src="/logo.jpg"
             alt=""
-            className="h-12 w-12 shrink-0 rounded-full border-2 border-[#f6b100] object-cover sm:h-16 sm:w-16"
+            className="h-11 w-11 shrink-0 rounded-full border-2 border-[#f6b100] object-cover sm:h-16 sm:w-16"
           />
           <span className="hero-badge-pulse font-label inline-flex items-center gap-1.5 rounded-full bg-[#ffeea8] px-3 py-1 text-xs font-bold text-[#0b3a2d] sm:text-sm">
             🛒 {t("hero.badge")}
@@ -192,14 +195,14 @@ export function HeroBanner() {
         </div>
 
         <p
-          className="mt-4 flex items-center gap-2 text-2xl text-[#f6b100] sm:text-4xl"
+          className="mt-3 flex items-center gap-2 text-xl text-[#f6b100] sm:mt-4 sm:text-4xl"
           style={{ fontFamily: SCRIPT_FONT }}
         >
           {t("hero.script")}
           <Sparks className="h-6 w-6 -scale-x-100 text-white sm:h-8 sm:w-8 rtl:scale-x-100" />
         </p>
         <h1
-          className="mt-1 text-4xl leading-tight font-black sm:text-6xl"
+          className="mt-0.5 text-[clamp(1.6rem,8.6vw,2.25rem)] leading-tight font-black sm:text-6xl"
           style={{ fontFamily: "Cairo, Poppins, system-ui, sans-serif", textShadow: HEADLINE_SHADOW }}
         >
           {t("hero.title")}
@@ -207,35 +210,38 @@ export function HeroBanner() {
         <svg
           viewBox="0 0 300 12"
           preserveAspectRatio="none"
-          className="mt-3 h-3 w-72 sm:h-3.5 sm:w-[32rem]"
+          className="mt-2 h-3 w-[78%] max-w-72 sm:mt-3 sm:h-3.5 sm:w-[32rem] sm:max-w-none"
           aria-hidden="true"
         >
           {/* Ragged brush bar, same look as the underline on the ad posters. */}
           <path d={UNDERLINE_PATH} fill="#f6b100" />
         </svg>
-        <p className="mt-3 max-w-md text-lg text-white sm:text-2xl" style={{ fontFamily: SCRIPT_FONT }}>
+        <p
+          className="mt-2 max-w-md text-base leading-snug text-white sm:mt-3 sm:text-2xl"
+          style={{ fontFamily: SCRIPT_FONT }}
+        >
           {t("hero.subtitle")}
         </p>
 
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5 sm:mt-4 sm:gap-2">
           {chips.map((chip) => (
             <span
               key={chip}
-              className="font-label rounded-full bg-[#ffeea8] px-3 py-1 text-xs font-bold text-[#0b3a2d] shadow sm:text-sm"
+              className="font-label rounded-full bg-[#ffeea8] px-2.5 py-0.5 text-[11px] font-bold text-[#0b3a2d] shadow sm:px-3 sm:py-1 sm:text-sm"
             >
               {chip}
             </span>
           ))}
         </div>
 
-        <div className="mt-5 flex items-center gap-3">
+        <div className="mt-4 flex items-center gap-3 sm:mt-5">
           <Link
             to="/deals"
-            className="font-label inline-flex items-center rounded-full bg-[#f6b100] px-6 py-2.5 text-base font-black text-[#06281d] shadow-lg ring-4 ring-[#f6b100]/25 transition hover:bg-[#ffc42e] sm:text-lg"
+            className="font-label inline-flex items-center rounded-full bg-[#f6b100] px-5 py-2 text-sm font-black whitespace-nowrap sm:px-6 sm:py-2.5 sm:text-lg text-[#06281d] shadow-lg ring-4 ring-[#f6b100]/25 transition hover:bg-[#ffc42e] sm:text-lg"
           >
             {t("hero.cta")}
           </Link>
-          <CurlyArrow className="hero-nudge h-10 w-16 text-white/90 rtl:-scale-x-100 sm:h-12 sm:w-20" />
+          <CurlyArrow className="hero-nudge hidden h-10 w-16 sm:block text-white/90 rtl:-scale-x-100 sm:h-12 sm:w-20" />
         </div>
       </div>
     </section>
