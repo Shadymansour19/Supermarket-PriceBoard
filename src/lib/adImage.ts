@@ -404,8 +404,33 @@ function drawIcon(ctx: Ctx, kind: IconKind, cx: number, cy: number, theme: Theme
 
 type Feature = { icon: IconKind; iconLabel?: string; line1: string; line2: string; strike?: boolean };
 
+/** "قطعة / قطعتين / ٣ قطع / ١٢ قطعة" — or the unit's own name (كجم, لتر...). */
+function countText(n: number, product: Product): string {
+  if (product.unit === "each") {
+    if (n === 1) return "قطعة";
+    if (n === 2) return "قطعتين";
+    return `${num(n)} ${n <= 10 ? "قطع" : "قطعة"}`;
+  }
+  return `${num(n)} ${unitLabel(product)}`;
+}
+
+/** What the tier price is "per": الواحد / الكيلو / اللتر ... */
+function perOneWord(product: Product): string {
+  const words: Record<string, string> = {
+    each: "الواحد",
+    kg: "الكيلو",
+    g: "الجرام",
+    liter: "اللتر",
+    ml: "المل",
+    dozen: "الدستة",
+    pack: "العبوة",
+    box: "الصندوق",
+    bag: "الكيس",
+  };
+  return words[product.unit] ?? "الواحد";
+}
+
 function features(product: Product, spec: AdSpec): Feature[] {
-  const unit = unitLabel(product);
   switch (spec.kind) {
     case "new":
       return [
@@ -416,24 +441,32 @@ function features(product: Product, spec: AdSpec): Feature[] {
     case "limited": {
       const days = daysRemaining(spec.discount.ends_at);
       return [
+        // Original price first, so it's the rightmost column.
+        { icon: "tag", line1: "السعر قبل", line2: adPrice(product.price), strike: true },
         {
           icon: "tag",
           line1: "السعر الجديد",
           line2: adPrice(spec.discount.new_price),
         },
-        { icon: "tag", line1: "السعر قبل", line2: adPrice(product.price), strike: true },
         { icon: "clock", line1: "باقي", line2: days <= 1 ? "يوم واحد" : daysText(days) },
       ];
     }
-    case "quantity":
-      return adTiers(spec)
+    case "quantity": {
+      const each = perOneWord(product);
+      const rows: Feature[] = adTiers(spec)
         .slice(0, 3)
         .map((tier) => ({
           icon: "number" as const,
           iconLabel: num(tier.min_quantity),
-          line1: `من ${num(tier.min_quantity)} ${unit || "قطع"}`,
-          line2: adPrice(tier.price),
+          line1: `من أول ${countText(tier.min_quantity, product)}`,
+          line2: `${each} بـ ${adPrice(tier.price)}`,
         }));
+      // The regular price rides along as one more column, first (rightmost) —
+      // only when there's room for it (with three tiers the row is already full).
+      if (rows.length < 3)
+        rows.unshift({ icon: "tag", line1: "السعر الأصلي", line2: adPrice(product.price), strike: true });
+      return rows;
+    }
   }
 }
 
@@ -626,7 +659,7 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
         ? ["سعر", "خاص"]
         : ["السعر الأصلي", adPrice(product.price)];
   drawSeal(ctx, theme, 150, 330, badge[0], badge[1]);
-  ticks(ctx, 275, 225, -0.9, "#ffffff", 0.8);
+  ticks(ctx, 275, 225, -0.9, theme.accent, 0.8);
 
   // Photo.
   const pcx = 580;
@@ -649,13 +682,30 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
   ctx.stroke();
 
   // Dashed orbit around the photo, a hand-written note and a curly arrow.
+  // Two-tone ring: the light field colour over the dark panel, the dark
+  // colour over the light field.
+  const drawOrbit = (color: string) => {
+    ctx.save();
+    ctx.setLineDash([14, 16]);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 6;
+    ctx.beginPath();
+    ctx.arc(pcx, pcy, pr + 30, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  };
   ctx.save();
-  ctx.setLineDash([10, 14]);
-  ctx.strokeStyle = "rgba(255,255,255,0.55)";
-  ctx.lineWidth = 3;
   ctx.beginPath();
-  ctx.arc(pcx, pcy, pr + 30, 0, Math.PI * 2);
-  ctx.stroke();
+  lightFieldPath(ctx);
+  ctx.clip();
+  drawOrbit(theme.dark);
+  ctx.restore();
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, AD_WIDTH, AD_HEIGHT);
+  lightFieldPath(ctx);
+  ctx.clip("evenodd");
+  drawOrbit(theme.field);
   ctx.restore();
   const note = {
     new: ["هتحبه", "من أول", "مرة!"],
@@ -746,7 +796,8 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
 
   // Icon row on the colour field.
   const items = features(product, spec);
-  const itemW = 330;
+  const itemW = Math.min(330, 1010 / items.length);
+  const narrow = items.length > 3;
   const rowY = 1095;
   const groupW = items.length * itemW;
   const startRight = AD_WIDTH / 2 + groupW / 2;
@@ -755,14 +806,14 @@ function drawPoster(ctx: Ctx, product: Product, spec: AdSpec, assets: Assets, ad
     drawIcon(ctx, f.icon, right - 50, rowY, theme, f.iconLabel);
     ctx.textAlign = "right";
     ctx.fillStyle = theme.ink;
-    ctx.font = body(spec.kind === "quantity" ? 25 : 28, 800);
-    ctx.fillText(f.line1, right - 100, rowY - 16);
-    ctx.font = body(spec.kind === "quantity" ? 32 : 28, 900);
-    ctx.fillText(f.line2, right - 100, rowY + 20);
+    ctx.font = body(narrow ? 22 : spec.kind === "quantity" ? 25 : 28, 800);
+    ctx.fillText(f.line1, right - (narrow ? 92 : 100), rowY - 16);
+    ctx.font = body(narrow ? 23 : spec.kind === "quantity" ? 29 : 28, 900);
+    ctx.fillText(f.line2, right - (narrow ? 92 : 100), rowY + 20);
     if (f.strike) {
       const w = ctx.measureText(f.line2).width;
       ctx.fillStyle = theme.ink;
-      ctx.fillRect(right - 100 - w, rowY + 19, w, 4);
+      ctx.fillRect(right - (narrow ? 92 : 100) - w, rowY + 19, w, 4);
     }
     if (i < items.length - 1) {
       ctx.save();
