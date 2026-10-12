@@ -227,7 +227,7 @@ export function ProductAdModal({ product, spec, onClose }: { product: Product; s
             <button
               type="button"
               disabled={!blob}
-              onClick={() => setMenuOpen((open) => !open)}
+              onClick={() => (canShareFiles() ? shareNative() : setMenuOpen(true))}
               aria-expanded={menuOpen}
               className="flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50"
             >
@@ -265,36 +265,26 @@ export function ProductAdModal({ product, spec, onClose }: { product: Product; s
           >
             <h3 className="font-heading px-4 pt-4 pb-2 text-sm font-semibold text-neutral-900">{t("admin.adShare")}</h3>
             <div className="divide-y divide-neutral-100 border-y border-neutral-100">
-              {canShareFiles() ? (
-                <MenuItem
-                  icon={<ShareIcon className="h-5 w-5 text-emerald-700" />}
-                  label={t("admin.adShareApps")}
-                  onClick={shareNative}
-                />
-              ) : (
-                <>
-                  <MenuItem
-                    icon={<FacebookIcon className="h-5 w-5 text-[#1877f2]" />}
-                    label="Facebook"
-                    onClick={shareFacebook}
-                  />
-                  <MenuItem
-                    icon={<InstagramIcon className="h-5 w-5 text-[#e1306c]" />}
-                    label="Instagram"
-                    onClick={shareInstagram}
-                  />
-                  <MenuItem
-                    icon={<WhatsAppIcon className="h-5 w-5 text-[#25d366]" />}
-                    label="WhatsApp"
-                    onClick={shareWhatsApp}
-                  />
-                  <MenuItem
-                    icon={<StatusIcon className="h-5 w-5 text-[#25d366]" />}
-                    label={t("admin.adWhatsAppStatus")}
-                    onClick={shareWhatsAppStatus}
-                  />
-                </>
-              )}
+              <MenuItem
+                icon={<FacebookIcon className="h-5 w-5 text-[#1877f2]" />}
+                label="Facebook"
+                onClick={shareFacebook}
+              />
+              <MenuItem
+                icon={<InstagramIcon className="h-5 w-5 text-[#e1306c]" />}
+                label="Instagram"
+                onClick={shareInstagram}
+              />
+              <MenuItem
+                icon={<WhatsAppIcon className="h-5 w-5 text-[#25d366]" />}
+                label="WhatsApp"
+                onClick={shareWhatsApp}
+              />
+              <MenuItem
+                icon={<StatusIcon className="h-5 w-5 text-[#25d366]" />}
+                label={t("admin.adWhatsAppStatus")}
+                onClick={shareWhatsAppStatus}
+              />
             </div>
             <button
               type="button"
