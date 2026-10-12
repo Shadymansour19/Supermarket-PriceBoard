@@ -14,7 +14,7 @@ const resources = {
         title: "Super Market Hamada",
         subtitle: "Everything your home needs, all in one place, at prices you'll love.",
         chips: ["Daily deals", "Wholesale prices", "Order on WhatsApp"],
-        cta: "Let's check out today's deals!",
+        cta: "See today's deals",
       },
       nav: { home: "Home", allCategories: "All categories", categories: "Categories", topCategories: "Top categories" },
       categories: {
@@ -282,7 +282,7 @@ const resources = {
         title: "سوبر ماركت حماده",
         subtitle: "كل اللي بيتك محتاجه في مكان واحد.. وبأحلى الأسعار",
         chips: ["عروض يومية", "أسعار الجملة", "اطلب واتساب"],
-        cta: "شوف العروض دلوقتي",
+        cta: "الحق عروض انهارده",
       },
       nav: { home: "الرئيسية", allCategories: "كل الأقسام", categories: "الأقسام", topCategories: "أهم الأقسام" },
       categories: {

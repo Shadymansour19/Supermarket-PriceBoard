@@ -1,3 +1,4 @@
+import { useLayoutEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 
@@ -113,6 +114,8 @@ const UNDERLINE_PATH = (() => {
   return `M${top.join(" L")} L${bottom.join(" L")} Z`;
 })();
 
+const ARROW_CLASS = "hero-nudge h-9 w-14 rtl:-scale-x-100 sm:h-12 sm:w-20";
+
 const SCRIPT_FONT = "Rakkas, Lalezar, Cairo, system-ui, sans-serif";
 // Same stacked-copies trick the ad posters use for the 3D headline; em units
 // so the depth scales with the font size.
@@ -132,9 +135,34 @@ const HEADLINE_SHADOW = [1, 2, 3, 4, 5, 6]
 export function HeroBanner() {
   const { t } = useTranslation();
   const chips = t("hero.chips", { returnObjects: true }) as string[];
+  const sectionRef = useRef<HTMLElement>(null);
+  const arrowRef = useRef<HTMLSpanElement>(null);
+  // Where the arrow sits inside the mint panel's box (physical px), so a
+  // dark copy of it can be clipped to the mint curve and drawn over the white one.
+  const [mintArrow, setMintArrow] = useState<{ left: number; top: number; w: number; h: number; rtl: boolean } | null>(
+    null,
+  );
+
+  useLayoutEffect(() => {
+    const section = sectionRef.current;
+    const arrow = arrowRef.current;
+    if (!section || !arrow) return;
+    const measure = () => {
+      const sr = section.getBoundingClientRect();
+      const ar = arrow.getBoundingClientRect();
+      const rtl = getComputedStyle(section).direction === "rtl";
+      const mintLeft = rtl ? sr.left : sr.right - sr.width * 0.46;
+      setMintArrow({ left: ar.left - mintLeft, top: ar.top - sr.top, w: ar.width, h: ar.height, rtl });
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(section);
+    return () => observer.disconnect();
+  }, [chips.length]);
 
   return (
     <section
+      ref={sectionRef}
       className="hero-fade-in relative isolate overflow-hidden rounded-2xl px-4 py-5 text-white sm:px-10 sm:py-12"
       style={{ backgroundColor: "#0f4a3a" }}
     >
@@ -146,6 +174,16 @@ export function HeroBanner() {
         aria-hidden="true"
       >
         <path d="M0 0H62C62 24 34 34 40 56C46 80 80 92 100 100H0Z" fill="#a6dcbf" opacity="0.3" />
+      </svg>
+      <svg width="0" height="0" className="absolute" aria-hidden="true">
+        <defs>
+          <clipPath id="hero-mint-rtl" clipPathUnits="objectBoundingBox">
+            <path d="M0 0H.62C.62 .24 .34 .34 .4 .56C.46 .8 .8 .92 1 1H0Z" />
+          </clipPath>
+          <clipPath id="hero-mint-ltr" clipPathUnits="objectBoundingBox">
+            <path d="M1 0H.38C.38 .24 .66 .34 .6 .56C.54 .8 .2 .92 0 1H1Z" />
+          </clipPath>
+        </defs>
       </svg>
       <div className="hero-shimmer pointer-events-none absolute inset-y-0 -start-1/3 w-1/3 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
 
@@ -237,13 +275,43 @@ export function HeroBanner() {
         <div className="mt-4 flex items-center gap-3 sm:mt-5">
           <Link
             to="/deals"
-            className="font-label inline-flex items-center rounded-full bg-[#f6b100] px-5 py-2 text-sm font-black whitespace-nowrap sm:px-6 sm:py-2.5 sm:text-lg text-[#06281d] shadow-lg ring-4 ring-[#f6b100]/25 transition hover:bg-[#ffc42e] sm:text-lg"
+            className="group font-label inline-flex items-center rounded-full bg-[#f6b100] px-5 py-2 text-sm font-black sm:whitespace-nowrap sm:px-6 sm:py-2.5 sm:text-lg text-[#06281d] shadow-lg ring-4 ring-[#f6b100]/25 transition hover:bg-[#ffc42e] sm:text-lg"
           >
             {t("hero.cta")}
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="ms-2 h-5 w-5 shrink-0 transition-transform duration-200 group-hover:translate-x-1.5 group-focus-visible:translate-x-1.5 group-active:translate-x-2 rtl:-scale-x-100 rtl:group-hover:-translate-x-1.5 rtl:group-focus-visible:-translate-x-1.5 rtl:group-active:-translate-x-2 sm:h-6 sm:w-6"
+              aria-hidden="true"
+            >
+              <path d="M4 12h15M13 6l6 6-6 6" />
+            </svg>
           </Link>
-          <CurlyArrow className="hero-nudge hidden h-10 w-16 sm:block text-white/90 rtl:-scale-x-100 sm:h-12 sm:w-20" />
+          <span ref={arrowRef} className="inline-block shrink-0">
+            <CurlyArrow className={ARROW_CLASS + " text-white/90"} />
+          </span>
         </div>
       </div>
+
+      {/* Dark copy of the arrow, visible only where it crosses the mint curve. */}
+      {mintArrow && (
+        <div
+          className="pointer-events-none absolute inset-y-0 end-0 w-[46%] overflow-hidden"
+          style={{ clipPath: `url(#hero-mint-${mintArrow.rtl ? "rtl" : "ltr"})` }}
+          aria-hidden="true"
+        >
+          <span
+            className="absolute inline-block"
+            style={{ left: mintArrow.left, top: mintArrow.top, width: mintArrow.w, height: mintArrow.h }}
+          >
+            <CurlyArrow className={ARROW_CLASS + " text-[#0f4a3a]"} />
+          </span>
+        </div>
+      )}
     </section>
   );
 }
