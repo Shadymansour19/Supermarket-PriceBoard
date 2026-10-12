@@ -44,7 +44,11 @@ export function AddToCartButton({
       // The white padding ring is what lets this read as a floating button
       // sitting half on the product photo, half on the card's white
       // background, instead of looking cropped by the image underneath it.
-      className={`flex items-center justify-center rounded-full bg-white p-1 shadow-md transition ${className}`}
+      // No shadow on the ring itself — it's the exact same white as the
+      // card content below, so a shadow there would draw a visible seam
+      // where none should show; the green circle inside still reads fine
+      // against the photo above without one.
+      className={`flex items-center justify-center rounded-full bg-white p-1 transition ${className}`}
     >
       <span
         className={`flex h-full w-full items-center justify-center rounded-full text-white transition ${
