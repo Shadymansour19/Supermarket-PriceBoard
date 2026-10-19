@@ -5,6 +5,15 @@ categories; the public browses read-only, with navigation by category/
 subcategory and search. See [SPEC.md](./SPEC.md) for the data model and
 decisions, [PLAN.md](./PLAN.md) for the phased build plan.
 
+## Documentation
+
+| File | Read it for |
+|---|---|
+| [ARCHITECTURE.md](./ARCHITECTURE.md) | Code map, data model, key flows, env vars |
+| [HOWTO.md](./HOWTO.md) | Recipes: edit text/colors/config, add fields/pages/tables, migrations, push setup, deploy, troubleshooting |
+| [SPEC.md](./SPEC.md) | Why things were decided the way they were |
+| [PLAN.md](./PLAN.md) | Build phases and status |
+
 ## Stack
 
 React + Vite + TypeScript + Tailwind (RTL-aware) on the frontend, Supabase
@@ -17,7 +26,7 @@ is in [vite.config.ts](./vite.config.ts).
 
 ```bash
 npm install
-cp .env.example .env.local   # fill in your Supabase project URL + anon key
+cp .env.example .env.local   # fill in Supabase URL + anon key + VAPID public key
 npm run dev
 ```
 
@@ -56,7 +65,7 @@ They can then sign in at `/admin/login`.
 1. Import the repo into Vercel (framework preset auto-detects as Vite —
    build command `npm run build`, output directory `dist`).
 2. In the project's **Settings → Environment Variables**, add
-   `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` (same values as your
+   `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` and `VITE_VAPID_PUBLIC_KEY` (same values as your
    `.env.local`) for the Production environment — and Preview too, if you
    want PR/branch deploys to work against the same database.
 3. [vercel.json](./vercel.json) rewrites every path to `index.html` so
@@ -64,6 +73,12 @@ They can then sign in at `/admin/login`.
    direct load or refresh — already committed, nothing to configure.
 4. Push to the branch Vercel is watching; it builds and deploys
    automatically from there on.
+
+## Push notifications
+
+New limited-time deals send a push notification via a Postgres trigger and the
+Edge Function in [supabase/functions/notify-new-deal/](./supabase/functions/notify-new-deal/).
+Setup and troubleshooting: see [HOWTO.md](./HOWTO.md#push-notifications).
 
 ## Scripts
 
