@@ -37,11 +37,14 @@ export function Footer() {
 
           <div className="flex flex-col gap-2">
             {CONTACT.phoneNumbers.map((phone) => (
-              <a key={phone.href} href={phone.href} className="flex items-center gap-3 hover:text-emerald-700" dir="ltr">
+              <a key={phone.href} href={phone.href} className="flex items-center gap-3 hover:text-emerald-700">
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-neutral-100 text-neutral-700">
                   <PhoneIcon className="h-5 w-5" />
                 </span>
-                {phone.display}
+                {/* Only the digits need to stay left-to-right; forcing it on
+                    the whole row flipped the icon to the wrong side in
+                    Arabic, where every other row follows the page's RTL flow. */}
+                <span dir="ltr">{phone.display}</span>
               </a>
             ))}
           </div>
