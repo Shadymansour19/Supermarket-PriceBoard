@@ -3,6 +3,7 @@ import { Link, Outlet } from "react-router-dom";
 import { AdminSessionPrompt } from "./AdminSessionPrompt";
 import { BottomNavBar } from "./BottomNavBar";
 import { ContactWidget } from "./ContactWidget";
+import { DeveloperCredit } from "./DeveloperCredit";
 import { Footer } from "./Footer";
 import { BellIcon, CartIcon, HeartIcon } from "./Icons";
 import { InstallBanner } from "./InstallBanner";
@@ -65,6 +66,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <Footer />
+      <DeveloperCredit />
       {/* Clears the fixed mobile bottom nav bar and floating cart button
        * so neither ever covers the tail end of the footer. */}
       <div className="pb-mobile-fab-safe md:hidden" />

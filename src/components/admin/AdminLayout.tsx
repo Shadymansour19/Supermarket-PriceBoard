@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import { NavLink, Outlet } from "react-router-dom";
 import { AdminBottomNavBar } from "./AdminBottomNavBar";
 import { AdminMenu } from "./AdminMenu";
+import { DeveloperCredit } from "../DeveloperCredit";
 import { LanguageToggle } from "../LanguageToggle";
 
 export function AdminLayout() {
@@ -40,6 +41,7 @@ export function AdminLayout() {
       </header>
       <main className="mx-auto max-w-6xl px-4 py-6 pb-20 md:pb-6">
         <Outlet />
+        <DeveloperCredit />
       </main>
       <AdminBottomNavBar />
     </div>
