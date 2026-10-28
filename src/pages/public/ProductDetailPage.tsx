@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams } from "react-router-dom";
 import { AskWhatsAppButton } from "../../components/AskWhatsAppButton";
@@ -28,19 +28,39 @@ export function ProductDetailPage() {
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const [extraImages, setExtraImages] = useState<ProductImage[]>([]);
-  // Defaults to the cover photo; sat to an extra image's path when a
-  // thumbnail below is clicked.
-  const [selectedImagePath, setSelectedImagePath] = useState<string | null>(null);
   const [limitedTimeDiscount, setLimitedTimeDiscount] = useState<LimitedTimeDiscount | null>(null);
   const [quantityDiscount, setQuantityDiscount] = useState<QuantityDiscount | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [justAdded, setJustAdded] = useState(false);
 
+  // Cover photo plus whatever's in product_images — one path per carousel
+  // slide/thumbnail, in display order.
+  const images = useMemo(() => {
+    if (!product) return [];
+    return [product.image_path, ...extraImages.map((img) => img.image_path)].filter(
+      (path): path is string => !!path,
+    );
+  }, [product, extraImages]);
+
+  // Which slide is currently in view — same auto-advancing, RTL-safe
+  // horizontal-scroll mechanics as DealsCarousel (IntersectionObserver
+  // tracks manual swipes, a geometry-based scrollBy moves it
+  // programmatically either way), just one full-size image per slide
+  // instead of several partially-visible cards.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const scrollerRef = useRef<HTMLDivElement | null>(null);
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const slideRatiosRef = useRef<number[]>([]);
+  const pausedUntilRef = useRef(0);
+  const ignoreObserverUntilRef = useRef(0);
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
+
   useEffect(() => {
     if (!productId) return;
+    setActiveIndex(0);
     fetchProductById(productId).then((fetchedProduct) => {
       setProduct(fetchedProduct);
-      setSelectedImagePath(fetchedProduct?.image_path ?? null);
       if (fetchedProduct) recordProductView(fetchedProduct.id);
     });
     fetchProductImages(productId)
@@ -53,6 +73,78 @@ export function ProductDetailPage() {
       .then(setQuantityDiscount)
       .catch(() => setQuantityDiscount(null));
   }, [productId]);
+
+  useEffect(() => {
+    const scroller = scrollerRef.current;
+    if (!scroller || images.length === 0) return;
+
+    slideRatiosRef.current = images.map(() => 0);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (Date.now() < ignoreObserverUntilRef.current) return;
+        entries.forEach((entry) => {
+          const index = slideRefs.current.findIndex((el) => el === entry.target);
+          if (index !== -1) slideRatiosRef.current[index] = entry.intersectionRatio;
+        });
+        let bestIndex = 0;
+        let bestRatio = -1;
+        slideRatiosRef.current.forEach((ratio, index) => {
+          if (ratio > bestRatio) {
+            bestRatio = ratio;
+            bestIndex = index;
+          }
+        });
+        setActiveIndex(bestIndex);
+      },
+      { root: scroller, threshold: [0, 0.5, 1] },
+    );
+
+    let cancelled = false;
+    document.fonts.ready.then(() => {
+      if (!cancelled) slideRefs.current.forEach((el) => el && observer.observe(el));
+    });
+
+    return () => {
+      cancelled = true;
+      observer.disconnect();
+    };
+  }, [images]);
+
+  // Auto-advance through the photos on a timer, unless the user asked for
+  // reduced motion or recently swiped/clicked a thumbnail themselves.
+  useEffect(() => {
+    if (images.length <= 1) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const id = setInterval(() => {
+      if (Date.now() < pausedUntilRef.current) return;
+      goToSlide((activeIndexRef.current + 1) % images.length);
+    }, 4000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [images]);
+
+  function goToSlide(index: number) {
+    const scroller = scrollerRef.current;
+    const slide = slideRefs.current[index];
+    if (!scroller || !slide) return;
+
+    ignoreObserverUntilRef.current = Date.now() + 600;
+    setActiveIndex(index);
+
+    // scrollBy on the strip's own element only ever moves that element,
+    // never an ancestor — unlike scrollIntoView, which would also yank the
+    // whole page if the user had scrolled past this section.
+    const scrollerRect = scroller.getBoundingClientRect();
+    const slideRect = slide.getBoundingClientRect();
+    const delta = slideRect.left - scrollerRect.left;
+    scroller.scrollBy({ left: delta, behavior: "smooth" });
+  }
+
+  function pauseAutoAdvance() {
+    pausedUntilRef.current = Date.now() + 6000;
+  }
 
   if (product === undefined) {
     return <p className="text-neutral-500">{t("common.loading")}</p>;
@@ -69,7 +161,7 @@ export function ProductDetailPage() {
     );
   }
 
-  const imageUrl = productImageUrl(selectedImagePath);
+  const imageUrl = productImageUrl(images[activeIndex] ?? null);
   const name = localizedField(product, "name", i18n.language);
   const description = localizedField(product, "description", i18n.language);
 
@@ -97,34 +189,62 @@ export function ProductDetailPage() {
           {/* Square, matching the admin upload/capture crop exactly — the
            * add-to-cart row is sticky-clamped near the bottom independently
            * of this, so a taller image no longer risks landing it behind
-           * the fixed bottom nav/cart button on shorter phones. */}
-          <div className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
-            {imageUrl ? (
-              <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-neutral-300">
-                <span className="text-6xl">🛒</span>
-              </div>
-            )}
-          </div>
+           * the fixed bottom nav/cart button on shorter phones.
+           *
+           * One photo fills the whole box at a time — swiping/scrolling
+           * snaps to the next whole slide (scroll-snap, not free scroll),
+           * every slide the same fixed square size so nothing zooms in or
+           * out as it changes. Auto-advances on a timer when left alone;
+           * see the effect above for the RTL-safe scroll mechanics
+           * (shared with DealsCarousel). */}
+          {images.length > 0 ? (
+            <div
+              ref={scrollerRef}
+              className="scrollbar-hide flex aspect-square w-full snap-x snap-mandatory overflow-x-auto rounded-xl bg-neutral-100"
+              onPointerDown={pauseAutoAdvance}
+              onWheel={pauseAutoAdvance}
+              onTouchStart={pauseAutoAdvance}
+            >
+              {images.map((path, index) => (
+                <div
+                  key={path}
+                  ref={(el) => {
+                    slideRefs.current[index] = el;
+                  }}
+                  className="h-full w-full shrink-0 snap-start"
+                >
+                  <img
+                    src={productImageUrl(path) ?? undefined}
+                    alt={index === 0 ? name : ""}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex aspect-square w-full items-center justify-center rounded-xl bg-neutral-100 text-neutral-300">
+              <span className="text-6xl">🛒</span>
+            </div>
+          )}
           {/* Only shown once there's actually more than one photo — the
            * cover plus whatever's in product_images (lib/productImages.ts). */}
-          {extraImages.length > 0 && (
+          {images.length > 1 && (
             <div className="flex gap-2 overflow-x-auto pb-1">
-              {[product.image_path, ...extraImages.map((img) => img.image_path)]
-                .filter((path): path is string => !!path)
-                .map((path) => (
-                  <button
-                    key={path}
-                    type="button"
-                    onClick={() => setSelectedImagePath(path)}
-                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-neutral-100 ${
-                      path === selectedImagePath ? "border-emerald-600" : "border-transparent"
-                    }`}
-                  >
-                    <img src={productImageUrl(path) ?? undefined} alt="" className="h-full w-full object-cover" />
-                  </button>
-                ))}
+              {images.map((path, index) => (
+                <button
+                  key={path}
+                  type="button"
+                  onClick={() => {
+                    pauseAutoAdvance();
+                    goToSlide(index);
+                  }}
+                  className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-neutral-100 ${
+                    index === activeIndex ? "border-emerald-600" : "border-transparent"
+                  }`}
+                >
+                  <img src={productImageUrl(path) ?? undefined} alt="" className="h-full w-full object-cover" />
+                </button>
+              ))}
             </div>
           )}
         </div>
