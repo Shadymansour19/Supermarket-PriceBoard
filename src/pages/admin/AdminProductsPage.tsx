@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProductAdModal } from "../../components/admin/ProductAdModal";
 import { ProductDiscountsModal } from "../../components/admin/ProductDiscountsModal";
@@ -7,6 +7,7 @@ import { SearchBar } from "../../components/SearchBar";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import type { AdSpec } from "../../lib/adImage";
 import { fetchCategoryTree } from "../../lib/categories";
+import { toErrorMessage } from "../../lib/errors";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
 import { addProductImage, deleteProductImageRow, fetchProductImages } from "../../lib/productImages";
@@ -93,6 +94,14 @@ export function AdminProductsPage() {
   const [newProductAd, setNewProductAd] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const formRef = useRef<HTMLDivElement | null>(null);
+
+  // The form always renders at the top of the page, but the row that opened
+  // it (via edit) can be far down a long product list — without this, the
+  // viewport stays scrolled there and the form opens off-screen.
+  useEffect(() => {
+    if (formMode) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [formMode]);
 
   const visibleProducts = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -171,11 +180,14 @@ export function AdminProductsPage() {
       }
       // New extra images: upload then record each as its own row. Sort
       // order just needs to keep newly-added ones after existing ones and
-      // each other — an ever-increasing timestamp does that without
-      // needing to know the current max.
+      // each other — `editExtraImages.length` (the count fetched into edit
+      // mode, before this save's own removals) plus each new one's index
+      // does that. `sort_order` is a 32-bit `int`, which a millisecond
+      // timestamp (~1.8 trillion right now) badly overflows — that was
+      // the actual cause of every save failing here.
       for (const [index, file] of extraImageFiles.entries()) {
         const path = await uploadProductImage(file, product.id);
-        await addProductImage(product.id, path, Date.now() + index);
+        await addProductImage(product.id, path, editExtraImages.length + index);
       }
 
       const isNew = formMode?.kind !== "edit";
@@ -185,7 +197,7 @@ export function AdminProductsPage() {
         setNewProductAd(product);
       }
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : String(err));
+      setActionError(toErrorMessage(err));
     }
   }
 
@@ -201,7 +213,7 @@ export function AdminProductsPage() {
       for (const img of extraImages) await deleteProductImage(img.image_path).catch(() => {});
       await reload();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : String(err));
+      setActionError(toErrorMessage(err));
     }
   }
 
@@ -227,7 +239,7 @@ export function AdminProductsPage() {
       )}
 
       {formMode && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-4">
+        <div ref={formRef} className="rounded-xl border border-neutral-200 bg-white p-4">
           <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
             {formMode.kind === "edit" ? t("admin.editProduct") : t("admin.newProduct")}
           </h2>

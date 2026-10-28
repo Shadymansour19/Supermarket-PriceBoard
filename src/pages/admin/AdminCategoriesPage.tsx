@@ -6,6 +6,7 @@ import { Chevron } from "../../components/Chevron";
 import { SearchBar } from "../../components/SearchBar";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
+import { toErrorMessage } from "../../lib/errors";
 import { deleteCategoryImage, uploadCategoryImage } from "../../lib/imageUpload";
 import type { Category, CategoryWithChildren } from "../../types/database";
 
@@ -92,7 +93,7 @@ export function AdminCategoriesPage() {
       setFormMode(null);
       await reload();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : String(err));
+      setActionError(toErrorMessage(err));
     }
   }
 
@@ -104,7 +105,7 @@ export function AdminCategoriesPage() {
       if (category.image_path) await deleteCategoryImage(category.image_path).catch(() => {});
       await reload();
     } catch (err) {
-      setActionError(err instanceof Error ? err.message : String(err));
+      setActionError(toErrorMessage(err));
     }
   }
 

@@ -12,6 +12,7 @@ import {
   setLimitedTimeDiscount,
   setQuantityDiscount,
 } from "../../lib/discounts";
+import { toErrorMessage } from "../../lib/errors";
 import { formatPrice, localizedField } from "../../lib/localize";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
 
@@ -144,7 +145,7 @@ export function ProductDiscountsModal({ product, onClose }: { product: Product; 
         setAdQueue(accepted);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      setError(toErrorMessage(err));
       setSaving(false);
     }
   }
