@@ -286,3 +286,39 @@ textarea {
     animation: none;
   }
 }
+
+/* UpdateBanner: slides down once on appearing, and its "Refresh" button
+   gets a soft pulsing glow to draw the eye to it. */
+@keyframes update-banner-in {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+
+@keyframes update-pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(255, 255, 255, 0);
+  }
+}
+
+.animate-update-banner-in {
+  animation: update-banner-in 0.4s ease both;
+}
+
+.animate-pulse-glow {
+  animation: update-pulse-glow 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-update-banner-in,
+  .animate-pulse-glow {
+    animation: none;
+  }
+}

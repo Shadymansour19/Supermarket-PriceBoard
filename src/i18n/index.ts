@@ -8,6 +8,13 @@ const resources = {
   en: {
     translation: {
       app: { name: "Super Market Hamada" },
+      update: {
+        available: "A new version is available",
+        refresh: "Refresh",
+        refreshing: "Updating…",
+        dismiss: "Dismiss",
+      },
+      credit: { developedBy: "Developed by" },
       hero: {
         badge: "Deals refreshed daily",
         script: "Quality at your doorstep!",
@@ -26,6 +33,17 @@ const resources = {
         selectCategory: "Select a category",
       },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
+      catalog: {
+        sortBy: "Sort by",
+        sortDefault: "Featured",
+        sortPriceAsc: "Price: Low to High",
+        sortPriceDesc: "Price: High to Low",
+        sortBestSelling: "Best Selling",
+        perPage: "Show",
+        previous: "Previous",
+        next: "Next",
+        pageOf: "Page {{page}} of {{pageCount}}",
+      },
       product: {
         price: "Price",
         inStock: "In stock",
@@ -167,6 +185,8 @@ const resources = {
         uploading: "Uploading image…",
         clearImage: "Remove selected image",
         removeImage: "Remove image",
+        additionalImages: "Additional images",
+        addImage: "Add image",
         cropImage: "Adjust photo",
         zoom: "Zoom",
         uploadPhoto: "Upload photo",
@@ -275,6 +295,13 @@ const resources = {
   ar: {
     translation: {
       app: { name: "سوبر ماركت حماده" },
+      update: {
+        available: "يتوفر إصدار جديد",
+        refresh: "تحديث",
+        refreshing: "جارٍ التحديث…",
+        dismiss: "إغلاق",
+      },
+      credit: { developedBy: "تطوير" },
       hero: {
         badge: "عروض تتجدد يوميًا",
         script: "الأصل بقى أقرب ليك!",
@@ -301,6 +328,17 @@ const resources = {
         selectCategory: "اختر قسمًا",
       },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
+      catalog: {
+        sortBy: "ترتيب حسب",
+        sortDefault: "مميز",
+        sortPriceAsc: "السعر: من الأقل للأعلى",
+        sortPriceDesc: "السعر: من الأعلى للأقل",
+        sortBestSelling: "الأكثر مبيعًا",
+        perPage: "عرض",
+        previous: "السابق",
+        next: "التالي",
+        pageOf: "صفحة {{page}} من {{pageCount}}",
+      },
       product: {
         price: "السعر",
         inStock: "متوفر",
@@ -442,6 +480,8 @@ const resources = {
         uploading: "جارٍ رفع الصورة…",
         clearImage: "إزالة الصورة المحددة",
         removeImage: "إزالة الصورة",
+        additionalImages: "صور إضافية",
+        addImage: "إضافة صورة",
         cropImage: "تعديل الصورة",
         zoom: "التكبير",
         uploadPhoto: "رفع صورة",

@@ -8,13 +8,16 @@ import { logReceivedNotification } from "./lib/notificationLog";
 declare const self: ServiceWorkerGlobalScope;
 precacheAndRoute(self.__WB_MANIFEST);
 
-// registerType: 'autoUpdate' (vite.config.ts) expects a new worker to
-// activate immediately instead of sitting in "waiting" until every
-// tab/window for the site is fully closed — generateSW does this
-// automatically, but injectManifest doesn't, so a hand-authored sw.ts has
-// to call skipWaiting itself. main.tsx reloads the page once the new
-// worker activates.
-self.skipWaiting();
+// registerType: 'prompt' (vite.config.ts) means a new worker should sit in
+// "waiting" until the visible UpdateBanner's "Refresh" is clicked, instead
+// of activating itself immediately — generateSW's own output listens for
+// this message automatically, but injectManifest doesn't generate
+// anything, so a hand-authored sw.ts has to add the listener itself.
+// `updateSW(true)` (lib/appUpdate.ts, called from UpdateBanner) is what
+// posts this message.
+self.addEventListener("message", (event) => {
+  if ((event.data as { type?: string } | undefined)?.type === "SKIP_WAITING") self.skipWaiting();
+});
 clientsClaim();
 
 type DealPushPayload = {

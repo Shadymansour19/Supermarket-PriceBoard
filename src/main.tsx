@@ -5,14 +5,19 @@ import { registerSW } from "virtual:pwa-register";
 import "./index.css";
 import "./i18n";
 import App from "./App.tsx";
+import { setNeedsRefresh } from "./lib/appUpdate";
 
-// registerType: 'autoUpdate' (vite.config.ts) makes this silently activate
-// and reload as soon as a new deploy is detected, instead of only picking
-// it up the next time every tab/window for the site happens to be fully
-// closed and reopened. The hourly `registration.update()` check matters
+// registerType: 'prompt' (vite.config.ts) means a new worker installs and
+// waits instead of activating itself — onNeedRefresh fires once that's
+// happened, and UpdateBanner (shown from App.tsx) is what calls `updateSW`
+// (captured here) to actually apply it, instead of silently reloading
+// mid-session on its own. The hourly `registration.update()` check matters
 // for an installed PWA that stays open for days — otherwise it would only
 // re-check on a fresh navigation.
-registerSW({
+const updateSW = registerSW({
+  onNeedRefresh() {
+    setNeedsRefresh(updateSW);
+  },
   onRegisteredSW(_url, registration) {
     if (!registration) return;
     setInterval(() => void registration.update(), 60 * 60 * 1000);
