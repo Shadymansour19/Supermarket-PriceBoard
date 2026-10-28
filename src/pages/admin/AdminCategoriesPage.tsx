@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CategoryForm, type CategoryFormValues } from "../../components/admin/CategoryForm";
 import { CATEGORY_AVATAR_COLORS, CategoryAvatar } from "../../components/CategoryAvatar";
@@ -28,6 +28,15 @@ export function AdminCategoriesPage() {
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
   const trimmedSearch = search.trim();
+  const formRef = useRef<HTMLDivElement | null>(null);
+
+  // The form always renders at the top of the page, but the row that opened
+  // it (edit, or "add subcategory" on a category further down the tree) can
+  // be far down a long list — without this, the viewport stays scrolled
+  // there and the form opens off-screen.
+  useEffect(() => {
+    if (formMode) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [formMode]);
 
   // While searching, a category is kept if it or any of its children
   // matches; only matching children are shown under it (all of them, if
@@ -131,7 +140,7 @@ export function AdminCategoriesPage() {
       )}
 
       {formMode && (
-        <div className="rounded-xl border border-neutral-200 bg-white p-4">
+        <div ref={formRef} className="rounded-xl border border-neutral-200 bg-white p-4">
           <h2 className="font-heading mb-3 text-sm font-semibold text-neutral-900">
             {formMode.kind === "edit" ? t("admin.editCategory") : t("admin.newCategory")}
             {formMode.kind === "create" && formMode.parentId && (
