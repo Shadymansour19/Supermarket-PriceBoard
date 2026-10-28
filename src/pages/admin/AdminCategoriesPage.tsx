@@ -8,6 +8,7 @@ import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { createCategory, deleteCategory, fetchCategoryTree, updateCategory } from "../../lib/categories";
 import { toErrorMessage } from "../../lib/errors";
 import { deleteCategoryImage, uploadCategoryImage } from "../../lib/imageUpload";
+import { localizedField } from "../../lib/localize";
 import type { Category, CategoryWithChildren } from "../../types/database";
 
 function matchesSearch(category: Category, query: string) {
@@ -19,7 +20,7 @@ type FormMode =
   | { kind: "edit"; category: Category };
 
 export function AdminCategoriesPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const confirmDialog = useConfirmDialog();
   const [categories, setCategories] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,11 @@ export function AdminCategoriesPage() {
   useEffect(() => {
     if (formMode) formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, [formMode]);
+
+  const parentCategory =
+    formMode?.kind === "create" && formMode.parentId
+      ? categories.find((c) => c.id === formMode.parentId)
+      : undefined;
 
   // While searching, a category is kept if it or any of its children
   // matches; only matching children are shown under it (all of them, if
@@ -146,7 +152,7 @@ export function AdminCategoriesPage() {
             {formMode.kind === "create" && formMode.parentId && (
               <span className="ms-1 font-normal text-neutral-500">
                 ({t("admin.addSubcategory")}:{" "}
-                {categories.find((c) => c.id === formMode.parentId)?.name_en})
+                {localizedField(parentCategory ?? { name_en: "", name_ar: "" }, "name", i18n.language)})
               </span>
             )}
           </h2>
