@@ -9,9 +9,10 @@ import type { AdSpec } from "../../lib/adImage";
 import { fetchCategoryTree } from "../../lib/categories";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
 import { formatPrice, shouldShowUnit } from "../../lib/localize";
+import { addProductImage, deleteProductImageRow, fetchProductImages } from "../../lib/productImages";
 import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
-import type { CategoryWithChildren, Product } from "../../types/database";
+import type { CategoryWithChildren, Product, ProductImage } from "../../types/database";
 
 const NEW_PRODUCT_AD: AdSpec = { kind: "new" };
 
@@ -85,6 +86,9 @@ export function AdminProductsPage() {
   const [categoryTree, setCategoryTree] = useState<CategoryWithChildren[]>([]);
   const [loading, setLoading] = useState(true);
   const [formMode, setFormMode] = useState<FormMode | null>(null);
+  // Fetched when entering edit mode (a new product can't have any yet) —
+  // see handleEditClick.
+  const [editExtraImages, setEditExtraImages] = useState<ProductImage[]>([]);
   const [discountsProduct, setDiscountsProduct] = useState<Product | null>(null);
   const [newProductAd, setNewProductAd] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -110,7 +114,19 @@ export function AdminProductsPage() {
     reload();
   }, [reload]);
 
-  async function handleSubmit(values: ProductFormValues, imageFile: File | null, removeImage: boolean) {
+  async function handleEditClick(product: Product) {
+    const images = await fetchProductImages(product.id).catch(() => []);
+    setEditExtraImages(images);
+    setFormMode({ kind: "edit", product });
+  }
+
+  async function handleSubmit(
+    values: ProductFormValues,
+    imageFile: File | null,
+    removeImage: boolean,
+    extraImageFiles: File[],
+    removedExtraImageIds: string[],
+  ) {
     setActionError(null);
     const payload = {
       name_en: values.name_en,
@@ -145,6 +161,23 @@ export function AdminProductsPage() {
         await deleteProductImage(previousImagePath).catch(() => {});
       }
 
+      // Removed extra images: delete the DB row and its storage file. The
+      // path comes from what was fetched into edit mode, since the form
+      // only ever hands back the id.
+      for (const id of removedExtraImageIds) {
+        const removed = editExtraImages.find((img) => img.id === id);
+        await deleteProductImageRow(id).catch(() => {});
+        if (removed) await deleteProductImage(removed.image_path).catch(() => {});
+      }
+      // New extra images: upload then record each as its own row. Sort
+      // order just needs to keep newly-added ones after existing ones and
+      // each other — an ever-increasing timestamp does that without
+      // needing to know the current max.
+      for (const [index, file] of extraImageFiles.entries()) {
+        const path = await uploadProductImage(file, product.id);
+        await addProductImage(product.id, path, Date.now() + index);
+      }
+
       const isNew = formMode?.kind !== "edit";
       setFormMode(null);
       await reload();
@@ -160,8 +193,12 @@ export function AdminProductsPage() {
     if (!(await confirmDialog({ message: t("common.confirmDelete"), destructive: true }))) return;
     setActionError(null);
     try {
+      // Fetched before deleting — the rows cascade-delete with the
+      // product, but their storage files wouldn't clean themselves up.
+      const extraImages = await fetchProductImages(product.id).catch(() => []);
       await deleteProduct(product.id);
       if (product.image_path) await deleteProductImage(product.image_path).catch(() => {});
+      for (const img of extraImages) await deleteProductImage(img.image_path).catch(() => {});
       await reload();
     } catch (err) {
       setActionError(err instanceof Error ? err.message : String(err));
@@ -197,6 +234,7 @@ export function AdminProductsPage() {
           <ProductForm
             categoryTree={categoryTree}
             initial={formMode.kind === "edit" ? formMode.product : undefined}
+            initialExtraImages={formMode.kind === "edit" ? editExtraImages : undefined}
             onSubmit={handleSubmit}
             onCancel={() => setFormMode(null)}
           />
@@ -246,7 +284,7 @@ export function AdminProductsPage() {
                       <StatusBadge ok={product.is_active} yesLabel={t("admin.active")} noLabel={t("admin.hidden")} />
                     </div>
                     <ProductActions
-                      onEdit={() => setFormMode({ kind: "edit", product })}
+                      onEdit={() => handleEditClick(product)}
                       onDiscounts={() => setDiscountsProduct(product)}
                       onArrivalAd={() => setNewProductAd(product)}
                       onDelete={() => handleDelete(product)}
@@ -301,7 +339,7 @@ export function AdminProductsPage() {
                       </td>
                       <td className="px-4 py-2">
                         <ProductActions
-                          onEdit={() => setFormMode({ kind: "edit", product })}
+                          onEdit={() => handleEditClick(product)}
                           onDiscounts={() => setDiscountsProduct(product)}
                           onArrivalAd={() => setNewProductAd(product)}
                           onDelete={() => handleDelete(product)}

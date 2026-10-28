@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { CloseIcon } from "../ContactIcons";
 import { productImageUrl } from "../../lib/supabase";
-import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductUnit } from "../../types/database";
+import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductImage, type ProductUnit } from "../../types/database";
 import { CameraCaptureModal } from "./CameraCaptureModal";
 import { ImageCropModal } from "./ImageCropModal";
 
@@ -31,12 +32,22 @@ export type ProductFormValues = {
 export function ProductForm({
   categoryTree,
   initial,
+  initialExtraImages,
   onSubmit,
   onCancel,
 }: {
   categoryTree: CategoryWithChildren[];
   initial?: Product;
-  onSubmit: (values: ProductFormValues, imageFile: File | null, removeImage: boolean) => Promise<void>;
+  /** Existing extra images (beyond the cover photo), when editing — empty/
+   * undefined for a new product, which can't have any yet. */
+  initialExtraImages?: ProductImage[];
+  onSubmit: (
+    values: ProductFormValues,
+    imageFile: File | null,
+    removeImage: boolean,
+    extraImageFiles: File[],
+    removedExtraImageIds: string[],
+  ) => Promise<void>;
   onCancel: () => void;
 }) {
   const { t } = useTranslation();
@@ -66,6 +77,16 @@ export function ProductForm({
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
+  // Extra images (beyond the cover) — existing ones not yet removed, newly
+  // added files pending upload, and which existing rows to delete on save.
+  const [extraImages, setExtraImages] = useState<ProductImage[]>(initialExtraImages ?? []);
+  const [newExtraImages, setNewExtraImages] = useState<{ file: File; previewUrl: string }[]>([]);
+  const [removedExtraImageIds, setRemovedExtraImageIds] = useState<string[]>([]);
+  // Which image slot a picked/captured file is for — the crop modal and
+  // gallery/camera inputs below are shared between the cover photo and
+  // "add an extra image", so this is what tells the confirm handler which
+  // one to update.
+  const [cropTarget, setCropTarget] = useState<"cover" | "extra">("cover");
   // A file picked from disk but not yet cropped/confirmed — held here just
   // long enough to show the crop modal, then discarded either way.
   const [cropSource, setCropSource] = useState<{ src: string; fileName: string } | null>(null);
@@ -76,6 +97,7 @@ export function ProductForm({
   // Fallback only: used when the browser has no getUserMedia support, so the
   // live CameraCaptureModal can't run.
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
+  const extraGalleryInputRef = useRef<HTMLInputElement | null>(null);
 
   // Show the newly cropped file immediately; fall back to the product's
   // existing image (or nothing, if removed) once there's no pending file.
@@ -93,14 +115,19 @@ export function ProductForm({
     return () => URL.revokeObjectURL(objectUrl);
   }, [imageFile, removeImage, initial?.image_path]);
 
-  function handleFileSelected(file: File | undefined) {
+  function handleFileSelected(file: File | undefined, target: "cover" | "extra" = "cover") {
     if (!file) return;
+    setCropTarget(target);
     setCropSource({ src: URL.createObjectURL(file), fileName: `${file.name.replace(/\.[^.]+$/, "")}.jpg` });
   }
 
   function handleCropConfirm(croppedFile: File) {
     if (cropSource) URL.revokeObjectURL(cropSource.src);
     setCropSource(null);
+    if (cropTarget === "extra") {
+      setNewExtraImages((prev) => [...prev, { file: croppedFile, previewUrl: URL.createObjectURL(croppedFile) }]);
+      return;
+    }
     setImageFile(croppedFile);
     setRemoveImage(false);
   }
@@ -113,6 +140,18 @@ export function ProductForm({
   function handleCropCancel() {
     if (cropSource) URL.revokeObjectURL(cropSource.src);
     setCropSource(null);
+  }
+
+  function removeExistingExtraImage(id: string) {
+    setExtraImages((prev) => prev.filter((img) => img.id !== id));
+    setRemovedExtraImageIds((prev) => [...prev, id]);
+  }
+
+  function removeNewExtraImage(index: number) {
+    setNewExtraImages((prev) => {
+      URL.revokeObjectURL(prev[index].previewUrl);
+      return prev.filter((_, i) => i !== index);
+    });
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -134,6 +173,8 @@ export function ProductForm({
         },
         imageFile,
         removeImage,
+        newExtraImages.map((img) => img.file),
+        removedExtraImageIds,
       );
     } finally {
       setSubmitting(false);
@@ -335,6 +376,57 @@ export function ProductForm({
               )}
             </div>
           </div>
+        </div>
+      </div>
+
+      <div className="sm:col-span-2">
+        <label className="mb-1 block text-sm text-neutral-600">{t("admin.additionalImages")}</label>
+        <div className="flex flex-wrap gap-3">
+          {extraImages.map((img) => (
+            <div key={img.id} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+              <img src={productImageUrl(img.image_path) ?? undefined} alt="" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeExistingExtraImage(img.id)}
+                aria-label={t("admin.removeImage")}
+                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+              >
+                <CloseIcon className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          {newExtraImages.map((img, index) => (
+            <div key={img.previewUrl} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+              <img src={img.previewUrl} alt="" className="h-full w-full object-cover" />
+              <button
+                type="button"
+                onClick={() => removeNewExtraImage(index)}
+                aria-label={t("admin.removeImage")}
+                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+              >
+                <CloseIcon className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+          <button
+            type="button"
+            onClick={() => extraGalleryInputRef.current?.click()}
+            aria-label={t("admin.addImage")}
+            className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
+          >
+            <span className="text-2xl leading-none">+</span>
+            <span className="text-[10px]">{t("admin.addImage")}</span>
+          </button>
+          <input
+            ref={extraGalleryInputRef}
+            type="file"
+            accept="image/*"
+            onChange={(e) => {
+              handleFileSelected(e.target.files?.[0], "extra");
+              e.target.value = "";
+            }}
+            className="hidden"
+          />
         </div>
       </div>
 

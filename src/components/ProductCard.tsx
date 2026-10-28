@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AddToCartButton } from "./AddToCartButton";
 import { DiscountPrice } from "./DiscountPrice";
 import { FavoriteButton } from "./FavoriteButton";
 import { HOT_DEAL_THRESHOLD, daysRemaining, discountPercent } from "../lib/discounts";
+import { fetchFirstExtraImage } from "../lib/productImages";
 import { productImageUrl } from "../lib/supabase";
 import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
@@ -32,12 +34,37 @@ export function ProductCard({
       : 0;
   const isHotDeal = percentOff >= HOT_DEAL_THRESHOLD;
 
+  // Driven by JS state (not CSS `:hover`) so a touch-screen press gets the
+  // exact same lift/shadow/image-swap as a mouse hover — `:hover` on touch
+  // devices is inconsistent (some browsers apply it briefly on tap, some
+  // leave it "stuck" until the next tap elsewhere). The second image is
+  // fetched lazily on the first hover/touch, not up front, so a card
+  // nobody interacts with never costs a request for an image nobody sees.
+  const [isActive, setIsActive] = useState(false);
+  const [secondImageUrl, setSecondImageUrl] = useState<string | null>(null);
+  const [hasFetchedSecondImage, setHasFetchedSecondImage] = useState(false);
+
+  function handleActivate() {
+    setIsActive(true);
+    if (hasFetchedSecondImage) return;
+    setHasFetchedSecondImage(true);
+    fetchFirstExtraImage(product.id)
+      .then((path) => {
+        if (path) setSecondImageUrl(productImageUrl(path));
+      })
+      .catch(() => {});
+  }
+
   return (
     <Link
       to={`/product/${product.id}`}
-      className={`group relative flex flex-col rounded-xl bg-white transition hover:shadow-md ${
-        isHotDeal ? "hot-border-travel" : "border border-neutral-200"
-      }`}
+      onMouseEnter={handleActivate}
+      onMouseLeave={() => setIsActive(false)}
+      onTouchStart={handleActivate}
+      onTouchEnd={() => setIsActive(false)}
+      className={`group relative flex flex-col rounded-xl bg-white transition-all duration-200 ${
+        isActive ? "-translate-y-1 shadow-lg" : ""
+      } ${isHotDeal ? "hot-border-travel" : "border border-neutral-200"}`}
       style={{ containerType: "inline-size" }}
     >
       {/* `.product-card` (the --hb-scale/--badge-level container-query
@@ -150,14 +177,32 @@ export function ProductCard({
        * `overflow-hidden`, which it still needs to contain the oversized
        * fire frame. */}
       <div className="relative aspect-square w-full">
-        <div className="h-full w-full overflow-hidden rounded-t-xl bg-neutral-100">
+        <div className="relative h-full w-full overflow-hidden rounded-t-xl bg-neutral-100">
           {imageUrl ? (
-            <img
-              src={imageUrl}
-              alt={name}
-              className="h-full w-full object-cover transition group-hover:scale-105"
-              loading="lazy"
-            />
+            <>
+              <img
+                src={imageUrl}
+                alt={name}
+                className={`h-full w-full object-cover transition duration-200 ${isActive ? "scale-105" : ""} ${
+                  isActive && secondImageUrl ? "opacity-0" : "opacity-100"
+                }`}
+                loading="lazy"
+              />
+              {/* A product's second photo (lib/productImages.ts) — only
+               * fetched once hovered/touched, so it overlays the cover
+               * photo rather than replacing it outright (nothing to show
+               * while it's still loading on that first interaction). */}
+              {secondImageUrl && (
+                <img
+                  src={secondImageUrl}
+                  alt=""
+                  aria-hidden="true"
+                  className={`absolute inset-0 h-full w-full object-cover transition duration-200 ${
+                    isActive ? "scale-105 opacity-100" : "opacity-0"
+                  }`}
+                />
+              )}
+            </>
           ) : (
             <div className="flex h-full w-full items-center justify-center text-neutral-300">
               <span className="text-4xl">🛒</span>

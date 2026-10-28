@@ -51,6 +51,16 @@ export type Profile = {
   created_at: string;
 };
 
+/** An extra photo beyond a product's own `image_path` cover image — see
+ * 0008_product_images.sql. */
+export type ProductImage = {
+  id: string;
+  product_id: string;
+  image_path: string;
+  sort_order: number;
+  created_at: string;
+};
+
 /** A category with its direct subcategories attached, for nav trees. */
 export type CategoryWithChildren = Category & {
   children: Category[];

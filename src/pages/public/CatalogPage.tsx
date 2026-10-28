@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BestSellersSection } from "../../components/BestSellersSection";
@@ -13,11 +13,17 @@ import { RecentlyArrivedSection } from "../../components/RecentlyArrivedSection"
 import { RecentlyViewedSection } from "../../components/RecentlyViewedSection";
 import { SearchBar } from "../../components/SearchBar";
 import { TopCategoriesRow } from "../../components/TopCategoriesRow";
+import { fetchOrderCountMap } from "../../lib/bestSellers";
 import { fetchCategoryTree, findCategoryWithParent, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { localizedField } from "../../lib/localize";
 import { fetchProducts } from "../../lib/products";
 import type { CategoryWithChildren, LimitedTimeDiscount, Product } from "../../types/database";
+
+type SortOption = "default" | "price_asc" | "price_desc" | "best_selling";
+
+const PAGE_SIZE_OPTIONS = [12, 24, 48, 96];
+const DEFAULT_PAGE_SIZE = 24;
 
 export function CatalogPage() {
   const { t, i18n } = useTranslation();
@@ -31,6 +37,12 @@ export function CatalogPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const [sortBy, setSortBy] = useState<SortOption>("default");
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const [page, setPage] = useState(1);
+  // Only fetched once "best selling" is actually picked — most visits never
+  // touch this sort, so there's no reason to query it on every page load.
+  const [orderCountMap, setOrderCountMap] = useState<Map<string, number> | null>(null);
   const isHome = !categoryId && !search;
   // Undefined until the category tree loads, or if `categoryId` doesn't
   // match anything in it (e.g. still mid-fetch).
@@ -62,6 +74,33 @@ export function CatalogPage() {
       .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, [categoryId, search, categories]);
+
+  // Resets to page 1 whenever the result set or its ordering could change —
+  // staying on, say, page 4 of a now-3-page list would just show nothing.
+  useEffect(() => {
+    setPage(1);
+  }, [categoryId, search, sortBy, pageSize]);
+
+  useEffect(() => {
+    if (sortBy !== "best_selling" || orderCountMap) return;
+    fetchOrderCountMap()
+      .then(setOrderCountMap)
+      .catch(() => setOrderCountMap(new Map()));
+  }, [sortBy, orderCountMap]);
+
+  const sortedProducts = useMemo(() => {
+    if (sortBy === "default") return products;
+    const sorted = [...products];
+    if (sortBy === "price_asc") sorted.sort((a, b) => a.price - b.price);
+    else if (sortBy === "price_desc") sorted.sort((a, b) => b.price - a.price);
+    else if (sortBy === "best_selling" && orderCountMap) {
+      sorted.sort((a, b) => (orderCountMap.get(b.id) ?? 0) - (orderCountMap.get(a.id) ?? 0));
+    }
+    return sorted;
+  }, [products, sortBy, orderCountMap]);
+
+  const pageCount = Math.max(1, Math.ceil(sortedProducts.length / pageSize));
+  const pagedProducts = sortedProducts.slice((page - 1) * pageSize, page * pageSize);
 
   return (
     <div className="space-y-6">
@@ -128,15 +167,69 @@ export function CatalogPage() {
           )}
 
           {!loading && !error && products.length > 0 && (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  limitedTimeDiscount={discountMap.get(product.id)}
-                />
-              ))}
-            </div>
+            <>
+              <div className="font-label flex flex-wrap items-center justify-between gap-2 text-sm">
+                <label className="flex items-center gap-1.5 text-neutral-600">
+                  {t("catalog.sortBy")}
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as SortOption)}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-neutral-900"
+                  >
+                    <option value="default">{t("catalog.sortDefault")}</option>
+                    <option value="price_asc">{t("catalog.sortPriceAsc")}</option>
+                    <option value="price_desc">{t("catalog.sortPriceDesc")}</option>
+                    <option value="best_selling">{t("catalog.sortBestSelling")}</option>
+                  </select>
+                </label>
+                <label className="flex items-center gap-1.5 text-neutral-600">
+                  {t("catalog.perPage")}
+                  <select
+                    value={pageSize}
+                    onChange={(e) => setPageSize(Number(e.target.value))}
+                    className="rounded-md border border-neutral-300 px-2 py-1 text-neutral-900"
+                  >
+                    {PAGE_SIZE_OPTIONS.map((size) => (
+                      <option key={size} value={size}>
+                        {size}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+                {pagedProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    limitedTimeDiscount={discountMap.get(product.id)}
+                  />
+                ))}
+              </div>
+
+              {pageCount > 1 && (
+                <div className="font-label flex items-center justify-center gap-3 text-sm">
+                  <button
+                    type="button"
+                    disabled={page <= 1}
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    className="rounded-md border border-neutral-300 px-3 py-1.5 text-neutral-700 hover:bg-neutral-100 disabled:opacity-40"
+                  >
+                    {t("catalog.previous")}
+                  </button>
+                  <span className="text-neutral-600">{t("catalog.pageOf", { page, pageCount })}</span>
+                  <button
+                    type="button"
+                    disabled={page >= pageCount}
+                    onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
+                    className="rounded-md border border-neutral-300 px-3 py-1.5 text-neutral-700 hover:bg-neutral-100 disabled:opacity-40"
+                  >
+                    {t("catalog.next")}
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </section>
       </div>

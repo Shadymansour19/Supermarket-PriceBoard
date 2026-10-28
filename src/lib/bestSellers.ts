@@ -33,3 +33,19 @@ export async function fetchBestSellingProducts(daysBack = 30, limit = 8): Promis
   const byId = new Map<string, Product>(products.map((product) => [product.id, product]));
   return ids.map((id) => byId.get(id)).filter((product): product is Product => product !== undefined);
 }
+
+/** Every product's total ordered quantity, for the catalog grid's "best
+ * selling" sort — a full year back and a high limit, unlike the home
+ * teaser's 30-day/8-item version, since sorting an entire category by
+ * sales should reflect its whole history, not just a recent highlight
+ * reel. A product with no orders at all simply never gets a map entry
+ * (absence means 0, not that something failed). */
+export async function fetchOrderCountMap(): Promise<Map<string, number>> {
+  const { data, error } = await supabase.rpc("best_selling_products", { days_back: 365, result_limit: 10000 });
+  if (error) throw error;
+  const map = new Map<string, number>();
+  for (const row of (data ?? []) as { product_id: string; total_quantity: number }[]) {
+    map.set(row.product_id, row.total_quantity);
+  }
+  return map;
+}

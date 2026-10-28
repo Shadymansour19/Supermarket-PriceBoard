@@ -16,16 +16,21 @@ import {
   isLimitedTimeDiscountActive,
 } from "../../lib/discounts";
 import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
+import { fetchProductImages } from "../../lib/productImages";
 import { fetchProductById } from "../../lib/products";
 import { recordProductView } from "../../lib/recentlyViewed";
 import { productImageUrl } from "../../lib/supabase";
-import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
+import type { LimitedTimeDiscount, Product, ProductImage, QuantityDiscount } from "../../types/database";
 
 export function ProductDetailPage() {
   const { t, i18n } = useTranslation();
   const { productId } = useParams();
   const { addToCart } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
+  const [extraImages, setExtraImages] = useState<ProductImage[]>([]);
+  // Defaults to the cover photo; sat to an extra image's path when a
+  // thumbnail below is clicked.
+  const [selectedImagePath, setSelectedImagePath] = useState<string | null>(null);
   const [limitedTimeDiscount, setLimitedTimeDiscount] = useState<LimitedTimeDiscount | null>(null);
   const [quantityDiscount, setQuantityDiscount] = useState<QuantityDiscount | null>(null);
   const [quantity, setQuantity] = useState(1);
@@ -35,8 +40,12 @@ export function ProductDetailPage() {
     if (!productId) return;
     fetchProductById(productId).then((fetchedProduct) => {
       setProduct(fetchedProduct);
+      setSelectedImagePath(fetchedProduct?.image_path ?? null);
       if (fetchedProduct) recordProductView(fetchedProduct.id);
     });
+    fetchProductImages(productId)
+      .then(setExtraImages)
+      .catch(() => setExtraImages([]));
     fetchLimitedTimeDiscount(productId)
       .then((discount) => setLimitedTimeDiscount(discount && isLimitedTimeDiscountActive(discount) ? discount : null))
       .catch(() => setLimitedTimeDiscount(null));
@@ -60,7 +69,7 @@ export function ProductDetailPage() {
     );
   }
 
-  const imageUrl = productImageUrl(product.image_path);
+  const imageUrl = productImageUrl(selectedImagePath);
   const name = localizedField(product, "name", i18n.language);
   const description = localizedField(product, "description", i18n.language);
 
@@ -84,16 +93,38 @@ export function ProductDetailPage() {
         {t("product.backToCatalog")}
       </Link>
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
-        {/* Square, matching the admin upload/capture crop exactly — the
-         * add-to-cart row is sticky-clamped near the bottom independently
-         * of this, so a taller image no longer risks landing it behind
-         * the fixed bottom nav/cart button on shorter phones. */}
-        <div className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
-          {imageUrl ? (
-            <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
-          ) : (
-            <div className="flex h-full w-full items-center justify-center text-neutral-300">
-              <span className="text-6xl">🛒</span>
+        <div className="space-y-3">
+          {/* Square, matching the admin upload/capture crop exactly — the
+           * add-to-cart row is sticky-clamped near the bottom independently
+           * of this, so a taller image no longer risks landing it behind
+           * the fixed bottom nav/cart button on shorter phones. */}
+          <div className="aspect-square w-full overflow-hidden rounded-xl bg-neutral-100">
+            {imageUrl ? (
+              <img src={imageUrl} alt={name} className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-neutral-300">
+                <span className="text-6xl">🛒</span>
+              </div>
+            )}
+          </div>
+          {/* Only shown once there's actually more than one photo — the
+           * cover plus whatever's in product_images (lib/productImages.ts). */}
+          {extraImages.length > 0 && (
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {[product.image_path, ...extraImages.map((img) => img.image_path)]
+                .filter((path): path is string => !!path)
+                .map((path) => (
+                  <button
+                    key={path}
+                    type="button"
+                    onClick={() => setSelectedImagePath(path)}
+                    className={`h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 bg-neutral-100 ${
+                      path === selectedImagePath ? "border-emerald-600" : "border-transparent"
+                    }`}
+                  >
+                    <img src={productImageUrl(path) ?? undefined} alt="" className="h-full w-full object-cover" />
+                  </button>
+                ))}
             </div>
           )}
         </div>
