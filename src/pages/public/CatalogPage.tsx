@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { BestSellersSection } from "../../components/BestSellersSection";
@@ -80,6 +80,20 @@ export function CatalogPage() {
   useEffect(() => {
     setPage(1);
   }, [categoryId, search, sortBy, pageSize]);
+
+  // Previous/Next swaps the grid's contents in place further down the page
+  // — without this, the user's still scrolled to the pagination row at the
+  // bottom of the old page and has to scroll back up to see the new one
+  // from its top. Skipped on first mount, where there's nothing to correct.
+  const resultsRef = useRef<HTMLDivElement | null>(null);
+  const isFirstPageRender = useRef(true);
+  useEffect(() => {
+    if (isFirstPageRender.current) {
+      isFirstPageRender.current = false;
+      return;
+    }
+    resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [page]);
 
   useEffect(() => {
     if (sortBy !== "best_selling" || orderCountMap) return;
@@ -168,7 +182,7 @@ export function CatalogPage() {
 
           {!loading && !error && products.length > 0 && (
             <>
-              <div className="font-label flex flex-wrap items-center justify-between gap-2 text-sm">
+              <div ref={resultsRef} className="font-label flex flex-wrap items-center justify-between gap-2 text-sm">
                 <label className="flex items-center gap-1.5 text-neutral-600">
                   {t("catalog.sortBy")}
                   <select
