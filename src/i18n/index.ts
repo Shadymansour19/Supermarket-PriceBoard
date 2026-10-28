@@ -67,7 +67,8 @@ const resources = {
       cart: {
         navLabel: "Cart",
         title: "Your cart",
-        empty: "Your cart is empty — add a product to get started.",
+        emptyTitle: "Your cart is empty",
+        emptyCta: "Add products to get started",
         quantity: "Quantity",
         addToCart: "Add to cart",
         added: "Added ✓",
@@ -362,7 +363,8 @@ const resources = {
       cart: {
         navLabel: "السلة",
         title: "سلة التسوق",
-        empty: "السلة فاضية دلوقتي — ضيف منتج عشان تبدأ.",
+        emptyTitle: "السلة فاضية",
+        emptyCta: "ضيف منتجات عشان تبدأ",
         quantity: "الكمية",
         addToCart: "أضف للسلة",
         added: "تمت الإضافة ✓",

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { CloseIcon, WhatsAppIcon } from "../../components/ContactIcons";
+import { CartIcon } from "../../components/Icons";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { useCart } from "../../context/CartContext";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
@@ -148,7 +149,15 @@ export function CartPage() {
 
       {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
       {error && <p className="text-red-600">{t("common.error")}</p>}
-      {!loading && !error && rows.length === 0 && <p className="text-neutral-500">{t("cart.empty")}</p>}
+      {!loading && !error && rows.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <p className="font-heading text-lg font-semibold text-neutral-700">{t("cart.emptyTitle")}</p>
+          <CartIcon className="h-16 w-16 text-neutral-300" />
+          <Link to="/" className="text-sm font-medium text-emerald-700 hover:underline">
+            {t("cart.emptyCta")}
+          </Link>
+        </div>
+      )}
 
       {!loading && !error && rows.length > 0 && (
         <>
