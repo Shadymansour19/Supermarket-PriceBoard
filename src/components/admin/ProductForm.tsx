@@ -92,12 +92,16 @@ export function ProductForm({
   const [cropSource, setCropSource] = useState<{ src: string; fileName: string } | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(() => productImageUrl(initial?.image_path ?? null));
   const [submitting, setSubmitting] = useState(false);
-  const [showCamera, setShowCamera] = useState(false);
+  // Which target the live-camera modal is open for, if any — same
+  // cover/extra split as `cropTarget` (and keeps it in sync: see
+  // `openCamera` below), since this modal is shared between both.
+  const [showCamera, setShowCamera] = useState<"cover" | "extra" | null>(null);
   const galleryInputRef = useRef<HTMLInputElement | null>(null);
   // Fallback only: used when the browser has no getUserMedia support, so the
   // live CameraCaptureModal can't run.
   const cameraInputRef = useRef<HTMLInputElement | null>(null);
   const extraGalleryInputRef = useRef<HTMLInputElement | null>(null);
+  const extraCameraInputRef = useRef<HTMLInputElement | null>(null);
 
   // Show the newly cropped file immediately; fall back to the product's
   // existing image (or nothing, if removed) once there's no pending file.
@@ -132,8 +136,22 @@ export function ProductForm({
     setRemoveImage(false);
   }
 
+  /** Opens the live camera modal (or, lacking `getUserMedia` support, the
+   * browser's own native camera file picker) for whichever slot — cover or
+   * extra — the button that called this is for. */
+  function openCamera(target: "cover" | "extra") {
+    setCropTarget(target);
+    if (supportsLiveCamera) {
+      setShowCamera(target);
+    } else if (target === "cover") {
+      cameraInputRef.current?.click();
+    } else {
+      extraCameraInputRef.current?.click();
+    }
+  }
+
   function handleCameraCapture(file: File) {
-    setShowCamera(false);
+    setShowCamera(null);
     setCropSource({ src: URL.createObjectURL(file), fileName: `camera-${Date.now()}.jpg` });
   }
 
@@ -322,7 +340,7 @@ export function ProductForm({
               </button>
               <button
                 type="button"
-                onClick={() => (supportsLiveCamera ? setShowCamera(true) : cameraInputRef.current?.click())}
+                onClick={() => openCamera("cover")}
                 className="rounded-lg border border-neutral-300 px-3 py-1.5 text-xs font-medium text-neutral-700 hover:bg-neutral-100"
               >
                 {t("admin.captureImage")}
@@ -417,6 +435,15 @@ export function ProductForm({
             <span className="text-2xl leading-none">+</span>
             <span className="text-[10px]">{t("admin.addImage")}</span>
           </button>
+          <button
+            type="button"
+            onClick={() => openCamera("extra")}
+            aria-label={t("admin.captureImage")}
+            className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
+          >
+            <span className="text-2xl leading-none">📷</span>
+            <span className="text-[10px]">{t("admin.captureImage")}</span>
+          </button>
           <input
             ref={extraGalleryInputRef}
             type="file"
@@ -427,10 +454,23 @@ export function ProductForm({
             }}
             className="hidden"
           />
+          {/* Fallback only: used when the browser has no getUserMedia
+              support, so the live CameraCaptureModal can't run. */}
+          <input
+            ref={extraCameraInputRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => {
+              handleFileSelected(e.target.files?.[0], "extra");
+              e.target.value = "";
+            }}
+            className="hidden"
+          />
         </div>
       </div>
 
-      {showCamera && <CameraCaptureModal onCapture={handleCameraCapture} onCancel={() => setShowCamera(false)} />}
+      {showCamera && <CameraCaptureModal onCapture={handleCameraCapture} onCancel={() => setShowCamera(null)} />}
       {cropSource && (
         <ImageCropModal
           imageSrc={cropSource.src}
