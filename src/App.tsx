@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { AdminLayout } from "./components/admin/AdminLayout";
 import { ProtectedRoute } from "./components/admin/ProtectedRoute";
 import { PublicLayout } from "./components/PublicLayout";
+import { ScrollToTop } from "./components/ScrollToTop";
 import { UpdateBanner } from "./components/UpdateBanner";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
@@ -28,6 +29,7 @@ export default function App() {
 
   return (
     <ConfirmDialogProvider>
+      <ScrollToTop />
       <UpdateBanner />
       <AuthProvider>
         <FavoritesProvider>
