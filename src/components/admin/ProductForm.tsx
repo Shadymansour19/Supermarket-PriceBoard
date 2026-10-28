@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { CloseIcon } from "../ContactIcons";
+import { CameraIcon, PlusIcon } from "../Icons";
 import { productImageUrl } from "../../lib/supabase";
 import { PRODUCT_UNITS, type CategoryWithChildren, type Product, type ProductImage, type ProductUnit } from "../../types/database";
 import { CameraCaptureModal } from "./CameraCaptureModal";
@@ -401,26 +402,28 @@ export function ProductForm({
         <label className="mb-1 block text-sm text-neutral-600">{t("admin.additionalImages")}</label>
         <div className="flex flex-wrap gap-3">
           {extraImages.map((img) => (
-            <div key={img.id} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+            <div key={img.id} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
               <img src={productImageUrl(img.image_path) ?? undefined} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeExistingExtraImage(img.id)}
                 aria-label={t("admin.removeImage")}
-                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+                title={t("admin.removeImage")}
+                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <CloseIcon className="h-3 w-3" />
               </button>
             </div>
           ))}
           {newExtraImages.map((img, index) => (
-            <div key={img.previewUrl} className="group relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+            <div key={img.previewUrl} className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
               <img src={img.previewUrl} alt="" className="h-full w-full object-cover" />
               <button
                 type="button"
                 onClick={() => removeNewExtraImage(index)}
                 aria-label={t("admin.removeImage")}
-                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition group-hover:opacity-100"
+                title={t("admin.removeImage")}
+                className="absolute end-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white"
               >
                 <CloseIcon className="h-3 w-3" />
               </button>
@@ -430,19 +433,19 @@ export function ProductForm({
             type="button"
             onClick={() => extraGalleryInputRef.current?.click()}
             aria-label={t("admin.addImage")}
-            className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
+            title={t("admin.addImage")}
+            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
           >
-            <span className="text-2xl leading-none">+</span>
-            <span className="text-[10px]">{t("admin.addImage")}</span>
+            <PlusIcon className="h-6 w-6" />
           </button>
           <button
             type="button"
             onClick={() => openCamera("extra")}
             aria-label={t("admin.captureImage")}
-            className="flex h-20 w-20 shrink-0 flex-col items-center justify-center gap-0.5 rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
+            title={t("admin.captureImage")}
+            className="flex h-20 w-20 shrink-0 items-center justify-center rounded-lg border border-dashed border-neutral-300 text-neutral-400 hover:border-emerald-400 hover:text-emerald-600"
           >
-            <span className="text-2xl leading-none">📷</span>
-            <span className="text-[10px]">{t("admin.captureImage")}</span>
+            <CameraIcon className="h-6 w-6" />
           </button>
           <input
             ref={extraGalleryInputRef}
