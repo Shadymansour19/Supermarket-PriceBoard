@@ -70,7 +70,8 @@ function MailIcon({ className = "h-4 w-4" }: { className?: string }) {
  * picks up the brand color on hover/focus.
  */
 export function DeveloperCredit() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const name = i18n.language.startsWith("ar") ? "شادي منصور" : "Shady Mansour";
 
   const links: { label: string; href: string; icon: ReactNode }[] = [
     { label: "GitHub", href: GITHUB_URL, icon: <GithubIcon /> },
@@ -80,9 +81,9 @@ export function DeveloperCredit() {
   ];
 
   return (
-    <div className="flex flex-col items-center gap-1.5 py-4 text-xs text-neutral-500">
+    <div className="credit flex flex-col items-center gap-1.5 py-4 text-xs text-neutral-500">
       <p className="font-label">
-        {t("credit.developedBy")} <span className="font-semibold text-neutral-700">Shady Mansour</span>
+        {t("credit.developedBy")} <span className="dev-name">{name}</span>
       </p>
       <div className="flex items-center gap-2.5">
         {links.map(({ label, href, icon }) => (

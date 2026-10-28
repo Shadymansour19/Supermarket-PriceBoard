@@ -17,6 +17,81 @@
   color-scheme: light;
 }
 
+/* "Developed by" credit name: Kaushan Script, a brush-pen calligraphy, with
+   a teal-to-emerald gradient that glides on hover — same treatment as the
+   `timesheet` project's dev credit, reused here so both apps share one
+   signature. */
+@font-face {
+  font-family: "Kaushan Name";
+  src: url("/fonts/kaushan-script-latin-400.woff2") format("woff2");
+  font-weight: 400;
+  font-display: swap;
+}
+
+.dev-name {
+  font-family: "Kaushan Name", "Brush Script MT", cursive;
+  font-weight: 400;
+  font-size: 1.45em;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+  /* the script's swashes overhang the box: the gradient clip must not cut them */
+  padding-inline: 0.06em 0.18em;
+  background: linear-gradient(90deg, #059669, #0284c7, #059669);
+  background-size: 220% 100%;
+  background-position: 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  transition: background-position 0.8s ease;
+  white-space: nowrap;
+}
+
+.credit:hover .dev-name {
+  background-position: 100% 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dev-name {
+    transition: none;
+  }
+}
+
+/* Arabic name: Aref Ruqaa Ink Bold, a colour font whose ink strokes fade —
+   recoloured to this app's emerald/blue through font-palette (Chrome, Edge,
+   Firefox); where colour fonts aren't supported (Safari) the letters fall
+   back to solid emerald. No text gradient here: it would flatten the
+   colour layers. */
+@font-face {
+  font-family: "Aref Ink Name";
+  src: url("/fonts/aref-ruqaa-ink-bold-name.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
+@font-palette-values --dev-ink {
+  font-family: "Aref Ink Name";
+  override-colors:
+    0 rgba(5, 150, 105, 0.5),
+    1 #059669,
+    2 #0284c7,
+    3 rgba(2, 132, 199, 0.5),
+    4 #0284c7;
+}
+
+:lang(ar) .dev-name {
+  font-family: "Aref Ink Name", serif;
+  font-weight: 700;
+  font-size: 1.7em;
+  line-height: 1;
+  letter-spacing: 0;
+  background: none;
+  -webkit-text-fill-color: currentColor;
+  color: #059669;
+  font-palette: --dev-ink;
+  transition: none;
+}
+
 html,
 body,
 #root {
