@@ -152,7 +152,7 @@ export function CartPage() {
       {!loading && !error && rows.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="font-heading text-lg font-semibold text-neutral-700">{t("cart.emptyTitle")}</p>
-          <CartIcon className="h-32 w-32 animate-cart-sway text-neutral-300" />
+          <CartIcon className="h-40 w-40 animate-cart-sway text-neutral-300" />
           <Link to="/" className="text-sm font-medium text-emerald-700 hover:underline">
             {t("cart.emptyCta")}
           </Link>
