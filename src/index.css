@@ -397,3 +397,28 @@ textarea {
     animation: none;
   }
 }
+
+/* Empty-cart icon: a gentle sway, like a cart rocking slightly from being empty. */
+@keyframes cart-sway {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-6deg);
+  }
+  75% {
+    transform: rotate(6deg);
+  }
+}
+
+.animate-cart-sway {
+  animation: cart-sway 2.2s ease-in-out infinite;
+  transform-origin: 50% 85%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-cart-sway {
+    animation: none;
+  }
+}
