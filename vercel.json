@@ -1,3 +1,16 @@
 {
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
+  "rewrites": [
+    {
+      "source": "/product/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*(facebookexternalhit|WhatsApp|Twitterbot|LinkedInBot|Slackbot|TelegramBot|Discordbot|Googlebot|Applebot|Pinterest|redditbot|vkShare|SkypeUriPreview).*"
+        }
+      ],
+      "destination": "/api/product-meta?id=:id"
+    },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
 }

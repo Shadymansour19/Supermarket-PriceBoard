@@ -16,6 +16,21 @@
       rel="stylesheet"
     />
     <title>Super Market Hamada</title>
+    <!-- Default/fallback preview for sharing the site itself (home, cart, etc).
+         A specific product page overrides these via the bot-only rewrite in
+         vercel.json + api/product-meta.ts — see that file for why: this is a
+         client-rendered SPA, so a crawler hitting /product/:id directly would
+         otherwise only ever see this generic card, never that product's own
+         name/photo. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Super Market Hamada" />
+    <meta property="og:title" content="Super Market Hamada" />
+    <meta property="og:description" content="Groceries from Super Market Hamada — browse the catalog and order on WhatsApp." />
+    <meta property="og:image" content="https://super-market-hamada.vercel.app/logo.jpg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Super Market Hamada" />
+    <meta name="twitter:description" content="Groceries from Super Market Hamada — browse the catalog and order on WhatsApp." />
+    <meta name="twitter:image" content="https://super-market-hamada.vercel.app/logo.jpg" />
   </head>
   <body>
     <div id="root"></div>
