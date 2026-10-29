@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
+import { HeartIcon } from "../../components/Icons";
 import { ProductCard } from "../../components/ProductCard";
 import { useFavorites } from "../../context/FavoritesContext";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
@@ -34,7 +36,15 @@ export function FavoritesPage() {
 
       {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
       {error && <p className="text-red-600">{t("common.error")}</p>}
-      {!loading && !error && products.length === 0 && <p className="text-neutral-500">{t("favorites.empty")}</p>}
+      {!loading && !error && products.length === 0 && (
+        <div className="flex flex-col items-center gap-3 py-16 text-center">
+          <p className="font-heading text-lg font-semibold text-neutral-700">{t("favorites.emptyTitle")}</p>
+          <HeartIcon className="h-40 w-40 animate-icon-sway text-neutral-300" />
+          <Link to="/" className="text-sm font-medium text-emerald-700 hover:underline">
+            {t("favorites.emptyCta")}
+          </Link>
+        </div>
+      )}
 
       {!loading && !error && products.length > 0 && (
         // Extra top margin — see the matching comment in DealsPage.

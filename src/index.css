@@ -398,8 +398,9 @@ textarea {
   }
 }
 
-/* Empty-cart icon: a gentle sway, like a cart rocking slightly from being empty. */
-@keyframes cart-sway {
+/* Empty-state icon (cart, favorites, notifications): a gentle sway, like it's
+   rocking slightly from being empty. */
+@keyframes icon-sway {
   0%,
   100% {
     transform: rotate(0deg);
@@ -412,13 +413,13 @@ textarea {
   }
 }
 
-.animate-cart-sway {
-  animation: cart-sway 2.2s ease-in-out infinite;
+.animate-icon-sway {
+  animation: icon-sway 2.2s ease-in-out infinite;
   transform-origin: 50% 85%;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-cart-sway {
+  .animate-icon-sway {
     animation: none;
   }
 }

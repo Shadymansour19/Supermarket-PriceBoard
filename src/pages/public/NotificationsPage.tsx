@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { CloseIcon } from "../../components/ContactIcons";
+import { BellIcon } from "../../components/Icons";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { clearNotificationLog, getNotificationLog, type NotificationLogEntry } from "../../lib/notificationLog";
@@ -154,9 +155,13 @@ export function NotificationsPage() {
         {logLoading ? (
           <p className="text-sm text-neutral-500">{t("common.loading")}</p>
         ) : log.length === 0 ? (
-          <p className="rounded-xl border border-dashed border-neutral-300 bg-white p-6 text-center text-sm text-neutral-500">
-            {t("notifications.historyEmpty")}
-          </p>
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="font-heading text-lg font-semibold text-neutral-700">{t("notifications.historyEmptyTitle")}</p>
+            <BellIcon className="h-40 w-40 animate-icon-sway text-neutral-300" />
+            {/* Plain text, not a link — unlike the cart/favorites empty
+             * states, there's nowhere meaningful to send someone from here. */}
+            <p className="text-sm text-neutral-500">{t("notifications.historyEmptyHint")}</p>
+          </div>
         ) : (
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
             {log.map((entry) => (
