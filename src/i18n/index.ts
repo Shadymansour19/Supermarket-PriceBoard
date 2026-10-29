@@ -31,6 +31,8 @@ const resources = {
         productsCount_other: "{{count}} products",
         backTo: "Back to {{name}}",
         selectCategory: "Select a category",
+        searchSubcategories: "Search subcategories…",
+        noMatchingSubcategories: "No subcategories match your search.",
       },
       search: { placeholder: "Search products…", noResults: "No products match your search." },
       catalog: {
@@ -330,6 +332,8 @@ const resources = {
         productsCount_other: "{{count}} منتج",
         backTo: "العودة إلى {{name}}",
         selectCategory: "اختر قسمًا",
+        searchSubcategories: "ابحث عن قسم فرعي…",
+        noMatchingSubcategories: "لا توجد أقسام فرعية مطابقة لبحثك.",
       },
       search: { placeholder: "ابحث عن منتج…", noResults: "لا توجد منتجات مطابقة لبحثك." },
       catalog: {

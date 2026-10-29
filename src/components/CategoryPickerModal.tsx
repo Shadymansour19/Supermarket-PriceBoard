@@ -1,9 +1,15 @@
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { CategoryAvatar } from "./CategoryAvatar";
 import { CloseIcon } from "./ContactIcons";
 import { localizedField } from "../lib/localize";
 import type { CategoryWithChildren } from "../types/database";
+
+/** Below this many subcategories, scanning the plain list is faster than
+ * typing — the search box only earns its keyboard-popping cost once there's
+ * actually enough to search through. */
+const SEARCH_THRESHOLD = 6;
 
 /**
  * The "popout box" for picking a different category from within a category
@@ -23,6 +29,15 @@ export function CategoryPickerModal({
 }) {
   const { t, i18n } = useTranslation();
   const topName = localizedField(topCategory, "name", i18n.language);
+  const [search, setSearch] = useState("");
+  const trimmedSearch = search.trim();
+  const showSearch = topCategory.children.length > SEARCH_THRESHOLD;
+  const visibleChildren = trimmedSearch
+    ? topCategory.children.filter(
+        (child) =>
+          child.name_en.toLowerCase().includes(trimmedSearch.toLowerCase()) || child.name_ar.includes(trimmedSearch),
+      )
+    : topCategory.children;
 
   return (
     <div
@@ -47,6 +62,15 @@ export function CategoryPickerModal({
             <CloseIcon className="h-5 w-5" />
           </button>
         </div>
+        {showSearch && (
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={t("categories.searchSubcategories")}
+            className="font-label mb-2 w-full rounded-lg border border-neutral-300 px-3 py-1.5 text-sm focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
+        )}
         <ul className="divide-y divide-neutral-100">
           <li>
             <Link
@@ -57,9 +81,9 @@ export function CategoryPickerModal({
               <CategoryAvatar imagePath={topCategory.image_path} name={topName} colorClass={colorClass} className="h-8 w-8 text-sm" />
               {topName}
             </Link>
-            {topCategory.children.length > 0 && (
+            {visibleChildren.length > 0 ? (
               <ul className="ms-11 space-y-0.5 pb-2">
-                {topCategory.children.map((child) => (
+                {visibleChildren.map((child) => (
                   <li key={child.id}>
                     <Link
                       to={`/category/${child.id}`}
@@ -71,6 +95,12 @@ export function CategoryPickerModal({
                   </li>
                 ))}
               </ul>
+            ) : (
+              trimmedSearch && (
+                <p className="font-label ms-11 pb-2 text-sm text-neutral-500">
+                  {t("categories.noMatchingSubcategories")}
+                </p>
+              )
             )}
           </li>
         </ul>
