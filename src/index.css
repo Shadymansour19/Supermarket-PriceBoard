@@ -446,28 +446,62 @@ textarea {
   }
 }
 
-/* Empty-deals hourglass: holds upright, flips end-over-end like its sand
-   just ran out, then holds upside down and flips back. */
-@keyframes icon-hourglass-flip {
-  0%,
-  35% {
+/* Empty-deals alarm clock: hands keep ticking around the face, and the
+   whole clock shakes in a short ringing burst every few seconds — like an
+   alarm going off — then sits still again until the next one. */
+@keyframes clock-hand-spin {
+  from {
     transform: rotate(0deg);
   }
-  50%,
-  85% {
-    transform: rotate(180deg);
-  }
-  100% {
+  to {
     transform: rotate(360deg);
   }
 }
 
-.animate-icon-hourglass-flip {
-  animation: icon-hourglass-flip 3.5s ease-in-out infinite;
+.clock-hand-hour {
+  animation: clock-hand-spin 12s linear infinite;
+  transform-origin: 12px 13px;
+}
+
+.clock-hand-minute {
+  animation: clock-hand-spin 2s linear infinite;
+  transform-origin: 12px 13px;
+}
+
+@keyframes icon-clock-ring {
+  0%,
+  8%,
+  100% {
+    transform: rotate(0deg);
+  }
+  1%,
+  5% {
+    transform: rotate(-12deg);
+  }
+  2%,
+  6% {
+    transform: rotate(12deg);
+  }
+  3% {
+    transform: rotate(-8deg);
+  }
+  4% {
+    transform: rotate(8deg);
+  }
+  7% {
+    transform: rotate(0deg);
+  }
+}
+
+.animate-icon-clock-ring {
+  animation: icon-clock-ring 3s ease-in-out infinite;
+  transform-origin: 50% 50%;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-icon-hourglass-flip {
+  .clock-hand-hour,
+  .clock-hand-minute,
+  .animate-icon-clock-ring {
     animation: none;
   }
 }

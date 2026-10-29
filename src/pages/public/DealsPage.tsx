@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
-import { HourglassIcon } from "../../components/Icons";
+import { AlarmClockIcon } from "../../components/Icons";
 import { ProductCard } from "../../components/ProductCard";
 import { fetchActiveLimitedTimeDeals } from "../../lib/discounts";
 import type { LimitedTimeDiscount, Product } from "../../types/database";
@@ -30,7 +30,7 @@ export function DealsPage() {
       {!loading && !error && deals.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="font-heading text-lg font-semibold text-neutral-700">{t("deals.noActiveDealsTitle")}</p>
-          <HourglassIcon className="h-40 w-40 animate-icon-hourglass-flip text-neutral-300" />
+          <AlarmClockIcon className="h-40 w-40 animate-icon-clock-ring text-neutral-300" />
           <Link to="/" className="text-sm font-medium text-emerald-700 hover:underline">
             {t("deals.noActiveDealsCta")}
           </Link>

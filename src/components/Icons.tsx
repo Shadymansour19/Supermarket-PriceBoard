@@ -216,7 +216,11 @@ export function CameraIcon({ className = "h-5 w-5" }: IconProps) {
   );
 }
 
-export function HourglassIcon({ className = "h-5 w-5" }: IconProps) {
+/** A classic twin-bell alarm clock — the hour/minute hands are separate
+ * elements (own `clock-hand-*` class) so CSS can spin each at its own
+ * speed around the face's center independently of the whole icon's own
+ * ring/shake animation (see `.animate-icon-clock-ring` in index.css). */
+export function AlarmClockIcon({ className = "h-5 w-5" }: IconProps) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -228,9 +232,12 @@ export function HourglassIcon({ className = "h-5 w-5" }: IconProps) {
       className={className}
       aria-hidden="true"
     >
-      <path d="M5 22h14M5 2h14" />
-      <path d="M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41a2 2 0 0 0-.59 1.42V22" />
-      <path d="M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2" />
+      <circle cx="7" cy="4" r="2" />
+      <circle cx="17" cy="4" r="2" />
+      <path d="M4 20l-2 2M20 20l2 2" />
+      <circle cx="12" cy="13" r="8" />
+      <line className="clock-hand-hour" x1="12" y1="13" x2="12" y2="9.5" />
+      <line className="clock-hand-minute" x1="12" y1="13" x2="15" y2="13" />
     </svg>
   );
 }
