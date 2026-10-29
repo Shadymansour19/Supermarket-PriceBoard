@@ -423,3 +423,25 @@ textarea {
     animation: none;
   }
 }
+
+/* Empty-favorites heart: a full 3D spin around its own vertical axis — the
+   parent's `perspective` (set inline where it's used) is what gives the
+   flat SVG actual depth as it turns, instead of just squashing sideways. */
+@keyframes icon-spin-3d {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(360deg);
+  }
+}
+
+.animate-icon-spin-3d {
+  animation: icon-spin-3d 3s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-icon-spin-3d {
+    animation: none;
+  }
+}

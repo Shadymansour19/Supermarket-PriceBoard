@@ -39,7 +39,9 @@ export function FavoritesPage() {
       {!loading && !error && products.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">
           <p className="font-heading text-lg font-semibold text-neutral-700">{t("favorites.emptyTitle")}</p>
-          <HeartIcon className="h-40 w-40 animate-icon-sway text-neutral-300" />
+          <div style={{ perspective: "600px" }}>
+            <HeartIcon className="h-40 w-40 animate-icon-spin-3d text-neutral-300" />
+          </div>
           <Link to="/" className="text-sm font-medium text-emerald-700 hover:underline">
             {t("favorites.emptyCta")}
           </Link>
