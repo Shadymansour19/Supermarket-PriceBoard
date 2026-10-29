@@ -445,3 +445,29 @@ textarea {
     animation: none;
   }
 }
+
+/* Empty-deals hourglass: holds upright, flips end-over-end like its sand
+   just ran out, then holds upside down and flips back. */
+@keyframes icon-hourglass-flip {
+  0%,
+  35% {
+    transform: rotate(0deg);
+  }
+  50%,
+  85% {
+    transform: rotate(180deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-icon-hourglass-flip {
+  animation: icon-hourglass-flip 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-icon-hourglass-flip {
+    animation: none;
+  }
+}

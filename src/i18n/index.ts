@@ -246,7 +246,8 @@ const resources = {
         showMore: "Show more",
         goToSlide: "Go to deal {{count}}",
         pageTitle: "Limited-time deals",
-        noActiveDeals: "No deals right now — check back soon!",
+        noActiveDealsTitle: "No deals right now",
+        noActiveDealsCta: "Browse all products instead",
         endsIn_one: "Ends in {{count}} day",
         endsIn_other: "Ends in {{count}} days",
         quantityDiscountTitle: "Buy more, save more",
@@ -544,7 +545,8 @@ const resources = {
         showMore: "عرض المزيد",
         goToSlide: "الانتقال إلى العرض {{count}}",
         pageTitle: "عروض لفترة محدودة",
-        noActiveDeals: "مفيش عروض دلوقتي... تابعنا يوصلك كل جديد!",
+        noActiveDealsTitle: "مفيش عروض دلوقتي",
+        noActiveDealsCta: "تصفح كل المنتجات بدل كده",
         // Arabic has six plural categories (zero/one/two/few/many/other),
         // not just one/other like English — leaving any of these out means
         // i18next falls back to showing the raw key for that count instead
