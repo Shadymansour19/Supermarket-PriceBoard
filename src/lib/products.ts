@@ -34,8 +34,17 @@ export async function fetchProducts(filter: ProductFilter = {}): Promise<Product
   }
   if (filter.search?.trim()) {
     const term = filter.search.trim();
-    // Matches either language's name field.
-    query = query.or(`name_en.ilike.%${term}%,name_ar.ilike.%${term}%`);
+    // `,` and `(`/`)` are the `.or()` filter's own syntax (clause separator
+    // and grouping) — wrapping the value in double quotes (PostgREST's own
+    // escaping convention, confirmed against the live API) makes those
+    // literal instead of being parsed as extra filter syntax; `"` itself
+    // still needs escaping since it's the quote character.
+    const value = `"%${term.replace(/"/g, '\\"')}%"`;
+    // Matches either language's name, description, or the size field — not
+    // just the name — so e.g. "1kg" or a word only in the description
+    // still finds the product.
+    const columns = ["name_en", "name_ar", "description_en", "description_ar", "size"];
+    query = query.or(columns.map((column) => `${column}.ilike.${value}`).join(","));
   }
 
   const { data, error } = await query;
