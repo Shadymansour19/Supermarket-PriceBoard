@@ -52,7 +52,12 @@ export function FavoritesPage() {
         // Extra top margin — see the matching comment in DealsPage.
         <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} limitedTimeDiscount={discountMap.get(product.id)} />
+            <ProductCard
+              key={product.id}
+              product={product}
+              limitedTimeDiscount={discountMap.get(product.id)}
+              hideFireFrame
+            />
           ))}
         </div>
       )}

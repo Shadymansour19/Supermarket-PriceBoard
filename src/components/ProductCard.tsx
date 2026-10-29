@@ -14,6 +14,7 @@ export function ProductCard({
   product,
   limitedTimeDiscount,
   quantityDiscount,
+  hideFireFrame = false,
 }: {
   product: Product;
   limitedTimeDiscount?: LimitedTimeDiscount;
@@ -22,6 +23,10 @@ export function ProductCard({
    * Ignored if `limitedTimeDiscount` is also passed; a card only ever
    * headlines one kind of deal. */
   quantityDiscount?: QuantityDiscount;
+  /** Drops just the oversized flame-frame image behind a hot deal's photo —
+   * the badge and border stay. Used in the dense 2-column grid (catalog,
+   * deals/wholesale/favorites pages); the carousel sections keep it. */
+  hideFireFrame?: boolean;
 }) {
   const { t, i18n } = useTranslation();
   const imageUrl = productImageUrl(product.image_path);
@@ -77,7 +82,7 @@ export function ProductCard({
        * wrapper from intercepting clicks meant for the image/content
        * below it. */}
       <div className="product-card pointer-events-none absolute inset-0 z-20">
-        {isHotDeal && (
+        {isHotDeal && !hideFireFrame && (
           <img
             src="/fire-frame.png"
             alt=""

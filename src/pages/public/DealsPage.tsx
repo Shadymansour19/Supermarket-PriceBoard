@@ -48,7 +48,7 @@ export function DealsPage() {
         // under the title on a narrower card, unlike the old mt-28.
         <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {deals.map(({ product, discount }) => (
-            <ProductCard key={product.id} product={product} limitedTimeDiscount={discount} />
+            <ProductCard key={product.id} product={product} limitedTimeDiscount={discount} hideFireFrame />
           ))}
         </div>
       )}

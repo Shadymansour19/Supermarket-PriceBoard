@@ -218,6 +218,7 @@ export function CatalogPage() {
                     key={product.id}
                     product={product}
                     limitedTimeDiscount={discountMap.get(product.id)}
+                    hideFireFrame
                   />
                 ))}
               </div>

@@ -33,7 +33,7 @@ export function WholesaleDealsPage() {
         // Extra top margin — see the matching comment in DealsPage.
         <div className="mt-16 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {deals.map(({ product, discount }) => (
-            <ProductCard key={product.id} product={product} quantityDiscount={discount} />
+            <ProductCard key={product.id} product={product} quantityDiscount={discount} hideFireFrame />
           ))}
         </div>
       )}
