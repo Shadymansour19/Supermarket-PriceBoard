@@ -57,9 +57,12 @@ export default async function handler(request: Request): Promise<Response> {
   const id = url.searchParams.get("id");
   const siteUrl = `${url.protocol}//${url.host}`;
   const fallbackImage = `${siteUrl}/logo.jpg`;
+  // The canonical page URL, not this function's own rewritten request URL
+  // (which carries the `?id=` query param vercel.json's rewrite added).
+  const pageUrl = `${siteUrl}/product/${id ?? ""}`;
 
   if (!id || !SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, url.toString()));
+    return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, pageUrl));
   }
 
   try {
@@ -74,7 +77,7 @@ export default async function handler(request: Request): Promise<Response> {
     const product = rows[0];
 
     if (!product) {
-      return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, url.toString()));
+      return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, pageUrl));
     }
 
     const title = (product.name_ar as string) || (product.name_en as string) || FALLBACK_TITLE;
@@ -87,11 +90,11 @@ export default async function handler(request: Request): Promise<Response> {
       ? `${SUPABASE_URL}/storage/v1/object/public/${IMAGE_BUCKET}/${imagePath}`
       : fallbackImage;
 
-    return htmlResponse(metaPage(title, description, image, url.toString()));
+    return htmlResponse(metaPage(title, description, image, pageUrl));
   } catch {
     // A Supabase hiccup shouldn't break the preview entirely — the generic
     // site card is still a reasonable fallback.
-    return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, url.toString()));
+    return htmlResponse(metaPage(FALLBACK_TITLE, FALLBACK_DESCRIPTION, fallbackImage, pageUrl));
   }
 }
 
