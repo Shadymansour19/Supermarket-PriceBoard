@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { HeartIcon } from "../../components/Icons";
 import { ProductCard } from "../../components/ProductCard";
+import { ProductGridSkeleton } from "../../components/ProductGridSkeleton";
 import { useFavorites } from "../../context/FavoritesContext";
 import { fetchActiveLimitedTimeDiscountMap } from "../../lib/discounts";
 import { fetchProductsByIds } from "../../lib/products";
@@ -34,7 +35,7 @@ export function FavoritesPage() {
     <div className="space-y-4">
       <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("favorites.title")}</h1>
 
-      {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+      {loading && <ProductGridSkeleton />}
       {error && <p className="text-red-600">{t("common.error")}</p>}
       {!loading && !error && products.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">

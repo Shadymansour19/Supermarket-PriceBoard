@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { AlarmClockIcon } from "../../components/Icons";
 import { ProductCard } from "../../components/ProductCard";
+import { ProductGridSkeleton } from "../../components/ProductGridSkeleton";
 import { fetchActiveLimitedTimeDeals } from "../../lib/discounts";
 import type { LimitedTimeDiscount, Product } from "../../types/database";
 
@@ -25,7 +26,7 @@ export function DealsPage() {
     <div className="space-y-4">
       <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("deals.pageTitle")}</h1>
 
-      {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+      {loading && <ProductGridSkeleton />}
       {error && <p className="text-red-600">{t("common.error")}</p>}
       {!loading && !error && deals.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">

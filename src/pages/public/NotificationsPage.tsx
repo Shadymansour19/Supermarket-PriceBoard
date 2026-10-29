@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
 import { CloseIcon } from "../../components/ContactIcons";
 import { BellIcon } from "../../components/Icons";
+import { Skeleton } from "../../components/Skeleton";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { usePushNotifications } from "../../hooks/usePushNotifications";
 import { clearNotificationLog, getNotificationLog, type NotificationLogEntry } from "../../lib/notificationLog";
@@ -153,7 +154,17 @@ export function NotificationsPage() {
         </div>
 
         {logLoading ? (
-          <p className="text-sm text-neutral-500">{t("common.loading")}</p>
+          <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
+            {Array.from({ length: 3 }, (_, index) => (
+              <li key={index} className="flex items-start gap-3 px-4 py-3">
+                <Skeleton className="h-9 w-9 shrink-0 rounded-lg" />
+                <div className="flex-1 space-y-1.5">
+                  <Skeleton className="h-4 w-1/2 rounded-md" />
+                  <Skeleton className="h-3 w-full rounded-md" />
+                </div>
+              </li>
+            ))}
+          </ul>
         ) : log.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
             <p className="font-heading text-lg font-semibold text-neutral-700">{t("notifications.historyEmptyTitle")}</p>

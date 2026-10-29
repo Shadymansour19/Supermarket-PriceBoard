@@ -7,6 +7,7 @@ import { FavoriteButton } from "../../components/FavoriteButton";
 import { QuantityStepper } from "../../components/QuantityStepper";
 import { ShareWhatsAppButton } from "../../components/ShareWhatsAppButton";
 import { SimilarProductsSection } from "../../components/SimilarProductsSection";
+import { Skeleton } from "../../components/Skeleton";
 import { useCart } from "../../context/CartContext";
 import { flyToCart, squareRectAt } from "../../lib/cartFlyAnimation";
 import {
@@ -147,7 +148,28 @@ export function ProductDetailPage() {
   }
 
   if (product === undefined) {
-    return <p className="text-neutral-500">{t("common.loading")}</p>;
+    return (
+      <div className="mx-auto max-w-4xl">
+        <Skeleton className="mb-4 h-5 w-32 rounded-md" />
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2">
+          <div className="space-y-3">
+            <Skeleton className="aspect-square w-full rounded-xl" />
+            <div className="flex gap-2">
+              {Array.from({ length: 3 }, (_, index) => (
+                <Skeleton key={index} className="h-16 w-16 shrink-0 rounded-lg" />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-3">
+            <Skeleton className="h-7 w-3/4 rounded-md" />
+            <Skeleton className="h-4 w-1/4 rounded-md" />
+            <Skeleton className="h-8 w-1/3 rounded-md" />
+            <Skeleton className="h-20 w-full rounded-md" />
+            <Skeleton className="h-10 w-full rounded-md" />
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (product === null) {

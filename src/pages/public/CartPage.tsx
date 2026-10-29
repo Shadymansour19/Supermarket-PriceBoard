@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { CloseIcon, WhatsAppIcon } from "../../components/ContactIcons";
 import { CartIcon } from "../../components/Icons";
 import { QuantityStepper } from "../../components/QuantityStepper";
+import { Skeleton } from "../../components/Skeleton";
 import { useCart } from "../../context/CartContext";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { CONTACT } from "../../config";
@@ -147,7 +148,20 @@ export function CartPage() {
         </div>
       </div>
 
-      {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+      {loading && (
+        <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
+          {Array.from({ length: 3 }, (_, index) => (
+            <li key={index} className="flex gap-3 p-3">
+              <Skeleton className="h-16 w-16 shrink-0 rounded-lg" />
+              <div className="flex-1 space-y-2 py-1">
+                <Skeleton className="h-4 w-2/3 rounded-md" />
+                <Skeleton className="h-3 w-1/3 rounded-md" />
+                <Skeleton className="h-7 w-24 rounded-md" />
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
       {error && <p className="text-red-600">{t("common.error")}</p>}
       {!loading && !error && rows.length === 0 && (
         <div className="flex flex-col items-center gap-3 py-16 text-center">

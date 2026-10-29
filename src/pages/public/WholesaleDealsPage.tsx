@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { ProductCard } from "../../components/ProductCard";
+import { ProductGridSkeleton } from "../../components/ProductGridSkeleton";
 import { fetchActiveQuantityDeals } from "../../lib/discounts";
 import type { Product, QuantityDiscount } from "../../types/database";
 
@@ -23,7 +24,7 @@ export function WholesaleDealsPage() {
     <div className="space-y-4">
       <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("deals.wholesalePageTitle")}</h1>
 
-      {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+      {loading && <ProductGridSkeleton />}
       {error && <p className="text-red-600">{t("common.error")}</p>}
       {!loading && !error && deals.length === 0 && (
         <p className="text-neutral-500">{t("deals.noActiveWholesaleDeals")}</p>

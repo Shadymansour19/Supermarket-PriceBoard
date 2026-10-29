@@ -8,6 +8,7 @@ import { CategoryPickerModal } from "../../components/CategoryPickerModal";
 import { HeroBanner } from "../../components/HeroBanner";
 import { LimitedTimeDealsSection } from "../../components/LimitedTimeDealsSection";
 import { ProductCard } from "../../components/ProductCard";
+import { ProductGridSkeleton } from "../../components/ProductGridSkeleton";
 import { QuantityDealsSection } from "../../components/QuantityDealsSection";
 import { RecentlyArrivedSection } from "../../components/RecentlyArrivedSection";
 import { RecentlyViewedSection } from "../../components/RecentlyViewedSection";
@@ -174,7 +175,7 @@ export function CatalogPage() {
           {isHome && <RecentlyArrivedSection />}
           {isHome && <RecentlyViewedSection />}
 
-          {loading && <p className="text-neutral-500">{t("common.loading")}</p>}
+          {loading && <ProductGridSkeleton count={pageSize < 8 ? pageSize : 8} />}
           {error && <p className="text-red-600">{t("common.error")}</p>}
           {!loading && !error && products.length === 0 && (
             <p className="text-neutral-500">{t("search.noResults")}</p>

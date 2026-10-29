@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CATEGORY_AVATAR_COLORS } from "../../components/CategoryAvatar";
 import { CategoryCard } from "../../components/CategoryCard";
+import { Skeleton } from "../../components/Skeleton";
 import { fetchCategoryTree, getCategoryFilterIds } from "../../lib/categories";
 import { fetchActiveProductCategoryIds } from "../../lib/products";
 import type { CategoryWithChildren } from "../../types/database";
@@ -31,7 +32,17 @@ export function CategoriesPage() {
     <div className="space-y-4">
       <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("nav.categories")}</h1>
 
-      {categories === null && !error && <p className="text-neutral-500">{t("common.loading")}</p>}
+      {categories === null && !error && (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+          {Array.from({ length: 6 }, (_, index) => (
+            <div key={index} className="flex flex-col items-center gap-2 rounded-xl border border-neutral-200 bg-white p-4">
+              <Skeleton className="h-16 w-16 rounded-full" />
+              <Skeleton className="h-4 w-20 rounded-md" />
+              <Skeleton className="h-3 w-14 rounded-md" />
+            </div>
+          ))}
+        </div>
+      )}
       {error && <p className="text-red-600">{t("common.error")}</p>}
 
       {categories && categories.length > 0 && (
