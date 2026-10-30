@@ -28,7 +28,8 @@ decision log in [SPEC.md](./SPEC.md). For step-by-step edit recipes, see
 - **Orders are not processed by the app.** "Order via WhatsApp" opens a
   pre-filled WhatsApp message to the store. The app only logs the line items
   afterwards (to rank best sellers).
-- **Only admins have accounts** (Supabase Auth + a row in `profiles`).
+- **Only staff have accounts** — admins and cashiers (Supabase Auth + a row in
+  `profiles` whose `role` is `admin` or `cashier`).
 
 ## Stack
 
@@ -49,15 +50,19 @@ src/
   types/database.ts   Hand-written TypeScript types mirroring the DB tables
   pages/
     public/           Storefront screens (Catalog, Deals, Cart, Product, ...)
-    admin/            LoginPage, AdminProductsPage, AdminCategoriesPage
+    admin/            LoginPage (shared by both roles), AdminProductsPage,
+                      AdminCategoriesPage, AdminFinancePage
+    cashier/          CashierSellPage, CashierReceivePage, CashierInvoicesPage
   components/         Reusable UI (ProductCard, HeroBanner, BottomNavBar, ...)
-    admin/            Admin-only UI (forms, image crop, ad generator, layout)
+    admin/            Admin-only UI (forms, image crop, ad generator, layout,
+                      PaymentsChart)
+    cashier/          CashierLayout, InvoiceBuilder (sale + receive), InvoiceList
   context/            React contexts: Auth, Cart, Favorites, ConfirmDialog
   hooks/              usePushNotifications, usePwaInstall, useAdminManifest,
                       useDocumentDirection, useScrollDirection
   lib/                Non-UI logic. Every Supabase query lives here.
 supabase/
-  migrations/         0001…0007 SQL files = the database schema, in order
+  migrations/         0001…0009 SQL files = the database schema, in order
   seed.sql            Sample data for development only
   functions/notify-new-deal/   Edge Function that sends push notifications
 public/               Static files: logo, PWA icons (pwa/), admin manifest
@@ -79,7 +84,8 @@ vercel.json           Rewrites every URL to index.html (SPA routing)
 | `/cart`, `/orders` | CartPage, OrderHistoryPage | |
 | `/favorites`, `/notifications` | FavoritesPage, NotificationsPage | |
 | `/admin/login` | LoginPage | |
-| `/admin/products`, `/admin/categories` | Admin pages | Wrapped in `ProtectedRoute` |
+| `/admin/products`, `/admin/categories`, `/admin/finance` | Admin pages | `ProtectedRoute` (admin only) |
+| `/cashier/sell`, `/cashier/receive`, `/cashier/invoices` | Cashier desk | `ProtectedRoute` (admin or cashier) |
 
 Public pages share `PublicLayout` (header, footer, bottom nav, contact widget).
 Admin pages share `AdminLayout`.
@@ -91,9 +97,11 @@ Summary of tables (all created by [supabase/migrations/](./supabase/migrations/)
 
 | Table | Purpose | Who can write |
 |---|---|---|
-| `profiles` | Marks which auth users are admins (`role='admin'`) | nobody via the app |
+| `profiles` | Marks which auth users are staff (`role='admin'` or `'cashier'`) | nobody via the app |
 | `categories` | Two-level tree via `parent_id`; has `image_path` | admin |
-| `products` | Bilingual name/description, price, unit, size, `in_stock`, `is_active` (soft hide) | admin |
+| `products` | Bilingual name/description, price, unit, size, `in_stock`, `stock_quantity`, `allow_fraction`, `is_active` (soft hide) | admin directly; stock also via invoices |
+| `product_costs` | Cost price per product (admin-only read — `products` is public) | admin; purchases update it |
+| `invoices` + `invoice_lines` | Sales and goods-received documents; every stock change goes through them | only via `record_invoice()` / `void_invoice()` |
 | `limited_time_discounts` | One per product: `new_price`, start, `duration_days`, generated `ends_at` | admin |
 | `quantity_discounts` + `quantity_discount_tiers` | "Buy N+ for price X" wholesale tiers | admin |
 | `push_subscriptions` | One row per device that enabled deal notifications | anyone (anonymous) |
@@ -119,8 +127,18 @@ automatically. Product/category text comes from `name_en` / `name_ar` columns,
 picked by `localizedField()` in `lib/localize.ts`. Prices go through
 `formatPrice()` using `CURRENCY_CODE` from `config.ts`.
 
-**Admin login:** `LoginPage` → Supabase Auth → `AuthContext` calls
-`isCurrentUserAdmin()` (`lib/auth.ts`) → `ProtectedRoute` allows `/admin/*`.
+**Staff login:** `LoginPage` → Supabase Auth → `AuthContext` calls
+`getCurrentUserRole()` (`lib/auth.ts`) → `ProtectedRoute` allows `/admin/*`
+for admins and `/cashier/*` for cashiers and admins; login redirects each
+role to its own area. `StaffSessionPrompt` (public layout) asks a signed-in
+staff member whether to go to their area — same dialog for both roles.
+
+**Selling / receiving stock:** `InvoiceBuilder` → `recordInvoice()`
+(`lib/invoices.ts`) → Postgres function `record_invoice` locks the product
+rows, checks stock and the fraction rule, sets the sale price itself, moves
+`stock_quantity`, writes the invoice. A trigger keeps `in_stock` in sync
+with the quantity. Admin reports: `lib/finance.ts` → `payments_by_period`
+and `stock_valuation` (admin-only RPCs); `AdminFinancePage` polls them.
 
 **Product images:** admin picks/captures photo → `ImageCropModal` →
 `lib/imageUpload.ts` resizes to ~1000px → uploaded to the public

@@ -237,6 +237,37 @@ visible. Newest first.
   small catalog app. Tailwind ≥3.3 logical properties (`ps-`, `pe-`,
   `ms-`, `me-`, etc.) are used instead of `pl-`/`pr-` so RTL doesn't
   require a parallel set of overrides.
+- **2026-10-30 — Cashier role, stock tracking, invoices, finance tab.**
+  Migration `0009`. Roles stay `profiles.role` text: `admin` and `cashier`
+  (many cashiers allowed; `is_staff()` = either). Stock is
+  `products.stock_quantity numeric(12,3)`; `allow_fraction` is an admin
+  per-product switch (milk yes, eggs no). Stock moves **only through
+  invoices** — `record_invoice()` (one atomic RPC, row-locked) for a *sale*
+  (stock down, money in) or *purchase* = goods received (stock up, money
+  out); no direct cashier writes to `products`. Designed against how real
+  POS/inventory systems separate duties:
+  - **Server owns the sale price.** The RPC computes each sale line's price
+    (regular / active limited-time / best quantity tier) and ignores any
+    client price; the cashier UI price is only a preview.
+  - **Cost price is admin-only** — own table `product_costs`, because
+    `products` is publicly readable (RLS is per row, not per column). A
+    purchase's unit cost updates it (latest-cost method).
+  - **Cashiers see only their own invoices**; admin sees all and is the
+    only one who can **void** (`void_invoice()`: reverses stock, excluded
+    from payments) — the "manager approval for voids" split. A purchase
+    void fails if that stock was already sold.
+  - **Sales can't exceed stock** (strict `>= 0`). Rollout caveat: existing
+    products start at 0 (their old `in_stock` flag is kept until the first
+    count) and can't be sold at the desk until stock is received/entered.
+    `in_stock` is auto-synced from quantity whenever quantity changes.
+  - Admin editing quantity in the product form is a manual correction and
+    is **not** logged; a stock-movement ledger is the natural next step.
+  - Finance reports (`payments_by_period`, `stock_valuation`) are
+    admin-only RPCs; buckets use the `Africa/Cairo` time zone and Monday
+    weeks. "Live" = 20 s polling + refresh on tab focus (no Realtime).
+  - Not built (deliberately): cashier account creation from the UI (needs a
+    service-role Edge Function), shifts/cash-drawer count, returns beyond
+    admin void, a manager tier, barcode scanning.
 
 ## Data model (Postgres / Supabase)
 
@@ -310,8 +341,13 @@ to stay inside free-tier storage and bandwidth.
   inactive products too (for un-hiding them).
 - **Storage bucket policies** mirror the same admin check for writes;
   reads are public.
-- Admin accounts are provisioned manually (Supabase dashboard / SQL), not
-  via public sign-up — there's no self-serve admin registration flow.
+- **Cashier** (`profiles.role = 'cashier'`): reads like the public, plus
+  `record_invoice()` (sell / receive stock) and reads of their *own*
+  invoices. No access to `product_costs`, other people's invoices, finance
+  reports, or product/discount editing. `void_invoice()` and the finance
+  RPCs are admin-only.
+- Admin and cashier accounts are provisioned manually (Supabase dashboard /
+  SQL — see HOWTO), not via public sign-up.
 
 ## Non-goals (for now)
 

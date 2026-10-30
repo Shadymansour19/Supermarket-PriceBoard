@@ -148,6 +148,24 @@ insert into public.profiles (id, role) values ('<auth-user-uuid>', 'admin');
 ```
 To remove admin rights: `delete from public.profiles where id = '<uuid>';`
 
+### Create / remove a cashier
+
+Same as an admin, with `role = 'cashier'` (as many as you like):
+```sql
+insert into public.profiles (id, role, display_name)
+values ('<auth-user-uuid>', 'cashier', 'Ahmed');   -- display_name shows on invoices
+```
+They sign in at `/admin/login` and land on `/cashier/sell`. To stop a
+cashier: `delete from public.profiles where id = '<uuid>';` (their invoices
+stay; the name is snapshotted on each).
+
+### First-time stock count
+
+Existing products start at quantity 0 and can't be sold at the cashier desk
+until they have stock. Enter each product's quantity (and cost price) in
+Admin → Products → Edit, or receive it through Cashier → Receive stock.
+Set **Allow fractional quantities** per product there too.
+
 ### Backup / inspect data
 
 Supabase dashboard → Table Editor, or Database → Backups. Images are in
