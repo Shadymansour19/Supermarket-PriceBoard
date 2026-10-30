@@ -14,6 +14,7 @@ import { useDocumentDirection } from "./hooks/useDocumentDirection";
 import { AdminCategoriesPage } from "./pages/admin/AdminCategoriesPage";
 import { AdminFinancePage } from "./pages/admin/AdminFinancePage";
 import { AdminProductsPage } from "./pages/admin/AdminProductsPage";
+import { AdminStaffPage } from "./pages/admin/AdminStaffPage";
 import { LoginPage } from "./pages/admin/LoginPage";
 import { CashierInvoicesPage } from "./pages/cashier/CashierInvoicesPage";
 import { CashierReceivePage } from "./pages/cashier/CashierReceivePage";
@@ -66,6 +67,7 @@ export default function App() {
                 <Route path="products" element={<AdminProductsPage />} />
                 <Route path="categories" element={<AdminCategoriesPage />} />
                 <Route path="finance" element={<AdminFinancePage />} />
+                <Route path="staff" element={<AdminStaffPage />} />
               </Route>
 
               <Route path="cashier/login" element={<Navigate to="/admin/login" replace />} />

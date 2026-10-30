@@ -265,8 +265,11 @@ visible. Newest first.
   - Finance reports (`payments_by_period`, `stock_valuation`) are
     admin-only RPCs; buckets use the `Africa/Cairo` time zone and Monday
     weeks. "Live" = 20 s polling + refresh on tab focus (no Realtime).
-  - Not built (deliberately): cashier account creation from the UI (needs a
-    service-role Edge Function), shifts/cash-drawer count, returns beyond
+  - Cashier accounts are created from the admin UI (Admin menu → Cashiers)
+    via the `manage-cashiers` Edge Function (JWT-verified, re-checks
+    `is_admin()`, only ever touches `role='cashier'` accounts; service-role
+    key stays server-side).
+  - Not built (deliberately): shifts/cash-drawer count, returns beyond
     admin void, a manager tier, barcode scanning.
 
 ## Data model (Postgres / Supabase)
@@ -346,8 +349,9 @@ to stay inside free-tier storage and bandwidth.
   invoices. No access to `product_costs`, other people's invoices, finance
   reports, or product/discount editing. `void_invoice()` and the finance
   RPCs are admin-only.
-- Admin and cashier accounts are provisioned manually (Supabase dashboard /
-  SQL — see HOWTO), not via public sign-up.
+- Admin accounts are provisioned manually (Supabase dashboard / SQL — see
+  HOWTO); cashier accounts are created by an admin from the app. No public
+  sign-up either way.
 
 ## Non-goals (for now)
 

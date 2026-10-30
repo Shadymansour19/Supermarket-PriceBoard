@@ -51,7 +51,7 @@ src/
   pages/
     public/           Storefront screens (Catalog, Deals, Cart, Product, ...)
     admin/            LoginPage (shared by both roles), AdminProductsPage,
-                      AdminCategoriesPage, AdminFinancePage
+                      AdminCategoriesPage, AdminFinancePage, AdminStaffPage
     cashier/          CashierSellPage, CashierReceivePage, CashierInvoicesPage
   components/         Reusable UI (ProductCard, HeroBanner, BottomNavBar, ...)
     admin/            Admin-only UI (forms, image crop, ad generator, layout,
@@ -65,6 +65,7 @@ supabase/
   migrations/         0001…0009 SQL files = the database schema, in order
   seed.sql            Sample data for development only
   functions/notify-new-deal/   Edge Function that sends push notifications
+  functions/manage-cashiers/   Edge Function: admin creates/removes cashier logins
 public/               Static files: logo, PWA icons (pwa/), admin manifest
 marketing/            Ad images/HTML for social media (not part of the app)
 vite.config.ts        Build config + PWA manifest (name, colors, icons)
@@ -84,7 +85,7 @@ vercel.json           Rewrites every URL to index.html (SPA routing)
 | `/cart`, `/orders` | CartPage, OrderHistoryPage | |
 | `/favorites`, `/notifications` | FavoritesPage, NotificationsPage | |
 | `/admin/login` | LoginPage | |
-| `/admin/products`, `/admin/categories`, `/admin/finance` | Admin pages | `ProtectedRoute` (admin only) |
+| `/admin/products`, `/admin/categories`, `/admin/finance`, `/admin/staff` | Admin pages | `ProtectedRoute` (admin only) |
 | `/cashier/sell`, `/cashier/receive`, `/cashier/invoices` | Cashier desk | `ProtectedRoute` (admin or cashier) |
 
 Public pages share `PublicLayout` (header, footer, bottom nav, contact widget).
@@ -132,6 +133,12 @@ picked by `localizedField()` in `lib/localize.ts`. Prices go through
 for admins and `/cashier/*` for cashiers and admins; login redirects each
 role to its own area. `StaffSessionPrompt` (public layout) asks a signed-in
 staff member whether to go to their area — same dialog for both roles.
+
+**Cashier accounts:** `AdminStaffPage` → `lib/staff.ts` →
+`supabase.functions.invoke("manage-cashiers")`. The function is the one place
+that uses the service-role key: it checks the caller with `is_admin()`,
+creates/updates/deletes the auth user and its `profiles` row, and refuses to
+touch any account that isn't a cashier.
 
 **Selling / receiving stock:** `InvoiceBuilder` → `recordInvoice()`
 (`lib/invoices.ts`) → Postgres function `record_invoice` locks the product

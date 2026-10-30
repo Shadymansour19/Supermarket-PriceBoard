@@ -150,14 +150,31 @@ To remove admin rights: `delete from public.profiles where id = '<uuid>';`
 
 ### Create / remove a cashier
 
-Same as an admin, with `role = 'cashier'` (as many as you like):
+Admin → menu → **Cashiers**: add one (name, email, password), set a new
+password, or remove one. They sign in at `/admin/login` and land on
+`/cashier/sell`. Removing a cashier deletes their login; their past invoices
+stay (the name is snapshotted on each). This goes through the
+`manage-cashiers` Edge Function (see below) — it needs the service-role key,
+which can't live in the browser.
+
+Fallback without the function (SQL editor): create the user in Supabase →
+Authentication → Users, then
 ```sql
 insert into public.profiles (id, role, display_name)
-values ('<auth-user-uuid>', 'cashier', 'Ahmed');   -- display_name shows on invoices
+values ('<auth-user-uuid>', 'cashier', 'Ahmed');
 ```
-They sign in at `/admin/login` and land on `/cashier/sell`. To stop a
-cashier: `delete from public.profiles where id = '<uuid>';` (their invoices
-stay; the name is snapshotted on each).
+
+### Deploy the `manage-cashiers` function
+
+Deploy it **with JWT verification on** (the default — unlike
+`notify-new-deal`): Supabase dashboard → Edge Functions → new function named
+exactly `manage-cashiers`, paste
+[supabase/functions/manage-cashiers/index.ts](./supabase/functions/manage-cashiers/index.ts),
+or `supabase functions deploy manage-cashiers`. No secrets to add —
+`SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_SERVICE_ROLE_KEY` are
+provided automatically. Check the slug in the dashboard matches the name the
+app calls (`lib/staff.ts`). If the Cashiers page shows "Something went
+wrong", look at Edge Functions → Logs.
 
 ### First-time stock count
 
