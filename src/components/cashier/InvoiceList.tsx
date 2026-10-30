@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { toErrorMessage } from "../../lib/errors";
-import { fetchInvoices, InvoiceError, voidInvoice } from "../../lib/invoices";
+import { fetchInvoices, InvoiceError, SEARCH_LIMIT, searchInvoices, voidInvoice } from "../../lib/invoices";
 import { formatPrice, formatQuantity } from "../../lib/localize";
 import { PrintInvoiceButton } from "./PrintInvoiceButton";
 import type { Invoice } from "../../types/database";
@@ -30,6 +30,11 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
+  // Whole-database results for the current search, or null while there is
+  // no search / the database function isn't available (then the loaded
+  // invoices are filtered locally instead).
+  const [remote, setRemote] = useState<Invoice[] | null>(null);
+  const [searching, setSearching] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const load = useCallback(() => {
@@ -41,6 +46,38 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
   // refreshKey lets a parent trigger a quiet re-read without remounting.
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(load, [load, refreshKey]);
+
+  // Debounced search against the whole database. A stale response (the box
+  // changed meanwhile) is dropped.
+  useEffect(() => {
+    const query = filter.trim();
+    if (!query) {
+      setRemote(null);
+      setSearching(false);
+      return;
+    }
+    let cancelled = false;
+    setSearching(true);
+    const id = setTimeout(() => {
+      searchInvoices(query)
+        .then((results) => {
+          if (!cancelled) setRemote(results);
+        })
+        .catch((err) => {
+          if (!cancelled) {
+            setRemote(null);
+            setError(toErrorMessage(err));
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setSearching(false);
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      clearTimeout(id);
+    };
+  }, [filter, refreshKey]);
 
   async function handleVoid(invoice: Invoice) {
     if (!(await confirmDialog({ message: t("cashier.confirmVoid"), destructive: true }))) return;
@@ -60,7 +97,7 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
   // address, reference, payment method, note, cashier, kind, date, total
   // and every item on it. Several words must ALL match, in any order.
   const terms = normalize(filter).split(/\s+/).filter(Boolean);
-  const shown = terms.length
+  const clientShown = terms.length
     ? invoices?.filter((invoice) => {
         const haystack = normalize(
           [
@@ -86,6 +123,8 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
         return terms.every((term) => haystack.includes(term));
       })
     : invoices;
+  // Whole-database results win when we have them for this search.
+  const shown = terms.length && remote ? remote : clientShown;
 
   return (
     <div className="space-y-2">
@@ -100,7 +139,11 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
           className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
         />
       )}
-      {terms.length > 0 && shown?.length === 0 && (
+      {terms.length > 0 && searching && <p className="text-xs text-neutral-400">{t("cashier.searching")}</p>}
+      {terms.length > 0 && !searching && remote && remote.length >= SEARCH_LIMIT && (
+        <p className="text-xs text-neutral-400">{t("cashier.searchCapped", { count: SEARCH_LIMIT })}</p>
+      )}
+      {terms.length > 0 && !searching && shown?.length === 0 && (
         <p className="py-8 text-center text-sm text-neutral-500">{t("cashier.noInvoiceMatches")}</p>
       )}
       {invoices?.length === 0 && <p className="py-8 text-center text-sm text-neutral-500">{t("cashier.noInvoices")}</p>}

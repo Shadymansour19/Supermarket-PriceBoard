@@ -114,3 +114,35 @@ export async function fetchInvoice(id: string): Promise<Invoice> {
   if (error) throw error;
   return data as Invoice;
 }
+
+/** How many matches one search returns at most (newest first). */
+export const SEARCH_LIMIT = 100;
+
+/**
+ * Searches ALL invoices in the database — every field on an invoice and
+ * every item on it (see `search_invoices` in 0012_search_invoices.sql),
+ * not just the ones already loaded. Returns null when that database
+ * function isn't there (migration not applied yet) so the caller can fall
+ * back to filtering what it has. Lines are fetched in a second query
+ * rather than embedded, since embedding on a function result depends on
+ * how the function is declared.
+ */
+export async function searchInvoices(query: string): Promise<Invoice[] | null> {
+  const { data, error } = await supabase.rpc("search_invoices", { p_query: query, p_limit: SEARCH_LIMIT });
+  if (error) {
+    if (error.code === "PGRST202") return null;
+    throw error;
+  }
+  const rows = (data ?? []) as Omit<Invoice, "invoice_lines">[];
+  if (rows.length === 0) return [];
+  const { data: lines, error: linesError } = await supabase
+    .from("invoice_lines")
+    .select("*")
+    .in("invoice_id", rows.map((row) => row.id));
+  if (linesError) throw linesError;
+  const byInvoice = new Map<string, Invoice["invoice_lines"]>();
+  for (const line of (lines ?? []) as Invoice["invoice_lines"]) {
+    byInvoice.set(line.invoice_id, [...(byInvoice.get(line.invoice_id) ?? []), line]);
+  }
+  return rows.map((row) => ({ ...row, invoice_lines: byInvoice.get(row.id) ?? [] }));
+}
