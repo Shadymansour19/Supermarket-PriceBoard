@@ -5,11 +5,8 @@ import { CheckIcon, MenuIcon } from "../Icons";
 import { CloseIcon } from "../ContactIcons";
 import { useAuth } from "../../context/AuthContext";
 import { useConfirmDialog } from "../../context/ConfirmDialogContext";
-import { listAccounts, removeAccount, signOutAll, signOutCurrent, switchTo } from "../../lib/accounts";
-import type { StaffRole } from "../../types/database";
+import { homePathFor, listAccounts, removeAccount, signOutAll, signOutCurrent, switchTo } from "../../lib/accounts";
 import { AddAccountDialog } from "./AddAccountDialog";
-
-const homeFor = (role: StaffRole) => (role === "admin" ? "/admin/products" : "/cashier/sell");
 
 /** The staff menu: the accounts signed in on this device (tap one to
  * switch, ✕ to forget it, add another), plus "view the public site",
@@ -45,7 +42,7 @@ export function AdminMenu() {
       return;
     }
     setOpen(false);
-    navigate(homeFor(result.role), { replace: true });
+    navigate(homePathFor(result.role), { replace: true });
   }
 
   async function handleRemove(id: string, name: string) {
@@ -62,7 +59,7 @@ export function AdminMenu() {
   async function handleSignOut() {
     setOpen(false);
     const role = await signOutCurrent();
-    navigate(role ? homeFor(role) : "/admin/login", { replace: true });
+    navigate(role ? homePathFor(role) : "/admin/login", { replace: true });
   }
 
   async function handleSignOutAll() {
@@ -193,7 +190,7 @@ export function AdminMenu() {
           onClose={() => setAdding(false)}
           onDone={(result) => {
             setAdding(false);
-            navigate(homeFor(result.role), { replace: true });
+            navigate(homePathFor(result.role), { replace: true });
           }}
         />
       )}

@@ -22,6 +22,9 @@ type SavedAccount = {
   refresh_token: string;
 };
 
+/** The area a staff role works in — where to land after signing in or switching. */
+export const homePathFor = (role: StaffRole) => (role === "admin" ? "/admin/products" : "/cashier/sell");
+
 export type AccountSummary = Pick<SavedAccount, "id" | "email" | "display_name" | "role">;
 
 function read(): SavedAccount[] {

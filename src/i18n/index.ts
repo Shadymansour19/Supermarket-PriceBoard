@@ -221,6 +221,8 @@ const resources = {
       },
       accounts: {
         here: "Accounts on this device",
+        promptTitle: "You're signed in with several accounts",
+        promptBody: "Several staff accounts are signed in on this device. Where would you like to go, or would you rather continue browsing as a customer?",
         add: "Add another account",
         addHint: "Sign in to another staff account. You can switch between them from the menu without typing passwords again.",
         notStaff: "This account doesn't have staff access.",
@@ -634,6 +636,8 @@ const resources = {
       },
       accounts: {
         here: "الحسابات على هذا الجهاز",
+        promptTitle: "أنت مسجل الدخول بعدة حسابات",
+        promptBody: "هناك عدة حسابات موظفين مسجلة الدخول على هذا الجهاز. إلى أين تريد الذهاب، أم تفضل متابعة التصفح كعميل؟",
         add: "إضافة حساب آخر",
         addHint: "سجّل الدخول بحساب موظف آخر. يمكنك التبديل بين الحسابات من القائمة دون إعادة كتابة كلمة المرور.",
         notStaff: "هذا الحساب ليس لديه صلاحية الموظفين.",
