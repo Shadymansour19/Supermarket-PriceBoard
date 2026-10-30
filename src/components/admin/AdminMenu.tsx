@@ -1,19 +1,31 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useNavigate } from "react-router-dom";
-import { MenuIcon } from "../Icons";
+import { CheckIcon, MenuIcon } from "../Icons";
+import { CloseIcon } from "../ContactIcons";
 import { useAuth } from "../../context/AuthContext";
-import { signOutStaff } from "../../lib/auth";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
+import { listAccounts, removeAccount, signOutAll, signOutCurrent, switchTo } from "../../lib/accounts";
+import type { StaffRole } from "../../types/database";
+import { AddAccountDialog } from "./AddAccountDialog";
 
-/** Groups the staff actions that aren't day-to-day navigation — "view the
- * public site", "cashier desk" (admin only) and "sign out" — behind one
- * menu button, instead of each sitting as a separate always-visible
- * top-bar button. */
+const homeFor = (role: StaffRole) => (role === "admin" ? "/admin/products" : "/cashier/sell");
+
+/** The staff menu: the accounts signed in on this device (tap one to
+ * switch, ✕ to forget it, add another), plus "view the public site",
+ * "cashier desk" / "cashiers" (admin only) and sign out. Replaces separate
+ * always-visible top-bar buttons for these non-day-to-day actions. */
 export function AdminMenu() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isAdmin } = useAuth();
+  const confirmDialog = useConfirmDialog();
+  const { isAdmin, session } = useAuth();
   const [open, setOpen] = useState(false);
+  const [adding, setAdding] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
+  // Re-read on every render: the list lives in localStorage, and `session`
+  // (a dependency of this component through useAuth) changes whenever it does.
+  const accounts = listAccounts();
 
   useEffect(() => {
     if (!open) return;
@@ -24,9 +36,38 @@ export function AdminMenu() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [open]);
 
+  async function handleSwitch(id: string) {
+    setNotice(null);
+    const result = await switchTo(id);
+    if (!result.ok) {
+      // The failed account was forgotten and the previous one stays active.
+      setNotice(t("accounts.expired"));
+      return;
+    }
+    setOpen(false);
+    navigate(homeFor(result.role), { replace: true });
+  }
+
+  async function handleRemove(id: string, name: string) {
+    // Our own dialog, never the browser's: removing an account is easy to
+    // hit by accident and means typing its password again.
+    if (!(await confirmDialog({ message: t("accounts.confirmRemove", { name }), destructive: true }))) return;
+    await removeAccount(id);
+    setNotice(null);
+    // Nothing else re-renders on a localStorage change; reopen to refresh.
+    setOpen(false);
+    setTimeout(() => setOpen(true), 0);
+  }
+
   async function handleSignOut() {
     setOpen(false);
-    await signOutStaff();
+    const role = await signOutCurrent();
+    navigate(role ? homeFor(role) : "/admin/login", { replace: true });
+  }
+
+  async function handleSignOutAll() {
+    setOpen(false);
+    await signOutAll();
     navigate("/admin/login", { replace: true });
   }
 
@@ -34,7 +75,10 @@ export function AdminMenu() {
     <div className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => {
+          setNotice(null);
+          setOpen((o) => !o);
+        }}
         aria-expanded={open}
         aria-label={t("admin.menu")}
         className="flex h-9 w-9 items-center justify-center rounded-full text-neutral-600 hover:bg-neutral-100"
@@ -47,7 +91,56 @@ export function AdminMenu() {
           {/* Closes the menu on an outside click without needing a
            * separate document-level listener. */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="font-label absolute top-full z-50 mt-2 w-48 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg end-0">
+          <div className="font-label absolute top-full z-50 mt-2 w-64 overflow-hidden rounded-lg border border-neutral-200 bg-white py-1 shadow-lg end-0">
+            <p className="px-4 pb-1 pt-2 text-xs font-medium uppercase text-neutral-400">{t("accounts.here")}</p>
+            <ul>
+              {accounts.map((account) => {
+                const active = account.id === session?.user.id;
+                const name = account.display_name ?? account.email ?? "—";
+                return (
+                  <li key={account.id} className="flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => handleSwitch(account.id)}
+                      aria-current={active}
+                      className="flex min-w-0 flex-1 items-center gap-2 px-4 py-2 text-start text-sm hover:bg-neutral-100"
+                    >
+                      <span className="min-w-0 flex-1">
+                        <span className="block truncate font-medium text-neutral-900">{name}</span>
+                        <span className="block truncate text-xs text-neutral-500">
+                          {t(account.role === "admin" ? "accounts.roleAdmin" : "accounts.roleCashier")}
+                          {account.display_name && account.email ? ` · ${account.email}` : ""}
+                        </span>
+                      </span>
+                      {active && <CheckIcon className="h-4 w-4 shrink-0 text-emerald-600" />}
+                    </button>
+                    {!active && (
+                      <button
+                        type="button"
+                        onClick={() => handleRemove(account.id, name)}
+                        title={t("accounts.remove")}
+                        aria-label={`${t("accounts.remove")}: ${name}`}
+                        className="me-2 shrink-0 rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-600"
+                      >
+                        <CloseIcon className="h-4 w-4" />
+                      </button>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+            {notice && <p className="px-4 py-1 text-xs text-red-600">{notice}</p>}
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setAdding(true);
+              }}
+              className="block w-full px-4 py-2 text-start text-sm text-emerald-700 hover:bg-neutral-100"
+            >
+              + {t("accounts.add")}
+            </button>
+            <div className="my-1 border-t border-neutral-100" />
             <a
               href="/"
               target="_blank"
@@ -82,8 +175,27 @@ export function AdminMenu() {
             >
               {t("admin.signOut")}
             </button>
+            {accounts.length > 1 && (
+              <button
+                type="button"
+                onClick={handleSignOutAll}
+                className="block w-full px-4 py-2 text-start text-sm text-red-600 hover:bg-neutral-100"
+              >
+                {t("accounts.signOutAll")}
+              </button>
+            )}
           </div>
         </>
+      )}
+
+      {adding && (
+        <AddAccountDialog
+          onClose={() => setAdding(false)}
+          onDone={(result) => {
+            setAdding(false);
+            navigate(homeFor(result.role), { replace: true });
+          }}
+        />
       )}
     </div>
   );

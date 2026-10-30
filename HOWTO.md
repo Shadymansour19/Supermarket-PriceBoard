@@ -176,6 +176,18 @@ provided automatically. Check the slug in the dashboard matches the name the
 app calls (`lib/staff.ts`). If the Cashiers page shows "Something went
 wrong", look at Edge Functions → Logs.
 
+### Receipts & switching accounts
+
+- **Print a receipt:** Cashier → Invoices → open one → pick paper (80 mm
+  roll / 58 mm roll / A4) → Print. Install the thermal printer's driver on
+  the computer and choose it in the print dialog; set margins to "None" /
+  paper size to the roll width if the printer's driver asks. Store name,
+  address and phone come from `src/config.ts` and `app.name` in i18n; the
+  logo is `public/logo.jpg`.
+- **Switch accounts:** staff menu → tap another saved account, or "Add
+  another account". On a shared phone, finish the day with "Sign out of all
+  accounts".
+
 ### First-time stock count
 
 Existing products start at quantity 0 and can't be sold at the cashier desk

@@ -62,7 +62,7 @@ src/
                       useDocumentDirection, useScrollDirection
   lib/                Non-UI logic. Every Supabase query lives here.
 supabase/
-  migrations/         0001…0009 SQL files = the database schema, in order
+  migrations/         0001…0010 SQL files = the database schema, in order
   seed.sql            Sample data for development only
   functions/notify-new-deal/   Edge Function that sends push notifications
   functions/manage-cashiers/   Edge Function: admin creates/removes cashier logins
@@ -133,6 +133,16 @@ picked by `localizedField()` in `lib/localize.ts`. Prices go through
 for admins and `/cashier/*` for cashiers and admins; login redirects each
 role to its own area. `StaffSessionPrompt` (public layout) asks a signed-in
 staff member whether to go to their area — same dialog for both roles.
+
+**Several accounts per device:** `lib/accounts.ts` keeps the signed-in staff
+accounts' session tokens in `localStorage` (`hamada_accounts`) and swaps the
+Supabase session on switch; `AdminMenu` is the UI (switch / add / remove /
+sign out / sign out of all). `AuthContext` re-derives the role from every
+auth event (newest lookup wins), so other tabs follow a switch on their own.
+
+**Printing:** `lib/receipt.ts` builds a standalone receipt HTML page and
+prints it from a hidden iframe (`PrintInvoiceButton`); paper size is 80/58 mm
+or A4.
 
 **Cashier accounts:** `AdminStaffPage` → `lib/staff.ts` →
 `supabase.functions.invoke("manage-cashiers")`. The function is the one place

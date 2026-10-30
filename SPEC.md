@@ -271,6 +271,32 @@ visible. Newest first.
     key stays server-side).
   - Not built (deliberately): shifts/cash-drawer count, returns beyond
     admin void, a manager tier, barcode scanning.
+- **2026-10-30 — Printable receipts + invoice numbers.** "Print" on every
+  invoice (and right after a sale/receipt) opens the browser print dialog
+  from a hidden iframe with its own stylesheet: works with any installed
+  printer, thermal included. Paper: 80 mm / 58 mm roll or A4 (remembered per
+  device). Header: logo, store name, address, phone (from `config.ts`);
+  then number, date, cashier, lines, total, note, VOID stamp, thank-you.
+  English or Arabic (RTL) by the UI language. Sequential `invoices.number`
+  is migration `0010` (the app falls back to a short id until it's applied).
+  Not tax-compliant e-receipts (Egypt's ETA e-receipt is a separate
+  integration) and no QR/barcode on the receipt yet.
+- **2026-10-30 — Multiple signed-in staff accounts per device + switching**
+  (ported from the `timesheet` app's design). Saved accounts live in
+  `localStorage` `hamada_accounts` (id, email, name, role, session tokens —
+  never passwords); the Supabase client holds one session, so a switch is
+  `setSession`. Staff menu: switch (✓ marks the active one), add account (a
+  wrong password or non-staff account leaves the current session alone),
+  remove from device (confirm dialog), sign out (this device's session only
+  — `scope: 'local'`; before, the global default also signed the person out
+  everywhere — then falls back to another saved account), sign out of all.
+  A dead saved account (revoked/expired/removed) is dropped on the first
+  failed switch and the previous one stays active. `AuthContext` ignores
+  stale role lookups (only the newest wins), re-checks the login against the
+  server when the tab regains focus (a revoked login ends right away), and
+  no longer flashes "Loading…" on same-user token refreshes. Tokens are in
+  the same storage the client already uses; on a shared phone use "Sign out
+  of all accounts".
 
 ## Data model (Postgres / Supabase)
 
