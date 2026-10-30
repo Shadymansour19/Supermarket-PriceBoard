@@ -6,7 +6,7 @@ export function CashierInvoicesPage() {
   return (
     <div className="space-y-4">
       <h1 className="font-heading text-lg font-semibold text-neutral-900">{t("cashier.invoices")}</h1>
-      <InvoiceList />
+      <InvoiceList limit={300} />
     </div>
   );
 }

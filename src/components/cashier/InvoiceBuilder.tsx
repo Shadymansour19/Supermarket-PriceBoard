@@ -6,12 +6,13 @@ import { QuantityStepper } from "../QuantityStepper";
 import { PrintInvoiceButton } from "./PrintInvoiceButton";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
 import { toErrorMessage } from "../../lib/errors";
-import { InvoiceError, recordInvoice } from "../../lib/invoices";
+import { useConfirmDialog } from "../../context/ConfirmDialogContext";
+import { EMPTY_DETAILS, InvoiceError, recordInvoice, type InvoiceDetails } from "../../lib/invoices";
 import { formatPrice, formatQuantity, localizedField, shouldShowUnit } from "../../lib/localize";
 import { unitPriceFor } from "../../lib/pricing";
 import { fetchProducts } from "../../lib/products";
 import { maxQuantity, minQuantity } from "../../lib/stock";
-import type { InvoiceKind, LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
+import { PAYMENT_METHODS, type InvoiceKind, type LimitedTimeDiscount, type Product, type QuantityDiscount } from "../../types/database";
 
 type Line = {
   product: Product;
@@ -31,13 +32,16 @@ type Line = {
 export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
   const { t, i18n } = useTranslation();
   const isSale = kind === "sale";
+  const confirmDialog = useConfirmDialog();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
   // What the empty search box shows instead of a blank page: the catalog,
   // so there's always something to tap (null while loading).
   const [browse, setBrowse] = useState<Product[] | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
-  const [note, setNote] = useState("");
+  const [details, setDetails] = useState<InvoiceDetails>(EMPTY_DETAILS);
+  const setDetail = <K extends keyof InvoiceDetails>(key: K, value: InvoiceDetails[K]) =>
+    setDetails((prev) => ({ ...prev, [key]: value }));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [recorded, setRecorded] = useState<{ id: string; total: number } | null>(null);
@@ -129,6 +133,16 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
   const total = lines.reduce((sum, line) => sum + Math.round(line.quantity * lineUnitPrice(line) * 100) / 100, 0);
   const missingCost = !isSale && lines.some((line) => line.cost.trim() === "" || Number(line.cost) < 0);
 
+  // Throws the whole draft away (items and details) — asks first, since a
+  // full basket is easy to wipe by accident next to the main button.
+  async function handleCancel() {
+    if (!(await confirmDialog({ message: t(isSale ? "cashier.confirmCancelSale" : "cashier.confirmCancelPurchase"), destructive: true }))) return;
+    setLines([]);
+    setDetails(EMPTY_DETAILS);
+    setError(null);
+    setRecorded(null);
+  }
+
   async function handleSubmit() {
     setSubmitting(true);
     setError(null);
@@ -140,11 +154,11 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
           quantity: line.quantity,
           ...(isSale ? {} : { unit_price: Number(line.cost) }),
         })),
-        note,
+        details,
       );
       setRecorded(result);
       setLines([]);
-      setNote("");
+      setDetails(EMPTY_DETAILS);
     } catch (err) {
       if (err instanceof InvoiceError) {
         const product = lines.find((line) => line.product.id === err.productId)?.product;
@@ -304,27 +318,94 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
             })}
           </ul>
 
-          <input
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder={t(isSale ? "cashier.saleNote" : "cashier.purchaseNote")}
-            aria-label={t(isSale ? "cashier.saleNote" : "cashier.purchaseNote")}
-            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
-          />
+          {/* Optional: a walk-in customer needs none of this. Collapsed by
+           * default so the fast path (tap items, complete) stays short. */}
+          <details className="rounded-xl border border-neutral-200 bg-white" open={Object.values(details).some((v) => v !== "")}>
+            <summary className="cursor-pointer px-4 py-3 text-sm font-medium text-neutral-700">
+              {t(isSale ? "cashier.customerDetails" : "cashier.supplierDetails")}
+              <span className="font-normal text-neutral-400"> · {t("cashier.optional")}</span>
+            </summary>
+            <div className="grid gap-3 border-t border-neutral-100 p-4 sm:grid-cols-2">
+              <input
+                value={details.party_name}
+                onChange={(e) => setDetail("party_name", e.target.value)}
+                maxLength={120}
+                placeholder={t(isSale ? "cashier.customerName" : "cashier.supplierName")}
+                aria-label={t(isSale ? "cashier.customerName" : "cashier.supplierName")}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              />
+              <input
+                type="tel"
+                inputMode="tel"
+                value={details.party_phone}
+                onChange={(e) => setDetail("party_phone", e.target.value)}
+                maxLength={40}
+                placeholder={t("cashier.phone")}
+                aria-label={t("cashier.phone")}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              />
+              <input
+                value={details.party_address}
+                onChange={(e) => setDetail("party_address", e.target.value)}
+                maxLength={250}
+                placeholder={t("cashier.address")}
+                aria-label={t("cashier.address")}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm sm:col-span-2"
+              />
+              <input
+                value={details.reference}
+                onChange={(e) => setDetail("reference", e.target.value)}
+                maxLength={80}
+                placeholder={t(isSale ? "cashier.saleReference" : "cashier.purchaseReference")}
+                aria-label={t(isSale ? "cashier.saleReference" : "cashier.purchaseReference")}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+              />
+              <select
+                value={details.payment_method}
+                onChange={(e) => setDetail("payment_method", e.target.value as InvoiceDetails["payment_method"])}
+                aria-label={t("cashier.paymentMethod")}
+                className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">{t("cashier.paymentMethod")}</option>
+                {PAYMENT_METHODS.map((method) => (
+                  <option key={method} value={method}>
+                    {t(`cashier.payment.${method}`)}
+                  </option>
+                ))}
+              </select>
+              <input
+                value={details.note}
+                onChange={(e) => setDetail("note", e.target.value)}
+                placeholder={t("cashier.note")}
+                aria-label={t("cashier.note")}
+                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm sm:col-span-2"
+              />
+            </div>
+          </details>
 
           <div className="flex items-center justify-between rounded-xl border border-neutral-200 bg-white p-4">
             <span className="font-heading text-base font-semibold text-neutral-900">{t("cart.total")}</span>
             <span className="font-label text-xl font-bold text-emerald-700">{formatPrice(total, i18n.language)}</span>
           </div>
 
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={submitting || missingCost}
-            className="font-label w-full rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
-          >
-            {t(isSale ? "cashier.completeSale" : "cashier.completePurchase")}
-          </button>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={handleCancel}
+              disabled={submitting}
+              className="font-label rounded-lg border border-neutral-300 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 hover:bg-neutral-100 disabled:opacity-50"
+            >
+              {t("common.cancel")}
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={submitting || missingCost}
+              className="font-label flex-1 rounded-lg bg-emerald-600 px-4 py-3 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-50"
+            >
+              {t(isSale ? "cashier.completeSale" : "cashier.completePurchase")}
+            </button>
+          </div>
         </>
       )}
     </div>

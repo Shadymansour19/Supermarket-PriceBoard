@@ -63,6 +63,10 @@ export type Profile = {
 
 export type InvoiceKind = "sale" | "purchase";
 
+/** How an invoice was paid — optional, see 0011_invoice_details.sql. */
+export const PAYMENT_METHODS = ["cash", "card", "wallet", "credit"] as const;
+export type PaymentMethod = (typeof PAYMENT_METHODS)[number];
+
 /** One line of an invoice. `unit_price` is the selling price for a sale and
  * the unit cost for a purchase. */
 export type InvoiceLine = {
@@ -86,6 +90,15 @@ export type Invoice = {
   note: string | null;
   created_by: string | null;
   cashier_name: string | null;
+  /** Optional details (0011): the customer on a sale, the supplier on a
+   * purchase. Optional in the type so the app still works before that
+   * migration is applied. */
+  party_name?: string | null;
+  party_phone?: string | null;
+  party_address?: string | null;
+  /** e.g. the supplier's invoice number, or a delivery order reference. */
+  reference?: string | null;
+  payment_method?: PaymentMethod | null;
   created_at: string;
   /** Set when an admin voided it — it stays on record but no longer counts. */
   voided_at: string | null;

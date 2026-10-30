@@ -1,5 +1,26 @@
 import { supabase } from "./supabase";
-import type { Invoice, InvoiceKind } from "../types/database";
+import type { Invoice, InvoiceKind, PaymentMethod } from "../types/database";
+
+/** Everything optional on an invoice: a free note, plus who it was for
+ * (customer on a sale, supplier on a purchase), a reference such as the
+ * supplier's invoice number, and how it was paid. Blank means "not given". */
+export type InvoiceDetails = {
+  note: string;
+  party_name: string;
+  party_phone: string;
+  party_address: string;
+  reference: string;
+  payment_method: PaymentMethod | "";
+};
+
+export const EMPTY_DETAILS: InvoiceDetails = {
+  note: "",
+  party_name: "",
+  party_phone: "",
+  party_address: "",
+  reference: "",
+  payment_method: "",
+};
 
 /** `unit_price` only matters for a purchase (the supplier's unit cost); for
  * a sale the server picks the price itself and ignores it. */
@@ -8,7 +29,7 @@ export type InvoiceLineInput = { product_id: string; quantity: number; unit_pric
 /** Thrown by `recordInvoice` for the failures a cashier can fix at the
  * desk — carries which product tripped it so the UI can name it. */
 export class InvoiceError extends Error {
-  code: "insufficient_stock" | "fraction_not_allowed" | "product_not_found" | "not_authorized";
+  code: "insufficient_stock" | "fraction_not_allowed" | "product_not_found" | "not_authorized" | "details_unavailable";
   productId?: string;
 
   constructor(code: InvoiceError["code"], productId?: string) {
@@ -30,10 +51,22 @@ export class InvoiceError extends Error {
 export async function recordInvoice(
   kind: InvoiceKind,
   lines: InvoiceLineInput[],
-  note: string,
+  details: InvoiceDetails = EMPTY_DETAILS,
 ): Promise<{ id: string; total: number }> {
-  const { data, error } = await supabase.rpc("record_invoice", { p_kind: kind, p_lines: lines, p_note: note || null });
+  const { note, ...party } = details;
+  // The extra argument is only sent when something was filled in, so a
+  // plain invoice behaves exactly as before.
+  const hasParty = Object.values(party).some((value) => value.trim() !== "");
+  const { data, error } = await supabase.rpc("record_invoice", {
+    p_kind: kind,
+    p_lines: lines,
+    p_note: note.trim() || null,
+    ...(hasParty ? { p_details: party } : {}),
+  });
   if (error) {
+    // PostgREST can't find the 4-argument function: the database hasn't had
+    // 0011_invoice_details.sql applied yet, so details can't be stored.
+    if (hasParty && error.code === "PGRST202") throw new InvoiceError("details_unavailable");
     const [code, productId] = error.message.split(":");
     if (
       code === "insufficient_stock" ||

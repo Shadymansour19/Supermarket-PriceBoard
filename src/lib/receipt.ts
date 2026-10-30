@@ -30,6 +30,13 @@ export type ReceiptLabels = {
   invoiceNo: string;
   date: string;
   cashier: string;
+  customer: string;
+  supplier: string;
+  phone: string;
+  address: string;
+  reference: string;
+  payment: string;
+  paymentMethods: Record<string, string>;
   item: string;
   total: string;
   voided: string;
@@ -94,6 +101,11 @@ export function buildReceiptHtml(invoice: Invoice, labels: ReceiptLabels, lang: 
   <div class="row muted"><span>${escapeHtml(labels.invoiceNo)}</span><span dir="ltr">#${number}</span></div>
   <div class="row muted"><span>${escapeHtml(labels.date)}</span><span>${new Date(invoice.created_at).toLocaleString(lang)}</span></div>
   ${invoice.cashier_name ? `<div class="row muted"><span>${escapeHtml(labels.cashier)}</span><span>${escapeHtml(invoice.cashier_name)}</span></div>` : ""}
+  ${invoice.reference ? `<div class="row muted"><span>${escapeHtml(labels.reference)}</span><span dir="ltr">${escapeHtml(invoice.reference)}</span></div>` : ""}
+  ${invoice.payment_method ? `<div class="row muted"><span>${escapeHtml(labels.payment)}</span><span>${escapeHtml(labels.paymentMethods[invoice.payment_method] ?? invoice.payment_method)}</span></div>` : ""}
+  ${invoice.party_name ? `<div class="row muted"><span>${escapeHtml(invoice.kind === "sale" ? labels.customer : labels.supplier)}</span><span>${escapeHtml(invoice.party_name)}</span></div>` : ""}
+  ${invoice.party_phone ? `<div class="row muted"><span>${escapeHtml(labels.phone)}</span><span dir="ltr">${escapeHtml(invoice.party_phone)}</span></div>` : ""}
+  ${invoice.party_address ? `<div class="row muted"><span>${escapeHtml(labels.address)}</span><span>${escapeHtml(invoice.party_address)}</span></div>` : ""}
   ${invoice.voided_at ? `<div class="void">${escapeHtml(labels.voided)}</div>` : ""}
   <hr>
   ${lines}
