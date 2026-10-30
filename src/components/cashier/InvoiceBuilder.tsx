@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 import { CloseIcon } from "../ContactIcons";
 import { QuantityStepper } from "../QuantityStepper";
 import { PrintInvoiceButton } from "./PrintInvoiceButton";
@@ -32,6 +33,9 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
   const isSale = kind === "sale";
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<Product[]>([]);
+  // What the empty search box shows instead of a blank page: the catalog,
+  // so there's always something to tap (null while loading).
+  const [browse, setBrowse] = useState<Product[] | null>(null);
   const [lines, setLines] = useState<Line[]>([]);
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +52,18 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
         setQuantityDealMap(new Map(quantityDeals.map(({ product, discount }) => [product.id, discount])));
       })
       .catch(() => {});
+  }, [isSale]);
+
+  useEffect(() => {
+    fetchProducts({})
+      .then((products) => {
+        // For a sale, what can actually be sold comes first.
+        const sorted = isSale
+          ? [...products].sort((a, b) => Number(b.stock_quantity > 0) - Number(a.stock_quantity > 0))
+          : products;
+        setBrowse(sorted);
+      })
+      .catch(() => setBrowse([]));
   }, [isSale]);
 
   // Debounced server-side search — the catalog can be large, and an empty
@@ -77,7 +93,14 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
     setError(null);
     setLines((prev) => {
       const existing = prev.find((line) => line.product.id === product.id);
-      if (!existing) return [...prev, { product, quantity: minQuantity(product), cost: "" }];
+      // Starts at 1 (a kilo, a liter, one piece) — not the smallest allowed
+      // fraction, which would have to be retyped on every line — or at what's
+      // left if a sale has less than 1 on hand.
+      if (!existing) {
+        const max = isSale ? maxQuantity(product) : undefined;
+        const start = max === undefined ? 1 : Math.min(1, max);
+        return [...prev, { product, quantity: Math.max(start, minQuantity(product)), cost: "" }];
+      }
       return prev.map((line) => {
         if (line.product.id !== product.id) return line;
         const max = isSale ? maxQuantity(product) : undefined;
@@ -136,8 +159,44 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
     }
   }
 
+  function renderProductButton(product: Product) {
+    const blocked = isSale && product.stock_quantity <= 0;
+    return (
+      <li key={product.id}>
+        <button
+          type="button"
+          disabled={blocked}
+          onClick={() => addProduct(product)}
+          className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-sm hover:bg-neutral-50 disabled:opacity-50"
+        >
+          <span className="min-w-0 truncate text-neutral-900">
+            {localizedField(product, "name", i18n.language)}
+            {product.size && <span className="text-neutral-400"> ({product.size})</span>}
+          </span>
+          <span className="font-label shrink-0 text-xs text-neutral-500">
+            {blocked
+              ? t("product.outOfStock")
+              : t("cashier.onHand", { quantity: formatQuantity(product.stock_quantity, i18n.language) })}
+          </span>
+        </button>
+      </li>
+    );
+  }
+
+  // A sale is impossible while nothing has stock — say what to do instead
+  // of leaving the cashier with a wall of greyed-out rows.
+  const nothingInStock = isSale && browse !== null && browse.length > 0 && browse.every((p) => p.stock_quantity <= 0);
+
   return (
     <div className="space-y-4">
+      {nothingInStock && (
+        <div role="note" className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">
+          {t("cashier.nothingInStock")}{" "}
+          <Link to="/cashier/receive" className="font-semibold underline">
+            {t("cashier.goReceive")}
+          </Link>
+        </div>
+      )}
       <div className="relative">
         <input
           type="search"
@@ -149,29 +208,7 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
         />
         {results.length > 0 && (
           <ul className="absolute inset-x-0 top-full z-20 mt-1 max-h-72 overflow-y-auto rounded-lg border border-neutral-200 bg-white shadow-lg">
-            {results.map((product) => {
-              const blocked = isSale && product.stock_quantity <= 0;
-              return (
-                <li key={product.id}>
-                  <button
-                    type="button"
-                    disabled={blocked}
-                    onClick={() => addProduct(product)}
-                    className="flex w-full items-center justify-between gap-3 px-3 py-2 text-start text-sm hover:bg-neutral-50 disabled:opacity-50"
-                  >
-                    <span className="min-w-0 truncate text-neutral-900">
-                      {localizedField(product, "name", i18n.language)}
-                      {product.size && <span className="text-neutral-400"> ({product.size})</span>}
-                    </span>
-                    <span className="font-label shrink-0 text-xs text-neutral-500">
-                      {blocked
-                        ? t("product.outOfStock")
-                        : t("cashier.onHand", { quantity: formatQuantity(product.stock_quantity, i18n.language) })}
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
+            {results.map(renderProductButton)}
           </ul>
         )}
       </div>
@@ -196,7 +233,18 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
       )}
 
       {lines.length === 0 ? (
-        <p className="py-10 text-center text-sm text-neutral-500">{t(isSale ? "cashier.emptySale" : "cashier.emptyPurchase")}</p>
+        <div className="space-y-2">
+          <p className="text-center text-sm text-neutral-500">{t(isSale ? "cashier.emptySale" : "cashier.emptyPurchase")}</p>
+          {browse === null && <p className="text-center text-sm text-neutral-400">{t("common.loading")}</p>}
+          {browse !== null && browse.length > 0 && !query.trim() && (
+            <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
+              {browse.slice(0, 30).map(renderProductButton)}
+            </ul>
+          )}
+          {browse !== null && browse.length > 30 && !query.trim() && (
+            <p className="text-center text-xs text-neutral-400">{t("cashier.searchForMore")}</p>
+          )}
+        </div>
       ) : (
         <>
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
