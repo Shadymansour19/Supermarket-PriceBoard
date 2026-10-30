@@ -4,19 +4,19 @@ import { Navigate } from "react-router-dom";
 import { DeveloperCredit } from "../../components/DeveloperCredit";
 import { EyeIcon } from "../../components/EyeIcon";
 import { useAuth } from "../../context/AuthContext";
-import { signInAdmin } from "../../lib/auth";
+import { signInStaff } from "../../lib/auth";
 
 export function LoginPage() {
   const { t } = useTranslation();
-  const { session, isAdmin, loading } = useAuth();
+  const { session, role, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
-  if (!loading && session && isAdmin) {
-    return <Navigate to="/admin/products" replace />;
+  if (!loading && session && role) {
+    return <Navigate to={role === "admin" ? "/admin/products" : "/cashier/sell"} replace />;
   }
 
   async function handleSubmit(e: FormEvent) {
@@ -24,7 +24,7 @@ export function LoginPage() {
     setSubmitting(true);
     setError(false);
     try {
-      await signInAdmin(email, password);
+      await signInStaff(email, password);
     } catch {
       setError(true);
     } finally {
@@ -74,8 +74,8 @@ export function LoginPage() {
             </div>
           </div>
           {error && <p className="text-sm text-red-600">{t("admin.signInFailed")}</p>}
-          {!loading && session && !isAdmin && (
-            <p className="text-sm text-red-600">{t("admin.notAdmin")}</p>
+          {!loading && session && !role && (
+            <p className="text-sm text-red-600">{t("admin.notStaff")}</p>
           )}
           <button
             type="submit"

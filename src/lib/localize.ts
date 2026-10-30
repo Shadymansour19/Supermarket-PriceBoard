@@ -33,3 +33,15 @@ export function formatPrice(price: number, lang: string): string {
 export function shouldShowUnit(unit: string): boolean {
   return unit !== "each";
 }
+
+const quantityFormatters: Record<string, Intl.NumberFormat> = {};
+
+/** A stock/cart quantity — whole numbers stay whole, fractions show up to
+ * 3 decimals (the precision the database keeps), never trailing zeros. */
+export function formatQuantity(quantity: number, lang: string): string {
+  const locale = lang === "ar" ? "ar" : "en";
+  if (!quantityFormatters[locale]) {
+    quantityFormatters[locale] = new Intl.NumberFormat(locale, { maximumFractionDigits: 3 });
+  }
+  return quantityFormatters[locale].format(quantity);
+}

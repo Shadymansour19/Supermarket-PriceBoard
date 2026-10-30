@@ -3,10 +3,12 @@ import { useTranslation } from "react-i18next";
 import { CartIcon, CheckIcon } from "./Icons";
 import { useCart } from "../context/CartContext";
 import { flyToCart } from "../lib/cartFlyAnimation";
+import { roundQuantity } from "../lib/stock";
 
 /**
- * Quick add-to-cart button for the product card grid — always adds exactly
- * one unit; adjusting quantity is a cart-page thing (QuantityStepper), not
+ * Quick add-to-cart button for the product card grid — adds one unit (or
+ * whatever is left under `maxQuantity`, the stock on hand, if less);
+ * adjusting quantity is a cart-page thing (QuantityStepper), not
  * a catalog-browsing one. `stopNavigation` is needed since the whole card
  * is a `<Link>` — without it, tapping the button would also navigate to
  * the product page.
@@ -14,16 +16,19 @@ import { flyToCart } from "../lib/cartFlyAnimation";
 export function AddToCartButton({
   productId,
   imageUrl,
+  maxQuantity,
   stopNavigation = false,
   className = "",
 }: {
   productId: string;
   imageUrl: string | null;
+  /** Stock on hand, when tracked — the cart can't go past it. */
+  maxQuantity?: number;
   stopNavigation?: boolean;
   className?: string;
 }) {
   const { t } = useTranslation();
-  const { addToCart } = useCart();
+  const { addToCart, quantityOf } = useCart();
   const [justAdded, setJustAdded] = useState(false);
 
   function handleAdd(e: React.MouseEvent<HTMLButtonElement>) {
@@ -31,9 +36,11 @@ export function AddToCartButton({
       e.preventDefault();
       e.stopPropagation();
     }
+    const amount = maxQuantity === undefined ? 1 : Math.min(1, roundQuantity(maxQuantity - quantityOf(productId)));
+    if (amount <= 0) return;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);
-    flyToCart(e.currentTarget.getBoundingClientRect(), imageUrl, () => addToCart(productId, 1));
+    flyToCart(e.currentTarget.getBoundingClientRect(), imageUrl, () => addToCart(productId, amount));
   }
 
   return (

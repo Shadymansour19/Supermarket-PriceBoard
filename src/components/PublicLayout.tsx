@@ -1,6 +1,6 @@
 import { useTranslation } from "react-i18next";
 import { Link, Outlet } from "react-router-dom";
-import { AdminSessionPrompt } from "./AdminSessionPrompt";
+import { StaffSessionPrompt } from "./StaffSessionPrompt";
 import { BottomNavBar } from "./BottomNavBar";
 import { ContactWidget } from "./ContactWidget";
 import { DeveloperCredit } from "./DeveloperCredit";
@@ -72,7 +72,7 @@ export function PublicLayout() {
       <div className="pb-mobile-fab-safe md:hidden" />
       <ContactWidget />
       <BottomNavBar />
-      <AdminSessionPrompt />
+      <StaffSessionPrompt />
     </div>
   );
 }

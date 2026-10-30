@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { MenuIcon } from "../Icons";
-import { signOutAdmin } from "../../lib/auth";
+import { useAuth } from "../../context/AuthContext";
+import { signOutStaff } from "../../lib/auth";
 
-/** Groups the two admin actions that aren't day-to-day navigation — "view
- * the public site" and "sign out" — behind one menu button, instead of
- * both sitting as separate always-visible top-bar buttons. */
+/** Groups the staff actions that aren't day-to-day navigation — "view the
+ * public site", "cashier desk" (admin only) and "sign out" — behind one
+ * menu button, instead of each sitting as a separate always-visible
+ * top-bar button. */
 export function AdminMenu() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { isAdmin } = useAuth();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -23,7 +26,7 @@ export function AdminMenu() {
 
   async function handleSignOut() {
     setOpen(false);
-    await signOutAdmin();
+    await signOutStaff();
     navigate("/admin/login", { replace: true });
   }
 
@@ -54,6 +57,15 @@ export function AdminMenu() {
             >
               {t("admin.viewSite")}
             </a>
+            {isAdmin && (
+              <Link
+                to="/cashier"
+                onClick={() => setOpen(false)}
+                className="block px-4 py-2 text-sm text-neutral-700 hover:bg-neutral-100"
+              >
+                {t("cashier.desk")}
+              </Link>
+            )}
             <button
               type="button"
               onClick={handleSignOut}

@@ -11,34 +11,13 @@ import { CONTACT } from "../../config";
 import { recordOrderLineItems } from "../../lib/bestSellers";
 import { confirmAfterReturn } from "../../lib/confirmAfterReturn";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
-import { formatPrice, localizedField } from "../../lib/localize";
+import { formatPrice, formatQuantity, localizedField } from "../../lib/localize";
+import { unitPriceFor } from "../../lib/pricing";
+import { maxQuantity } from "../../lib/stock";
 import { recordOrder } from "../../lib/orderHistory";
 import { fetchProductsByIds } from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../../types/database";
-
-/** The cheapest price this item can actually be bought at, at its current
- * cart quantity — unlike the catalog card (which only ever headlines one
- * kind of deal, for a clean, uncluttered display), the cart is where the
- * customer's money is on the line, so it compares every offer that
- * currently applies (regular price, an active limited-time discount, the
- * best quantity-discount tier this quantity qualifies for) and picks
- * whichever is actually lowest, instead of assuming one type always
- * beats the other. */
-function unitPriceFor(
-  product: Product,
-  quantity: number,
-  limitedTimeDiscount: LimitedTimeDiscount | undefined,
-  quantityDiscount: QuantityDiscount | undefined,
-): number {
-  const candidates = [product.price];
-  if (limitedTimeDiscount) candidates.push(limitedTimeDiscount.new_price);
-  const bestTier = quantityDiscount?.tiers
-    .filter((tier) => tier.min_quantity <= quantity)
-    .sort((a, b) => b.min_quantity - a.min_quantity)[0];
-  if (bestTier) candidates.push(bestTier.price);
-  return Math.min(...candidates);
-}
 
 export function CartPage() {
   const { t, i18n } = useTranslation();
@@ -206,10 +185,15 @@ export function CartPage() {
                     </div>
                     <p className="font-label text-sm text-neutral-600">
                       {formatPrice(unitPrice, i18n.language)}
-                      <span className="text-neutral-400"> × {quantity} = </span>
+                      <span className="text-neutral-400"> × {formatQuantity(quantity, i18n.language)} = </span>
                       <span className="font-semibold text-emerald-700">{formatPrice(subtotal, i18n.language)}</span>
                     </p>
-                    <QuantityStepper value={quantity} onChange={(q) => setItemQuantity(product.id, q)} />
+                    <QuantityStepper
+                      value={quantity}
+                      onChange={(q) => setItemQuantity(product.id, q)}
+                      allowFraction={product.allow_fraction}
+                      max={maxQuantity(product)}
+                    />
                   </div>
                 </li>
               );

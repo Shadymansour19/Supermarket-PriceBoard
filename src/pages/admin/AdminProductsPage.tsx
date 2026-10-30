@@ -9,9 +9,16 @@ import type { AdSpec } from "../../lib/adImage";
 import { fetchCategoryTree } from "../../lib/categories";
 import { toErrorMessage } from "../../lib/errors";
 import { deleteProductImage, uploadProductImage } from "../../lib/imageUpload";
-import { formatPrice, shouldShowUnit } from "../../lib/localize";
+import { formatPrice, formatQuantity, shouldShowUnit } from "../../lib/localize";
 import { addProductImage, deleteProductImageRow, fetchProductImages } from "../../lib/productImages";
-import { createProduct, deleteProduct, fetchProducts, updateProduct } from "../../lib/products";
+import {
+  createProduct,
+  deleteProduct,
+  fetchProductCost,
+  fetchProducts,
+  saveProductCost,
+  updateProduct,
+} from "../../lib/products";
 import { productImageUrl } from "../../lib/supabase";
 import type { CategoryWithChildren, Product, ProductImage } from "../../types/database";
 
@@ -90,6 +97,7 @@ export function AdminProductsPage() {
   // Fetched when entering edit mode (a new product can't have any yet) —
   // see handleEditClick.
   const [editExtraImages, setEditExtraImages] = useState<ProductImage[]>([]);
+  const [editCostPrice, setEditCostPrice] = useState<number | null>(null);
   const [discountsProduct, setDiscountsProduct] = useState<Product | null>(null);
   const [newProductAd, setNewProductAd] = useState<Product | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
@@ -124,8 +132,12 @@ export function AdminProductsPage() {
   }, [reload]);
 
   async function handleEditClick(product: Product) {
-    const images = await fetchProductImages(product.id).catch(() => []);
+    const [images, cost] = await Promise.all([
+      fetchProductImages(product.id).catch(() => []),
+      fetchProductCost(product.id).catch(() => null),
+    ]);
     setEditExtraImages(images);
+    setEditCostPrice(cost);
     setFormMode({ kind: "edit", product });
   }
 
@@ -147,6 +159,8 @@ export function AdminProductsPage() {
       size: values.size || null,
       category_id: values.category_id,
       in_stock: values.in_stock,
+      stock_quantity: Number(values.stock_quantity),
+      allow_fraction: values.allow_fraction,
       is_active: values.is_active,
     };
     const previousImagePath = formMode?.kind === "edit" ? formMode.product.image_path : null;
@@ -158,6 +172,11 @@ export function AdminProductsPage() {
       } else {
         product = await createProduct(payload);
       }
+
+      // Only touched when it changed — a blank field clears the cost.
+      const newCost = values.cost_price.trim() === "" ? null : Number(values.cost_price);
+      const previousCost = formMode?.kind === "edit" ? editCostPrice : null;
+      if (newCost !== previousCost) await saveProductCost(product.id, newCost);
 
       if (imageFile) {
         const path = await uploadProductImage(imageFile, product.id);
@@ -247,6 +266,7 @@ export function AdminProductsPage() {
             categoryTree={categoryTree}
             initial={formMode.kind === "edit" ? formMode.product : undefined}
             initialExtraImages={formMode.kind === "edit" ? editExtraImages : undefined}
+            initialCostPrice={formMode.kind === "edit" ? editCostPrice : undefined}
             onSubmit={handleSubmit}
             onCancel={() => setFormMode(null)}
           />
@@ -286,6 +306,7 @@ export function AdminProductsPage() {
                       {shouldShowUnit(product.unit) && (
                         <span className="text-neutral-400"> / {t(`unit.${product.unit}`)}</span>
                       )}
+                      <span className="text-neutral-400"> · {t("admin.onHand", { quantity: formatQuantity(product.stock_quantity, i18n.language) })}</span>
                     </p>
                     <div className="flex flex-wrap gap-1.5">
                       <StatusBadge
@@ -342,7 +363,7 @@ export function AdminProductsPage() {
                       <td className="px-4 py-2">
                         <StatusBadge
                           ok={product.in_stock}
-                          yesLabel={t("admin.inStock")}
+                          yesLabel={`${t("admin.inStock")} · ${formatQuantity(product.stock_quantity, i18n.language)}`}
                           noLabel={t("product.outOfStock")}
                         />
                       </td>

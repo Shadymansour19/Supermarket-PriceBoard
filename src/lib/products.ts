@@ -113,6 +113,8 @@ export type ProductInput = {
   size?: string | null;
   image_path?: string | null;
   in_stock?: boolean;
+  stock_quantity?: number;
+  allow_fraction?: boolean;
   is_active?: boolean;
 };
 
@@ -147,5 +149,30 @@ export async function updateProduct(id: string, input: Partial<ProductInput>): P
 
 export async function deleteProduct(id: string): Promise<void> {
   const { error } = await supabase.from("products").delete().eq("id", id);
+  if (error) throw error;
+}
+
+/** The product's current cost price, or null if none is recorded. Admin
+ * only (the `product_costs` table has no public read — see 0009). */
+export async function fetchProductCost(productId: string): Promise<number | null> {
+  const { data, error } = await supabase
+    .from("product_costs")
+    .select("cost_price")
+    .eq("product_id", productId)
+    .maybeSingle();
+  if (error) throw error;
+  return data ? Number(data.cost_price) : null;
+}
+
+/** Sets (or clears, with null) a product's cost price. */
+export async function saveProductCost(productId: string, costPrice: number | null): Promise<void> {
+  if (costPrice === null) {
+    const { error } = await supabase.from("product_costs").delete().eq("product_id", productId);
+    if (error) throw error;
+    return;
+  }
+  const { error } = await supabase
+    .from("product_costs")
+    .upsert({ product_id: productId, cost_price: costPrice, updated_at: new Date().toISOString() });
   if (error) throw error;
 }

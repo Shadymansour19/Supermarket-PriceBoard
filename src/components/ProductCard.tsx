@@ -7,7 +7,8 @@ import { FavoriteButton } from "./FavoriteButton";
 import { HOT_DEAL_THRESHOLD, daysRemaining, discountPercent } from "../lib/discounts";
 import { fetchFirstExtraImage } from "../lib/productImages";
 import { productImageUrl } from "../lib/supabase";
-import { formatPrice, localizedField, shouldShowUnit } from "../lib/localize";
+import { formatPrice, formatQuantity, localizedField, shouldShowUnit } from "../lib/localize";
+import { maxQuantity } from "../lib/stock";
 import type { LimitedTimeDiscount, Product, QuantityDiscount } from "../types/database";
 
 export function ProductCard({
@@ -223,7 +224,13 @@ export function ProductCard({
           // in LTR; in RTL it shifted the button a full half-width left
           // of true center.
           <div className="absolute bottom-0 left-1/2 z-10 -translate-x-1/2 translate-y-1/2">
-            <AddToCartButton productId={product.id} imageUrl={imageUrl} stopNavigation className="h-10 w-10" />
+            <AddToCartButton
+              productId={product.id}
+              imageUrl={imageUrl}
+              maxQuantity={maxQuantity(product)}
+              stopNavigation
+              className="h-10 w-10"
+            />
           </div>
         )}
       </div>
@@ -267,6 +274,14 @@ export function ProductCard({
           {!product.in_stock && (
             <span className="w-fit rounded-full bg-neutral-100 px-2 py-0.5 text-xs text-neutral-500">
               {t("product.outOfStock")}
+            </span>
+          )}
+          {product.in_stock && product.stock_quantity > 0 && (
+            <span className="text-xs text-neutral-500">
+              {t("product.stockLeft", {
+                quantity: formatQuantity(product.stock_quantity, i18n.language),
+                unit: shouldShowUnit(product.unit) ? ` ${t(`unit.${product.unit}`)}` : "",
+              })}
             </span>
           )}
           {/* The badge/price alone would read as an unconditional price

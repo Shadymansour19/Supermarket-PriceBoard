@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
+import { roundQuantity } from "../lib/stock";
 
 const STORAGE_KEY = "hamada_cart";
 
@@ -58,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const existing = prev.find((item) => item.productId === productId);
       const next = existing
         ? prev.map((item) =>
-            item.productId === productId ? { ...item, quantity: item.quantity + quantity } : item,
+            item.productId === productId ? { ...item, quantity: roundQuantity(item.quantity + quantity) } : item,
           )
         : [...prev, { productId, quantity }];
       persist(next);

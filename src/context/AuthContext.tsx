@@ -1,34 +1,43 @@
 import type { Session } from "@supabase/supabase-js";
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { isCurrentUserAdmin } from "../lib/auth";
+import { getCurrentUserRole } from "../lib/auth";
 import { supabase } from "../lib/supabase";
+import type { StaffRole } from "../types/database";
 
 type AuthState = {
   session: Session | null;
+  role: StaffRole | null;
   isAdmin: boolean;
+  isCashier: boolean;
+  /** Admin or cashier. */
+  isStaff: boolean;
   loading: boolean;
 };
 
-const AuthContext = createContext<AuthState>({ session: null, isAdmin: false, loading: true });
+function buildState(session: Session | null, role: StaffRole | null, loading: boolean): AuthState {
+  return { session, role, isAdmin: role === "admin", isCashier: role === "cashier", isStaff: role !== null, loading };
+}
+
+const AuthContext = createContext<AuthState>(buildState(null, null, true));
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [state, setState] = useState<AuthState>({ session: null, isAdmin: false, loading: true });
+  const [state, setState] = useState<AuthState>(buildState(null, null, true));
 
   useEffect(() => {
     let cancelled = false;
 
-    async function loadAdminStatus(session: Session | null) {
-      const isAdmin = session ? await isCurrentUserAdmin() : false;
-      if (!cancelled) setState({ session, isAdmin, loading: false });
+    async function loadRole(session: Session | null) {
+      const role = session ? await getCurrentUserRole() : null;
+      if (!cancelled) setState(buildState(session, role, false));
     }
 
-    supabase.auth.getSession().then(({ data }) => loadAdminStatus(data.session));
+    supabase.auth.getSession().then(({ data }) => loadRole(data.session));
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setState((prev) => ({ ...prev, loading: true }));
-      loadAdminStatus(session);
+      loadRole(session);
     });
 
     return () => {

@@ -34,6 +34,12 @@ export function AdminLayout() {
             >
               {t("admin.categories")}
             </NavLink>
+            <NavLink
+              to="/admin/finance"
+              className={({ isActive }) => `hidden md:block ${linkClass({ isActive })}`}
+            >
+              {t("finance.title")}
+            </NavLink>
             <LanguageToggle />
             <AdminMenu />
           </nav>

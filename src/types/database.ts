@@ -39,16 +39,67 @@ export type Product = {
   size: string | null;
   image_path: string | null;
   in_stock: boolean;
+  /** Quantity on the shelves — fractional (e.g. 2.5 liters) only matters
+   * when `allow_fraction` is true. See 0009_cashier_stock.sql. */
+  stock_quantity: number;
+  /** Admin switch: can this product be bought in fractions (milk) or only
+   * whole units (eggs)? */
+  allow_fraction: boolean;
   is_active: boolean;
   created_at: string;
   updated_at: string;
   updated_by: string | null;
 };
 
+/** Roles stored in `profiles.role` that the app understands. */
+export type StaffRole = "admin" | "cashier";
+
 export type Profile = {
   id: string;
   role: string;
+  display_name: string | null;
   created_at: string;
+};
+
+export type InvoiceKind = "sale" | "purchase";
+
+/** One line of an invoice. `unit_price` is the selling price for a sale and
+ * the unit cost for a purchase. */
+export type InvoiceLine = {
+  id: string;
+  invoice_id: string;
+  product_id: string | null;
+  product_name: string;
+  quantity: number;
+  unit_price: number;
+};
+
+/** A sale (customer purchase) or purchase (goods received) — see
+ * 0009_cashier_stock.sql. */
+export type Invoice = {
+  id: string;
+  kind: InvoiceKind;
+  total: number;
+  note: string | null;
+  created_by: string | null;
+  cashier_name: string | null;
+  created_at: string;
+  /** Set when an admin voided it — it stays on record but no longer counts. */
+  voided_at: string | null;
+  invoice_lines: InvoiceLine[];
+};
+
+export type PaymentsBucket = {
+  bucket: string;
+  payments_in: number;
+  payments_out: number;
+};
+
+export type StockValuation = {
+  cost_value: number;
+  retail_value: number;
+  products_in_stock: number;
+  products_missing_cost: number;
 };
 
 /** An extra photo beyond a product's own `image_path` cover image — see

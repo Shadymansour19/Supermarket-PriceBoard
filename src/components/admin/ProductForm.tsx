@@ -27,6 +27,10 @@ export type ProductFormValues = {
   size: string;
   category_id: string;
   in_stock: boolean;
+  stock_quantity: string;
+  allow_fraction: boolean;
+  /** Blank means "no cost recorded". Saved to the admin-only product_costs table. */
+  cost_price: string;
   is_active: boolean;
 };
 
@@ -34,6 +38,7 @@ export function ProductForm({
   categoryTree,
   initial,
   initialExtraImages,
+  initialCostPrice,
   onSubmit,
   onCancel,
 }: {
@@ -42,6 +47,8 @@ export function ProductForm({
   /** Existing extra images (beyond the cover photo), when editing — empty/
    * undefined for a new product, which can't have any yet. */
   initialExtraImages?: ProductImage[];
+  /** Current cost price when editing (it lives in a separate admin-only table). */
+  initialCostPrice?: number | null;
   onSubmit: (
     values: ProductFormValues,
     imageFile: File | null,
@@ -75,6 +82,9 @@ export function ProductForm({
     setCategoryId(newTopId);
   }
   const [inStock, setInStock] = useState(initial?.in_stock ?? true);
+  const [stockQuantity, setStockQuantity] = useState(initial ? String(initial.stock_quantity) : "0");
+  const [allowFraction, setAllowFraction] = useState(initial?.allow_fraction ?? false);
+  const [costPrice, setCostPrice] = useState(initialCostPrice != null ? String(initialCostPrice) : "");
   const [isActive, setIsActive] = useState(initial?.is_active ?? true);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [removeImage, setRemoveImage] = useState(false);
@@ -188,6 +198,9 @@ export function ProductForm({
           size,
           category_id: categoryId,
           in_stock: inStock,
+          stock_quantity: stockQuantity,
+          allow_fraction: allowFraction,
+          cost_price: costPrice,
           is_active: isActive,
         },
         imageFile,
@@ -276,6 +289,48 @@ export function ProductForm({
           placeholder="e.g. 500g, 1L, 6-pack"
           className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
         />
+      </div>
+      <div className="grid grid-cols-2 gap-3 sm:col-span-2">
+        <div>
+          <label className="mb-1 block text-sm text-neutral-600">{t("admin.stockQuantity")}</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            // Whole numbers only unless fractions are allowed — the browser
+            // then rejects 2.5 eggs before it ever reaches the database.
+            step={allowFraction ? "0.001" : "1"}
+            required
+            value={stockQuantity}
+            onChange={(e) => setStockQuantity(e.target.value)}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-sm text-neutral-600">{t("admin.costPrice")}</label>
+          <input
+            type="number"
+            inputMode="decimal"
+            min="0"
+            step="0.01"
+            value={costPrice}
+            onChange={(e) => setCostPrice(e.target.value)}
+            className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm"
+          />
+        </div>
+        <label className="col-span-2 flex items-start gap-2 text-sm text-neutral-700">
+          <input
+            type="checkbox"
+            className="mt-0.5"
+            checked={allowFraction}
+            onChange={(e) => setAllowFraction(e.target.checked)}
+          />
+          <span>
+            {t("admin.allowFraction")}
+            <span className="block text-xs text-neutral-500">{t("admin.allowFractionHint")}</span>
+          </span>
+        </label>
+        <p className="col-span-2 text-xs text-neutral-500">{t("admin.stockHint")}</p>
       </div>
       <div className={subcategories.length > 0 ? "" : "sm:col-span-2"}>
         <label className="mb-1 block text-sm text-neutral-600">{t("product.category")}</label>

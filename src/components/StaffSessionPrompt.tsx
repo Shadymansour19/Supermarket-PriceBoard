@@ -3,25 +3,27 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-const DISMISSED_KEY = "hamada_admin_prompt_dismissed";
+const DISMISSED_KEY = "hamada_staff_prompt_dismissed";
 
 /**
- * Asks an admin who lands on the customer-facing site whether they meant
- * to go to the dashboard instead — easy to do by accident (an old tab, a
- * bookmark, the install icon) while still signed in on this device. Only
+ * Asks a staff member (admin or cashier) who lands on the customer-facing
+ * site whether they meant to go to their own work area instead — easy to
+ * do by accident (an old tab, a bookmark, the install icon) while still
+ * signed in on this device. Same dialog for both roles; only the wording
+ * and destination differ. Only
  * once per browser session (sessionStorage, not localStorage): re-asking
  * on every single page within the same visit would be more annoying than
  * useful, but a fresh visit later should ask again rather than silently
  * remembering a choice made days ago.
  */
-export function AdminSessionPrompt() {
+export function StaffSessionPrompt() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const { isAdmin, loading } = useAuth();
+  const { role, loading } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (loading || !isAdmin) return;
+    if (loading || !role) return;
     let alreadyDismissed = false;
     try {
       alreadyDismissed = sessionStorage.getItem(DISMISSED_KEY) === "true";
@@ -30,7 +32,7 @@ export function AdminSessionPrompt() {
       // if nothing had been dismissed yet.
     }
     if (!alreadyDismissed) setVisible(true);
-  }, [loading, isAdmin]);
+  }, [loading, role]);
 
   function dismiss() {
     setVisible(false);
@@ -42,29 +44,32 @@ export function AdminSessionPrompt() {
     }
   }
 
-  if (!visible) return null;
+  if (!visible || !role) return null;
+
+  const isCashier = role === "cashier";
+  const title = t(isCashier ? "cashier.sessionPromptTitle" : "admin.sessionPromptTitle");
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-label={t("admin.sessionPromptTitle")}
+      aria-label={title}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
       onClick={dismiss}
     >
       <div className="w-full max-w-sm space-y-3 rounded-xl bg-white p-4" onClick={(e) => e.stopPropagation()}>
-        <h2 className="font-heading text-base font-bold text-neutral-900">{t("admin.sessionPromptTitle")}</h2>
-        <p className="text-sm text-neutral-600">{t("admin.sessionPromptBody")}</p>
+        <h2 className="font-heading text-base font-bold text-neutral-900">{title}</h2>
+        <p className="text-sm text-neutral-600">{t(isCashier ? "cashier.sessionPromptBody" : "admin.sessionPromptBody")}</p>
         <div className="space-y-2">
           <button
             type="button"
             onClick={() => {
               dismiss();
-              navigate("/admin/products");
+              navigate(isCashier ? "/cashier/sell" : "/admin/products");
             }}
             className="font-label w-full rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700"
           >
-            {t("admin.goToAdmin")}
+            {t(isCashier ? "cashier.goToDesk" : "admin.goToAdmin")}
           </button>
           <button
             type="button"

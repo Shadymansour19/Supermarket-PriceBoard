@@ -16,17 +16,18 @@ import {
   fetchQuantityDiscount,
   isLimitedTimeDiscountActive,
 } from "../../lib/discounts";
-import { formatPrice, localizedField, shouldShowUnit } from "../../lib/localize";
+import { formatPrice, formatQuantity, localizedField, shouldShowUnit } from "../../lib/localize";
 import { fetchProductImages } from "../../lib/productImages";
 import { fetchProductById } from "../../lib/products";
 import { recordProductView } from "../../lib/recentlyViewed";
+import { maxQuantity as maxQuantityFor, roundQuantity } from "../../lib/stock";
 import { productImageUrl } from "../../lib/supabase";
 import type { LimitedTimeDiscount, Product, ProductImage, QuantityDiscount } from "../../types/database";
 
 export function ProductDetailPage() {
   const { t, i18n } = useTranslation();
   const { productId } = useParams();
-  const { addToCart } = useCart();
+  const { addToCart, quantityOf } = useCart();
   const [product, setProduct] = useState<Product | null | undefined>(undefined);
   const [extraImages, setExtraImages] = useState<ProductImage[]>([]);
   const [limitedTimeDiscount, setLimitedTimeDiscount] = useState<LimitedTimeDiscount | null>(null);
@@ -191,6 +192,10 @@ export function ProductDetailPage() {
     // Safe: this handler is only ever wired up to a button below, which
     // only renders once the early returns above have ruled out null/undefined.
     const id = product!.id;
+    // Whatever's already in the cart counts against the stock too.
+    const max = maxQuantityFor(product!);
+    const amount = max === undefined ? quantity : Math.min(quantity, roundQuantity(max - quantityOf(id)));
+    if (amount <= 0) return;
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1500);
     // A small square centered on the actual tap/click point, not the
@@ -198,7 +203,7 @@ export function ProductDetailPage() {
     // using its full bounds would fly a stretched banner shape instead of
     // a clean square, and starting exactly where the finger tapped reads
     // as more responsive than always starting from the button's center.
-    flyToCart(squareRectAt(e.clientX, e.clientY), imageUrl, () => addToCart(id, quantity));
+    flyToCart(squareRectAt(e.clientX, e.clientY), imageUrl, () => addToCart(id, amount));
   }
 
   return (
@@ -308,7 +313,12 @@ export function ProductDetailPage() {
                 product.in_stock ? "bg-emerald-50 text-emerald-700" : "bg-neutral-100 text-neutral-500"
               }`}
             >
-              {t(product.in_stock ? "product.inStock" : "product.outOfStock")}
+              {product.in_stock && product.stock_quantity > 0
+                ? t("product.stockLeftLabel", {
+                    quantity: formatQuantity(product.stock_quantity, i18n.language),
+                    unit: shouldShowUnit(product.unit) ? ` ${t(`unit.${product.unit}`)}` : "",
+                  })
+                : t(product.in_stock ? "product.inStock" : "product.outOfStock")}
             </span>
           </div>
           <div className="flex flex-wrap items-center gap-2">
@@ -348,7 +358,12 @@ export function ProductDetailPage() {
            * inline row from `sm:` up, where the two-column layout means
            * this never gets anywhere near the bottom of the viewport. */}
           <div className="sticky bottom-[var(--mobile-fab-safe)] z-20 flex flex-wrap items-center gap-3 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm sm:static sm:z-auto sm:border-0 sm:bg-transparent sm:p-0 sm:shadow-none">
-            <QuantityStepper value={quantity} onChange={setQuantity} />
+            <QuantityStepper
+              value={quantity}
+              onChange={setQuantity}
+              allowFraction={product.allow_fraction}
+              max={maxQuantityFor(product)}
+            />
             <button
               type="button"
               onClick={handleAddToCart}
