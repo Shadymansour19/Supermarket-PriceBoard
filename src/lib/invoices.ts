@@ -70,3 +70,14 @@ export async function fetchInvoices(limit = 50): Promise<Invoice[]> {
   if (error) throw error;
   return (data ?? []) as Invoice[];
 }
+
+/** One invoice with its lines, e.g. to print right after recording it. */
+export async function fetchInvoice(id: string): Promise<Invoice> {
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("*, invoice_lines(*)")
+    .eq("id", id)
+    .single();
+  if (error) throw error;
+  return data as Invoice;
+}

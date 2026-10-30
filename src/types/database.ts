@@ -78,6 +78,9 @@ export type InvoiceLine = {
  * 0009_cashier_stock.sql. */
 export type Invoice = {
   id: string;
+  /** Sequential receipt number (0010_invoice_number.sql). Optional so the
+   * app still works — falling back to a short id — before that's applied. */
+  number?: number;
   kind: InvoiceKind;
   total: number;
   note: string | null;

@@ -5,6 +5,7 @@ import { useConfirmDialog } from "../../context/ConfirmDialogContext";
 import { toErrorMessage } from "../../lib/errors";
 import { fetchInvoices, InvoiceError, voidInvoice } from "../../lib/invoices";
 import { formatPrice, formatQuantity } from "../../lib/localize";
+import { PrintInvoiceButton } from "./PrintInvoiceButton";
 import type { Invoice } from "../../types/database";
 
 /** Recent invoices, newest first, tap to see the lines. A cashier only ever
@@ -73,6 +74,7 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
                     )}
                   </span>
                   <span className="font-label block truncate text-xs text-neutral-500">
+                    {invoice.number !== undefined && `#${invoice.number} · `}
                     {new Date(invoice.created_at).toLocaleString(i18n.language)}
                     {isAdmin && invoice.cashier_name && ` · ${invoice.cashier_name}`}
                   </span>
@@ -94,15 +96,18 @@ export function InvoiceList({ limit = 50, refreshKey = 0 }: { limit?: number; re
                       </li>
                     ))}
                   </ul>
-                  {isAdmin && !voided && (
-                    <button
-                      type="button"
-                      onClick={() => handleVoid(invoice)}
-                      className="text-xs font-medium text-red-600 hover:underline"
-                    >
-                      {t("cashier.void")}
-                    </button>
-                  )}
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    <PrintInvoiceButton invoice={invoice} />
+                    {isAdmin && !voided && (
+                      <button
+                        type="button"
+                        onClick={() => handleVoid(invoice)}
+                        className="text-xs font-medium text-red-600 hover:underline"
+                      >
+                        {t("cashier.void")}
+                      </button>
+                    )}
+                  </div>
                 </div>
               )}
             </li>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { CloseIcon } from "../ContactIcons";
 import { QuantityStepper } from "../QuantityStepper";
+import { PrintInvoiceButton } from "./PrintInvoiceButton";
 import { fetchActiveLimitedTimeDiscountMap, fetchActiveQuantityDeals } from "../../lib/discounts";
 import { toErrorMessage } from "../../lib/errors";
 import { InvoiceError, recordInvoice } from "../../lib/invoices";
@@ -35,7 +36,7 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
   const [note, setNote] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [recordedTotal, setRecordedTotal] = useState<number | null>(null);
+  const [recorded, setRecorded] = useState<{ id: string; total: number } | null>(null);
   const [limitedTimeMap, setLimitedTimeMap] = useState<Map<string, LimitedTimeDiscount>>(new Map());
   const [quantityDealMap, setQuantityDealMap] = useState<Map<string, QuantityDiscount>>(new Map());
 
@@ -72,7 +73,7 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
   }, [query]);
 
   function addProduct(product: Product) {
-    setRecordedTotal(null);
+    setRecorded(null);
     setError(null);
     setLines((prev) => {
       const existing = prev.find((line) => line.product.id === product.id);
@@ -118,7 +119,7 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
         })),
         note,
       );
-      setRecordedTotal(result.total);
+      setRecorded(result);
       setLines([]);
       setNote("");
     } catch (err) {
@@ -175,12 +176,18 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
         )}
       </div>
 
-      {recordedTotal !== null && (
-        <p role="status" className="rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800">
-          {t(isSale ? "cashier.saleRecorded" : "cashier.purchaseRecorded", {
-            total: formatPrice(recordedTotal, i18n.language),
-          })}
-        </p>
+      {recorded !== null && (
+        <div
+          role="status"
+          className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-800"
+        >
+          <span>
+            {t(isSale ? "cashier.saleRecorded" : "cashier.purchaseRecorded", {
+              total: formatPrice(recorded.total, i18n.language),
+            })}
+          </span>
+          <PrintInvoiceButton invoiceId={recorded.id} />
+        </div>
       )}
       {error && (
         <p role="alert" className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
