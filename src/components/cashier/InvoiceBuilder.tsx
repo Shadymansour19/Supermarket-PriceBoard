@@ -247,6 +247,7 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
         </div>
       ) : (
         <>
+          {!isSale && <p className="text-xs text-neutral-500">{t("cashier.costHint")}</p>}
           <ul className="divide-y divide-neutral-200 rounded-xl border border-neutral-200 bg-white">
             {lines.map((line) => {
               const { product } = line;
@@ -277,7 +278,9 @@ export function InvoiceBuilder({ kind }: { kind: InvoiceKind }) {
                       max={isSale ? maxQuantity(product) : undefined}
                     />
                     {isSale ? (
-                      <span className="font-label text-sm text-neutral-600">{formatPrice(unitPrice, i18n.language)}</span>
+                      <span className="font-label text-sm text-neutral-600" title={t("cashier.systemPrice")}>
+                        {formatPrice(unitPrice, i18n.language)}
+                      </span>
                     ) : (
                       <label className="font-label flex items-center gap-1.5 text-sm text-neutral-600">
                         {t("cashier.unitCost")}
