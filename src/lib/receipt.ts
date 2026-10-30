@@ -40,12 +40,14 @@ function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
+// `logo` is the printed height in millimetres (the logo is square) — a third
+// or so of the printable width on a roll, like most shop receipts.
 const PAPER_CSS: Record<ReceiptPaper, { page: string; font: number; logo: number }> = {
   // Thermal rolls: width is fixed, height is "as long as needed"; the
   // small margin keeps text off the roll's unprintable edges.
-  "80": { page: "80mm auto; margin: 4mm 3mm", font: 12, logo: 56 },
-  "58": { page: "58mm auto; margin: 3mm 2mm", font: 10, logo: 40 },
-  a4: { page: "A4; margin: 18mm", font: 14, logo: 80 },
+  "80": { page: "80mm auto; margin: 4mm 3mm", font: 12, logo: 26 },
+  "58": { page: "58mm auto; margin: 3mm 2mm", font: 10, logo: 20 },
+  a4: { page: "A4; margin: 18mm", font: 14, logo: 32 },
 };
 
 export function buildReceiptHtml(invoice: Invoice, labels: ReceiptLabels, lang: string, paper: ReceiptPaper): string {
@@ -70,7 +72,7 @@ export function buildReceiptHtml(invoice: Invoice, labels: ReceiptLabels, lang: 
   .center { text-align: center; }
   /* Thermal printers are black-and-white: boosting contrast keeps the logo
    * from printing as a grey smudge. */
-  img { height: ${css.logo}px; width: auto; filter: grayscale(1) contrast(1.6); }
+  img { height: ${css.logo}mm; width: auto; filter: grayscale(1) contrast(1.8); }
   h1 { font-size: ${css.font + 4}px; margin: 4px 0 2px; }
   .muted { color: #333; font-size: ${css.font - 1}px; }
   hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }
