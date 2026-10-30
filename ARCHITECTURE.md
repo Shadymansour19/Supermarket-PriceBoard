@@ -62,7 +62,7 @@ src/
                       useDocumentDirection, useScrollDirection
   lib/                Non-UI logic. Every Supabase query lives here.
 supabase/
-  migrations/         0001…0010 SQL files = the database schema, in order
+  migrations/         0001…0011 SQL files = the database schema, in order
   seed.sql            Sample data for development only
   functions/notify-new-deal/   Edge Function that sends push notifications
   functions/manage-cashiers/   Edge Function: admin creates/removes cashier logins
@@ -102,7 +102,7 @@ Summary of tables (all created by [supabase/migrations/](./supabase/migrations/)
 | `categories` | Two-level tree via `parent_id`; has `image_path` | admin |
 | `products` | Bilingual name/description, price, unit, size, `in_stock`, `stock_quantity`, `allow_fraction`, `is_active` (soft hide) | admin directly; stock also via invoices |
 | `product_costs` | Cost price per product (admin-only read — `products` is public) | admin; purchases update it |
-| `invoices` + `invoice_lines` | Sales and goods-received documents; every stock change goes through them | only via `record_invoice()` / `void_invoice()` |
+| `invoices` + `invoice_lines` | Sales and goods-received documents (sequential `number`; optional customer/supplier name, phone, address, reference, payment method); every stock change goes through them | only via `record_invoice()` / `void_invoice()` |
 | `limited_time_discounts` | One per product: `new_price`, start, `duration_days`, generated `ends_at` | admin |
 | `quantity_discounts` + `quantity_discount_tiers` | "Buy N+ for price X" wholesale tiers | admin |
 | `push_subscriptions` | One row per device that enabled deal notifications | anyone (anonymous) |

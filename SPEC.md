@@ -297,6 +297,21 @@ visible. Newest first.
   no longer flashes "Loading…" on same-user token refreshes. Tokens are in
   the same storage the client already uses; on a shared phone use "Sign out
   of all accounts".
+- **2026-10-30 — Optional invoice details, Cancel, invoice search** (migrations
+  `0010` number, `0011` details). Invoices carry optional `party_name`,
+  `party_phone`, `party_address`, `reference` (supplier's invoice no. / order
+  ref) and `payment_method` (cash, card, mobile wallet, on credit) — the
+  customer on a sale, the supplier on a purchase; all blank for a walk-in.
+  `record_invoice` gained a 4th argument `p_details jsonb` (trimmed, length-
+  capped, payment method validated; the old 3-argument call still works
+  through the default). Shown on the receipt and in the invoice list. The
+  cashier form has a collapsed "Customer/Supplier details" section and a
+  Cancel button (confirm, then clears items and details). The Invoices tab
+  has one search box over every field plus item names (all words must
+  match; phone matches ignoring spaces; Arabic digits work) across the
+  latest 300 invoices — client-side, so older ones need a server-side
+  search later. Customer phone/address are personal data: invoices are
+  visible only to admins and to the cashier who made them (RLS).
 
 ## Data model (Postgres / Supabase)
 
